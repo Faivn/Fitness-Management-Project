@@ -130,7 +130,7 @@ Without configuration the app shows a "not configured" screen listing the missin
 
 ## Vercel environment variables
 
-Two Vercel projects are involved (ADR-004 / ADR-015). Nothing here has been deployed yet.
+Two Vercel projects are involved (ADR-004 / ADR-015), both deployed to production: the website `mova-fitness` (https://mova-fitness.vercel.app) and the API `mova-api` (https://mova-api.vercel.app).
 
 **API project `mova-api`** (Root Directory `apps/api`, framework preset "Other"). Set for Production (and Preview if wanted):
 
@@ -170,7 +170,7 @@ Never set a service-role key anywhere, and never give `GROQ_API_KEY` an `EXPO_PU
 
 ## Known gaps and blockers
 
-- **Vercel is not connected to the live backend yet.** The public site still runs as the read-only sample preview until the variables in "Vercel environment variables" below are set. Supabase, Groq and the local app have been verified against real services.
+- **Production is connected to the live backend.** `mova-fitness` is built with the three `EXPO_PUBLIC_*` variables below and talks to `mova-api`, which holds the server-side variables (including `GROQ_API_KEY`, stored as Sensitive). For `mova-api` the project settings are: Root Directory `apps/api`, install `cd ../.. && npm ci`, build `cd ../.. && npm run build:shared && mkdir -p apps/api/public && printf "User-agent: *\nDisallow: /\n" > apps/api/public/robots.txt`, output directory `public`. Deploy each project with `vercel deploy --prod` from the repository root (the root `.vercel/repo.json` links `mova-fitness`; for `mova-api` set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`). In Supabase → Authentication → URL Configuration, the Site URL is the website URL and `http://localhost:8081/**` stays in Redirect URLs for local development.
 - **Generated Supabase types** are not committed (spec §8.0.3). They need a linked project; until then, DB rows are mapped to typed DTOs by hand in `apps/api/src/db/mappers.ts`.
 - **Mobile UI tests** (§11.2) cover the key components so far (status labels, the planned-vs-actual card, unknown values, proposal and conflict labels, and the routine editor against the shared schema). Full screen-flow tests with mocked API responses are still to be added.
 - **Native builds** have not been produced: this machine has no Xcode or Android SDK. The iOS JavaScript bundle builds successfully (`npx expo export --platform ios`).
