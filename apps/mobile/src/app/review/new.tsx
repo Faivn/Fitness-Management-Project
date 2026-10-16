@@ -1,7 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { isLocalDate, todayIn, type MonthlyReviewDraft } from '@mova/shared';
+import { isLocalDate, type MonthlyReviewDraft } from '@mova/shared';
 import { Banner, Button, Card, Mascot, Row, Screen, Section, StatusBadge, Text, TextField } from '@/components';
 import { AIDisclaimer } from '@/components/domain';
 import { useGenerateReview, useProfile, useSaveReview } from '@/hooks/api';
@@ -17,7 +18,7 @@ import { spacing } from '@/theme/tokens';
 export default function NewReview() {
   const params = useLocalSearchParams<{ start?: string; end?: string }>();
   const profile = useProfile();
-  const bounds = monthBounds(todayIn(profile.data?.timezone ?? 'UTC'));
+  const bounds = monthBounds(appToday(profile.data?.timezone ?? 'UTC'));
   const [start, setStart] = useState(params.start ?? bounds.start);
   const [end, setEnd] = useState(params.end ?? bounds.end);
   const [reflection, setReflection] = useState('');

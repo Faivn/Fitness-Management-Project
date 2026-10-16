@@ -1,6 +1,7 @@
 import type { ApiErrorBody } from '@mova/shared';
 import { randomUUID } from 'expo-crypto';
-import { config } from './config';
+import { SampleWriteError, sampleApi } from '@/sample/sampleApi';
+import { config, sampleMode } from './config';
 import { supabase } from './supabase';
 
 export class ApiError extends Error {
@@ -32,6 +33,20 @@ async function token(): Promise<string | null> {
 }
 
 export async function api<T>(method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
+  if (sampleMode) {
+    try {
+      return await sampleApi<T>(method, path);
+    } catch (e) {
+      if (e instanceof SampleWriteError) {
+        throw new ApiError(
+          403,
+          'sample_preview',
+          "This is a read-only preview with sample data, so changes aren't saved and the AI isn't connected. Everything you can see works the same way once Mova is connected to its backend.",
+        );
+      }
+      throw new ApiError(404, 'not_found', "This part of the sample preview doesn't have sample data.");
+    }
+  }
   const t = await token();
   if (!t) throw new ApiError(401, 'unauthorized', 'Sign in to continue.');
   let res: Response;

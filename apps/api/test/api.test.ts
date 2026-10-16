@@ -3,7 +3,7 @@
  * embedded Postgres with RLS, using a scripted AI. No network access.
  */
 import { beforeAll, describe, expect, it } from 'vitest';
-import { AiUnavailableError } from '../src/lib/groq.js';
+import { AiUnavailableError } from '../src/lib/ai.js';
 import { createHarness, key } from './support/harness.js';
 
 type H = Awaited<ReturnType<typeof createHarness>>;
@@ -47,7 +47,7 @@ describe('security and transport', () => {
   it('serves a public health check without configuration details', async () => {
     const r = await h.call('GET', 'health', undefined, null);
     expect(r.status).toBe(200);
-    expect(JSON.stringify(r.body)).not.toMatch(/key|supabase|groq/i);
+    expect(JSON.stringify(r.body)).not.toMatch(/key|supabase|openai/i);
   });
 
   it('rejects requests without a valid token', async () => {

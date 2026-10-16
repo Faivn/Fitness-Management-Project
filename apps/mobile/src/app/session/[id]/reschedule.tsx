@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useMemo, useState } from 'react';
-import { addDays, isLocalDate, isLocalTime, todayIn, type ScheduleConflict } from '@mova/shared';
+import { addDays, isLocalDate, isLocalTime, type ScheduleConflict } from '@mova/shared';
 import { Banner, Button, Card, Chip, ErrorState, LoadingState, Row, Screen, Text, TextField } from '@/components';
 import { ConflictList } from '@/components/domain';
 import { useProfile, useReschedule, useSession } from '@/hooks/api';
@@ -17,7 +18,7 @@ export default function Reschedule() {
   const session = useSession(id);
   const profile = useProfile();
   const reschedule = useReschedule();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [reason, setReason] = useState('');

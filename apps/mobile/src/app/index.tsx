@@ -1,27 +1,27 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Banner, Button, Screen, Text } from '@/components';
+import { Banner, Button, Screen } from '@/components';
 import { LoadingState } from '@/components/States';
 import { useCompleteOnboarding, useProfile } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { isConfigured, missingConfig } from '@/lib/config';
+import { sampleMode } from '@/lib/config';
 import { deviceTimeZone } from '@/lib/format';
 import { WELCOME_SEEN_KEY } from '@/lib/onboarding';
 
-/** Entry gate: configuration → welcome (first run) → sign in → workspace. */
+/**
+ * Entry gate (WF-01): first visit → Welcome; afterwards → the workspace.
+ * There is no sign-in step: "Get started" opens a private workspace.
+ */
 export default function Index() {
-  const { session, loading } = useAuth();
+  const { session, loading, startWorkspace } = useAuth();
   const [welcomeSeen, setWelcomeSeen] = useState<boolean | null>(null);
-  const profile = useProfile(!!session);
+  const [startError, setStartError] = useState<string | null>(null);
+  const live = !sampleMode;
+  const profile = useProfile(live && !!session);
   const complete = useCompleteOnboarding();
-  const needsOnboarding = !!profile.data && !profile.data.onboardingCompletedAt;
-
-  // The user already saw the welcome screen before signing in: finish onboarding without showing it again.
-  useEffect(() => {
-    if (needsOnboarding && welcomeSeen && complete.isIdle) complete.mutate(deviceTimeZone());
-  }, [needsOnboarding, welcomeSeen, complete]);
+  const needsOnboarding = live && !!profile.data && !profile.data.onboardingCompletedAt;
 
   useEffect(() => {
     AsyncStorage.getItem(WELCOME_SEEN_KEY)
@@ -29,43 +29,41 @@ export default function Index() {
       .catch(() => setWelcomeSeen(false));
   }, []);
 
-  if (!isConfigured) {
-    return (
-      <Screen edges={['top', 'left', 'right']}>
-        <Text variant="title">Mova isn't configured yet</Text>
-        <Banner tone="warning" title="Missing environment variables">
-          {`Set ${missingConfig.join(', ')} in apps/mobile/.env (see .env.example), then restart the app.`}
-        </Banner>
-      </Screen>
-    );
-  }
-  if (loading || welcomeSeen === null) return <LoadingState label="Opening your workspace…" />;
-  if (!session) return <Redirect href={welcomeSeen ? '/sign-in' : '/welcome'} />;
-  if (profile.isPending) return <LoadingState label="Opening your workspace…" />;
-  if (profile.isError) {
-    // WF-01: initialisation failure presents a clear retry path.
+  // A returning visitor whose session was cleared gets a fresh private workspace without a sign-in step.
+  useEffect(() => {
+    if (live && !loading && !session && welcomeSeen) {
+      startWorkspace().catch((e: Error) => setStartError(e.message));
+    }
+  }, [live, loading, session, welcomeSeen, startWorkspace]);
+
+  useEffect(() => {
+    if (needsOnboarding && welcomeSeen && complete.isIdle) complete.mutate(deviceTimeZone());
+  }, [needsOnboarding, welcomeSeen, complete]);
+
+  if (welcomeSeen === null || loading) return <LoadingState label="Opening your workspace…" />;
+  if (!welcomeSeen) return <Redirect href="/welcome" />;
+  if (sampleMode) return <Redirect href="/(tabs)" />;
+
+  const failure = startError ?? (profile.isError ? errorMessage(profile.error) : complete.isError ? errorMessage(complete.error) : null);
+  if (failure) {
+    // WF-01: an initialisation failure presents a clear retry path.
     return (
       <Screen edges={['top', 'left', 'right']}>
         <Banner tone="error" title="We couldn't open your workspace">
-          {errorMessage(profile.error)}
+          {failure}
         </Banner>
-        <Button label="Try again" onPress={() => profile.refetch()} />
+        <Button
+          label="Try again"
+          onPress={() => {
+            setStartError(null);
+            if (!session) startWorkspace().catch((e: Error) => setStartError(e.message));
+            else if (profile.isError) void profile.refetch();
+            else complete.mutate(deviceTimeZone());
+          }}
+        />
       </Screen>
     );
   }
-  if (needsOnboarding) {
-    if (!welcomeSeen) return <Redirect href="/welcome" />;
-    if (complete.isError) {
-      return (
-        <Screen edges={['top', 'left', 'right']}>
-          <Banner tone="error" title="We couldn't finish setting up">
-            {errorMessage(complete.error)}
-          </Banner>
-          <Button label="Try again" onPress={() => complete.mutate(deviceTimeZone())} />
-        </Screen>
-      );
-    }
-    return <LoadingState label="Setting up your workspace…" />;
-  }
+  if (!session || profile.isPending || needsOnboarding) return <LoadingState label="Opening your workspace…" />;
   return <Redirect href="/(tabs)" />;
 }

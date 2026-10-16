@@ -2,7 +2,7 @@
   "name": "@mova/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Mova API — TypeScript Vercel Functions (auth verification, validation, Groq orchestration, domain writes).",
+  "description": "Mova API — TypeScript Vercel Functions (auth verification, validation, OpenAI orchestration, domain writes).",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@mova/shared": "*",
     "@supabase/supabase-js": "^2.118.0",
+    "openai": "^7.34.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -14,14 +14,17 @@ Status values: **Accepted** (implemented), **Proposed** (implemented as a defaul
 **Why Expo:** It builds iOS and Android without a local Xcode/Android Studio install (EAS Build), provides the needed native modules (SecureStore, notifications, crypto), and also runs on the web for quick previews.
 **Spec wording to update:** §8 headings and §8.1–8.3, §11.2 and §13 item 1 refer to Flutter; read them as "the React Native client".
 
-## ADR-002 — Groq instead of OpenAI for AI features
+## ADR-002 — OpenAI as the AI provider (as specified)
 
-**Status:** Accepted (product-owner instruction)
-**Context:** §8.0, §8.0.4, §8.0.5 and §8.4 name the OpenAI API. The product owner chose Groq.
-**Decision:** The API calls Groq's OpenAI-compatible Chat Completions endpoint from the server only (`apps/api/src/lib/groq.ts`), using Structured Outputs (`response_format: json_schema`, best-effort mode). Default model `openai/gpt-oss-120b`, configurable by `GROQ_MODEL`.
-**Unchanged guarantees:** the key stays on the server (`GROQ_API_KEY`, never in the app); every model response is re-validated with Zod and domain rules and treated as untrusted; one repair retry, then a safe "AI unavailable" error; AI output is only ever a `draft` proposal until the user approves the exact version.
-**Why best-effort mode:** strict mode requires every field to be required and is limited to some models; the schemas have legitimately optional fields. Zod validation provides the guarantee instead.
-**Env mapping:** `OPENAI_API_KEY` → `GROQ_API_KEY`, `OPENAI_MODEL` → `GROQ_MODEL`.
+**Status:** Accepted
+**History:** An earlier iteration used Groq at the product owner's request. The product owner has since confirmed OpenAI, which matches spec §8.0.4, so there is no longer a deviation from the specification here.
+**Decision:** The API calls OpenAI from the server only (`apps/api/src/lib/ai.ts`), using the official `openai` SDK and the Responses API with Structured Outputs (`text.format: json_schema`). The model is set by `OPENAI_MODEL` (default `gpt-5.5`).
+**Guarantees:**
+- The key stays on the server (`OPENAI_API_KEY`) and never reaches the app.
+- Every model response is re-validated with Zod and domain rules and treated as untrusted. After one repair retry, the API returns a safe "AI unavailable" error.
+- AI output is only ever a `draft` proposal until the user approves that exact version.
+**Strict mode:** `strict: false` is used because the schemas have legitimately optional fields, and Zod validation provides the guarantee instead.
+**Temperature:** sent only when `OPENAI_SUPPORTS_TEMPERATURE=true`, because some reasoning models reject it.
 
 ## ADR-003 — npm workspaces monorepo with a shared domain package
 
@@ -85,3 +88,22 @@ Guarantees enforced in the database:
 
 **Status:** Accepted
 **Decision:** The real migrations are run in an embedded Postgres (PGlite) together with test-only stubs for `auth.uid()` and the Supabase roles (`supabase/tests/supabase-stubs.sql`). Database tests exercise RLS, triggers and RPCs directly. API tests run the real HTTP handler against the same database through a minimal Supabase-compatible query client (`apps/api/test/support/pgSupabase.ts`), with a scripted AI. This covers the §11.3 integration scenarios without network access. It does **not** replace a test against a real Supabase project; see `docs/DEVELOPMENT.md`.
+
+## ADR-014 — No sign-in step: Supabase anonymous sessions
+
+**Status:** Proposed (spec WF-01, §8.0.2)
+**Context:** WF-01 requires entering the workspace without a lengthy profile, and treats authentication as conditional ("if authentication is required"). §8.0.2 assumes email/password at first. The product owner wants anyone with the URL to enter without signing in.
+**Decision:** "Get started" calls `supabase.auth.signInAnonymously()`. This gives each visitor a private, RLS-protected workspace tied to that browser or device. The architecture is unchanged: the API still verifies a Supabase access token, and RLS still scopes every row to `auth.uid()`. The email sign-in screen remains available from Settings for existing accounts.
+**Trade-offs:**
+- An anonymous workspace is lost if browser data is cleared; Settings says so.
+- Linking an email to keep the workspace is not built yet.
+- Anonymous sign-ins must be enabled in the Supabase project. `supabase/config.toml` enables them locally, and CAPTCHA or rate limits are recommended before public launch.
+
+## ADR-015 — Public web deployment and the read-only sample preview
+
+**Status:** Accepted
+**Decision:**
+- The web experience is the Expo web export, deployed as a single static Vercel project from the repo root (`vercel.json`: `npm run build:web` → `apps/mobile/dist`, with an SPA rewrite to `index.html`). The API remains a separate Vercel project (Root Directory `apps/api`, ADR-004) for when the backend is connected.
+- When the app has no backend configuration (no `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `EXPO_PUBLIC_API_URL`), it runs a **read-only sample preview**. It serves `apps/mobile/src/sample/snapshot.json`, which is generated from the real API by `npm run sample:generate`: real handler, migrations, RLS and functions on an embedded Postgres, with a canned sample AI. A banner on every screen labels it as sample data. Saving shows a clear "read-only preview" message, and no AI is called.
+- Setting the three variables in the Vercel project and redeploying switches the same site to the live app.
+**Replaces:** the earlier local "demo login" approach, which was removed.

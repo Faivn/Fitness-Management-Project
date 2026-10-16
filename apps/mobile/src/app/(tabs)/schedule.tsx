@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
-import { addDays, dayOfWeek, todayIn } from '@mova/shared';
+import { addDays, dayOfWeek } from '@mova/shared';
 import { Button, Card, ErrorState, LoadingState, Row, Screen, Section, Text } from '@/components';
 import { MealSlotCard, SessionCard, WeekStrip } from '@/components/domain';
 import { useProfile, useSchedule } from '@/hooks/api';
@@ -10,7 +11,7 @@ import { formatDate } from '@/lib/format';
 /** WF-11 unified schedule: workouts, runs and the meal timetable together. */
 export default function Schedule() {
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const monday = addDays(today, -((dayOfWeek(today) + 6) % 7));
   const [weekStart, setWeekStart] = useState(monday);
   const [selected, setSelected] = useState(today);

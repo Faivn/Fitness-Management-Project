@@ -270,8 +270,9 @@ const styles = StyleSheet.create({
   rowDone: { backgroundColor: colors.positiveWash },
   rowSkipped: { backgroundColor: colors.surfaceSubtle },
   cSet: { width: 32 },
-  cPrev: { flex: 1.4 },
-  cNum: { flex: 1, textAlign: 'center' },
+  // flexBasis/minWidth 0 so inputs shrink to fit narrow screens (web inputs have an intrinsic width).
+  cPrev: { flex: 1.4, flexBasis: 0, minWidth: 0 },
+  cNum: { flex: 1, flexBasis: 0, minWidth: 0, width: 0, textAlign: 'center' },
   cAct: { width: 60, alignItems: 'flex-end' },
   input: { minHeight: 36, borderRadius: radii.sm, backgroundColor: colors.surfaceSubtle, color: colors.ink, fontSize: 16 },
 });

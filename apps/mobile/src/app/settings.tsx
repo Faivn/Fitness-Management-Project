@@ -14,7 +14,7 @@ import { ensureNotificationPermission } from '@/lib/reminders';
 export default function Settings() {
   const profile = useProfile();
   const update = useUpdatePreferences();
-  const { signOut } = useAuth();
+  const { signOut, isAnonymous } = useAuth();
   const [equipment, setEquipment] = useState<string | null>(null);
   const [notes, setNotes] = useState<string | null>(null);
   const [permissionNote, setPermissionNote] = useState<string | null>(null);
@@ -118,7 +118,15 @@ export default function Settings() {
       </Section>
 
       <Section title="Account">
-        <Button label="Sign out" variant="danger" onPress={() => signOut().then(() => router.replace('/sign-in'))} />
+        {isAnonymous ? (
+          <Text variant="small" color="inkSecondary">
+            This workspace is private to this browser or device and isn't linked to an email address. Clearing your browser data or
+            signing in elsewhere won't bring it back.
+          </Text>
+        ) : (
+          <Button label="Sign out" variant="danger" onPress={() => signOut().then(() => router.replace('/'))} />
+        )}
+        <Button label="Sign in to an existing account" variant="ghost" onPress={() => router.push('/sign-in')} />
       </Section>
     </Screen>
   );

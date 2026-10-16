@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Env } from './config/env.js';
-import type { AiClient } from './lib/groq.js';
+import type { AiClient } from './lib/ai.js';
 import type { VerifiedUser } from './lib/supabase.js';
 
 /** Per-request context. `db` is the user-scoped (RLS) Supabase client. */

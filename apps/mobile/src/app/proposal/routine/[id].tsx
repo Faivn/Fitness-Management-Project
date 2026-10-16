@@ -1,7 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { routinePlanSchema, todayIn, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
+import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
 import { Banner, Button, Card, ErrorState, LoadingState, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
 import { AIDisclaimer, ConflictList, ProposalBanner } from '@/components/domain';
 import { cleanPlan, RoutineEditor } from '@/components/RoutineEditor';
@@ -33,7 +34,7 @@ export default function RoutineProposalReview() {
   const approve = useApproveRoutineProposal();
   const reject = useRejectProposal('routine-proposals');
 
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const [editing, setEditing] = useState<RoutinePlan | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [instruction, setInstruction] = useState('');

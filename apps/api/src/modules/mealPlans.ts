@@ -11,7 +11,7 @@ import type { AppContext } from '../context.js';
 import { must, mustOne } from '../db/helpers.js';
 import { toMealEntry, toShoppingItem } from '../db/mappers.js';
 import { aiUnavailable, conflict, fromDbError, unprocessable } from '../http/errors.js';
-import { AiUnavailableError, type ChatMessage } from '../lib/groq.js';
+import { AiUnavailableError, type ChatMessage } from '../lib/ai.js';
 import { getFitnessContext } from './aiContext.js';
 import { appendMessage, ensureConversation } from './conversations.js';
 import { mealPlanRevisionPrompt, mealPlanSystemPrompt } from './prompts.js';

@@ -1,5 +1,6 @@
 /**
- * TEST SUPPORT ONLY. A tiny stand-in for the subset of the supabase-js query
+ * DEVELOPMENT AND TEST ONLY — never imported by the deployed function
+ * (api/router.ts). A tiny stand-in for the subset of the supabase-js query
  * builder the API uses, executed against an embedded Postgres (PGlite) that
  * has the real migrations applied. Every statement runs inside a transaction
  * as the `authenticated` role with the caller's user id, so Row Level
@@ -7,7 +8,8 @@
  */
 import { PGlite, types } from '@electric-sql/pglite';
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
@@ -19,18 +21,29 @@ function ident(name: string): string {
 
 type ColumnInfo = Map<string, { dataType: string }>;
 
-export async function createTestDatabase(): Promise<{ db: PGlite; columns: Map<string, ColumnInfo> }> {
+const SUPABASE_DIR = join(dirname(fileURLToPath(import.meta.url)), '../../../../supabase');
+
+/**
+ * Create an embedded Postgres with the real migrations applied. With a
+ * `dataDir` the database persists on disk and migrations run only once.
+ */
+export async function createTestDatabase(opts: { dataDir?: string } = {}): Promise<{ db: PGlite; columns: Map<string, ColumnInfo>; fresh: boolean }> {
   const db = new PGlite({
+    dataDir: opts.dataDir,
     parsers: {
       [types.DATE]: (v: string) => v,
       [types.TIMESTAMPTZ]: (v: string) => new Date(v).toISOString(),
       [types.NUMERIC]: (v: string) => Number(v),
     },
   });
-  const root = join(__dirname, '../../../../supabase');
-  await db.exec(readFileSync(join(root, 'tests/supabase-stubs.sql'), 'utf8'));
-  for (const f of readdirSync(join(root, 'migrations')).filter((x) => x.endsWith('.sql')).sort()) {
-    await db.exec(readFileSync(join(root, 'migrations', f), 'utf8'));
+  const root = SUPABASE_DIR;
+  const existing = await db.query<{ exists: boolean }>(`select to_regclass('public.workout_sessions') is not null as exists`);
+  const fresh = !existing.rows[0]?.exists;
+  if (fresh) {
+    await db.exec(readFileSync(join(root, 'tests/supabase-stubs.sql'), 'utf8'));
+    for (const f of readdirSync(join(root, 'migrations')).filter((x) => x.endsWith('.sql')).sort()) {
+      await db.exec(readFileSync(join(root, 'migrations', f), 'utf8'));
+    }
   }
   const rows = await db.query<{ table_name: string; column_name: string; data_type: string }>(
     `select table_name, column_name, data_type from information_schema.columns where table_schema = 'public'`,
@@ -41,7 +54,7 @@ export async function createTestDatabase(): Promise<{ db: PGlite; columns: Map<s
     t.set(r.column_name, { dataType: r.data_type });
     columns.set(r.table_name, t);
   }
-  return { db, columns };
+  return { db, columns, fresh };
 }
 
 function pgArrayLiteral(values: unknown[]): string {

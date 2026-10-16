@@ -1,7 +1,8 @@
 import { router, Stack } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { addDays, isLocalDate, todayIn } from '@mova/shared';
+import { addDays, isLocalDate } from '@mova/shared';
 import { Banner, Button, Mascot, NumberField, Row, Screen, Text, TextField } from '@/components';
 import { AIDisclaimer } from '@/components/domain';
 import { useGenerateMealPlan, useProfile } from '@/hooks/api';
@@ -11,7 +12,7 @@ import { useDraft } from '@/lib/drafts';
 /** WF-10: describe goals and food preferences in your own words. */
 export default function NewMealPlan() {
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const generate = useGenerateMealPlan();
   const draft = useDraft('meal-request', '');
   const [startDate, setStartDate] = useState(addDays(today, 1));

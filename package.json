@@ -13,7 +13,9 @@
     "test": "npm run build:shared && npm run test --workspaces --if-present",
     "mobile": "npm run start -w mobile",
     "api:dev": "npm run dev -w @mova/api",
-    "test:db": "vitest run --root supabase"
+    "test:db": "vitest run --root supabase",
+    "sample:generate": "npm run build:shared && node --import tsx apps/api/src/dev/generateSampleSnapshot.ts",
+    "build:web": "npm run build:shared && npm run build:web -w mobile"
   },
   "engines": {
     "node": ">=20"

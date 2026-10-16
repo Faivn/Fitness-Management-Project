@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { todayIn, type SummaryItem } from '@mova/shared';
+import { type SummaryItem } from '@mova/shared';
 import { Button, Card, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, Section, StatusBadge, Text } from '@/components';
 import { useHistory, useProfile, useReviews } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
@@ -14,7 +15,7 @@ import { spacing } from '@/theme/tokens';
  */
 export default function History() {
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const [anchor, setAnchor] = useState(today);
   const { start, end } = monthBounds(anchor);
   const history = useHistory(start, end);

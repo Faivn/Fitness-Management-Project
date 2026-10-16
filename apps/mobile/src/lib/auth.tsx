@@ -1,11 +1,19 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { isConfigured } from './config';
+import { isConfigured, sampleMode } from './config';
 import { supabase } from './supabase';
 
 interface AuthState {
   session: Session | null;
   loading: boolean;
+  /** True when the workspace belongs to an anonymous session (no email linked). */
+  isAnonymous: boolean;
+  /**
+   * WF-01 "Get started": open a private workspace without a sign-in step.
+   * Uses a Supabase anonymous session so every visitor gets their own
+   * RLS-protected data. No-op in the sample preview.
+   */
+  startWorkspace(): Promise<void>;
   signIn(email: string, password: string): Promise<void>;
   signUp(email: string, password: string): Promise<{ needsConfirmation: boolean }>;
   signOut(): Promise<void>;
@@ -23,10 +31,10 @@ function authError(message: string): Error {
 /** Sign-in is kept separate from fitness profiling (WF-01). */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(isConfigured);
+  const [loading, setLoading] = useState(isConfigured && !sampleMode);
 
   useEffect(() => {
-    if (!isConfigured) return;
+    if (!isConfigured || sampleMode) return;
     supabase.auth
       .getSession()
       .then(({ data }) => setSession(data.session))
@@ -39,6 +47,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       session,
       loading,
+      isAnonymous: Boolean((session?.user as { is_anonymous?: boolean } | undefined)?.is_anonymous),
+      async startWorkspace() {
+        if (sampleMode) return;
+        const { data } = await supabase.auth.getSession();
+        if (data.session) return;
+        const { error } = await supabase.auth.signInAnonymously().catch((e: Error) => ({ error: e }));
+        if (error) throw authError(error.message);
+      },
       async signIn(email, password) {
         const { error } = await supabase.auth.signInWithPassword({ email, password }).catch((e: Error) => ({ error: e }));
         if (error) throw authError(error.message);

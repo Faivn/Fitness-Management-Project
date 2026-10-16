@@ -1,7 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { isLocalDate, isLocalTime, todayIn, type ActivityType, type ScheduleConflict } from '@mova/shared';
+import { isLocalDate, isLocalTime, type ActivityType, type ScheduleConflict } from '@mova/shared';
 import { Banner, Button, NumberField, Row, Screen, Segmented, TextField } from '@/components';
 import { ConflictList } from '@/components/domain';
 import { useProfile, useScheduleActivity } from '@/hooks/api';
@@ -12,7 +13,7 @@ import { ACTIVITY_LABELS } from '@/lib/format';
 export default function ScheduleActivity() {
   const params = useLocalSearchParams<{ date?: string }>();
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const create = useScheduleActivity();
   const [type, setType] = useState<ActivityType>('running');
   const [title, setTitle] = useState('');

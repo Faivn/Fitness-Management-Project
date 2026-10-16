@@ -1,7 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { routinePlanSchema, todayIn, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
+import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
 import { Banner, Button, LoadingState, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
 import { ConflictList } from '@/components/domain';
 import { cleanPlan, emptyPlan, RoutineEditor } from '@/components/RoutineEditor';
@@ -26,7 +27,7 @@ export default function EditRoutine() {
   const [activate, setActivate] = useState(false);
   const [rescheduleFuture, setRescheduleFuture] = useState(false);
   const [changeReason, setChangeReason] = useState('');
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const [startDate, setStartDate] = useState(today);
   const [weeks, setWeeks] = useState<number | undefined>(4);
   const [conflicts, setConflicts] = useState<ScheduleConflict[] | null>(null);

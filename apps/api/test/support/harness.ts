@@ -1,8 +1,8 @@
 import type { ZodType } from 'zod';
 import { handleRequest } from '../../src/app.js';
 import type { Env } from '../../src/config/env.js';
-import { AiUnavailableError, type AiClient, type ChatMessage } from '../../src/lib/groq.js';
-import { createTestDatabase, PgTestClient } from './pgSupabase.js';
+import { AiUnavailableError, type AiClient, type ChatMessage } from '../../src/lib/ai.js';
+import { createTestDatabase, PgTestClient } from '../../src/dev/pgliteSupabase.js';
 
 export const USERS = {
   alice: '11111111-1111-4111-8111-111111111111',
@@ -12,10 +12,10 @@ export const USERS = {
 export const testEnv: Env = {
   SUPABASE_URL: 'http://supabase.test',
   SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key-0000',
-  GROQ_API_KEY: 'test-groq-key',
-  GROQ_MODEL: 'test-model',
-  GROQ_BASE_URL: 'http://groq.test/v1',
-  GROQ_TIMEOUT_MS: 5000,
+  OPENAI_API_KEY: 'test-openai-key',
+  OPENAI_MODEL: 'test-model',
+  OPENAI_TIMEOUT_MS: 5000,
+  OPENAI_SUPPORTS_TEMPERATURE: false,
   APP_ORIGIN: 'http://localhost:8081',
   API_ENV: 'test',
 };

@@ -1,7 +1,8 @@
 import { router, Stack } from 'expo-router';
+import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { addDays, isLocalDate, isLocalTime, todayIn, type ActivityType, type WorkoutSession } from '@mova/shared';
+import { addDays, isLocalDate, isLocalTime, type ActivityType, type WorkoutSession } from '@mova/shared';
 import { Banner, Button, Card, Chip, NumberField, Row, Screen, Section, Segmented, Text, TextField } from '@/components';
 import { useLogActivity, useProfile } from '@/hooks/api';
 import { ApiError, errorMessage, newIdempotencyKey } from '@/lib/api';
@@ -33,7 +34,7 @@ interface Draft {
  */
 export default function LogActivity() {
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const log = useLogActivity();
   const weightUnit = profile.data?.weightUnit ?? 'kg';
   const distanceUnit = profile.data?.distanceUnit ?? 'km';

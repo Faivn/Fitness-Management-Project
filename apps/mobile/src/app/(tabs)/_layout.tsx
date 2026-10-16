@@ -3,6 +3,7 @@ import { Redirect, router, Tabs } from 'expo-router';
 import { Pressable, type ColorValue } from 'react-native';
 import { useReminderSync } from '@/hooks/useReminderSync';
 import { useAuth } from '@/lib/auth';
+import { sampleMode } from '@/lib/config';
 import { colors } from '@/theme/tokens';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -32,12 +33,17 @@ function ReminderSync() {
   return null;
 }
 
+function MaybeReminderSync() {
+  return sampleMode ? null : <ReminderSync />;
+}
+
 export default function TabsLayout() {
   const { session, loading } = useAuth();
-  if (!loading && !session) return <Redirect href="/sign-in" />;
+  // No session (e.g. browser data cleared): go back through the entry gate, which reopens a workspace.
+  if (!sampleMode && !loading && !session) return <Redirect href="/" />;
   return (
     <>
-    <ReminderSync />
+    <MaybeReminderSync />
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.ink,

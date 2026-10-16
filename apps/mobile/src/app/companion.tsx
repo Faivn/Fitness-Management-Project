@@ -60,7 +60,7 @@ export default function Companion() {
     <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.page }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }} keyboardVerticalOffset={90}>
         <ScrollView ref={scroll} contentContainerStyle={styles.thread} onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}>
-          <Row>
+          <Row style={{ flexWrap: 'wrap' }}>
             <Button label="New conversation" size="sm" variant="ghost" onPress={() => setConversationId(undefined)} />
             <Button label="Create a routine" size="sm" variant="ghost" onPress={() => router.push('/routine/ai')} />
             <Button label="Plan meals" size="sm" variant="ghost" onPress={() => router.push('/meal/new')} />

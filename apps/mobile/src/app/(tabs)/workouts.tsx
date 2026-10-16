@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { addDays, todayIn } from '@mova/shared';
+import { appToday } from '@/lib/today';
+import { addDays } from '@mova/shared';
 import { Button, Card, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, Section, StatusBadge, Text } from '@/components';
 import { ProposalBanner, SessionCard } from '@/components/domain';
 import { useProfile, useRoutineProposals, useRoutines, useSessions } from '@/hooks/api';
@@ -9,7 +10,7 @@ import { DAY_SHORT } from '@/lib/format';
 /** Workouts: routines (AI or manual — same model), drafts awaiting review, upcoming sessions. */
 export default function Workouts() {
   const profile = useProfile();
-  const today = todayIn(profile.data?.timezone ?? 'UTC');
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   const routines = useRoutines();
   const proposals = useRoutineProposals();
   const upcoming = useSessions(today, addDays(today, 13));

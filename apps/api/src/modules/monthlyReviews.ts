@@ -10,7 +10,7 @@ import {
 import type { AppContext } from '../context.js';
 import { must, mustOne } from '../db/helpers.js';
 import { unprocessable } from '../http/errors.js';
-import { AiUnavailableError } from '../lib/groq.js';
+import { AiUnavailableError } from '../lib/ai.js';
 import { loadPeriodRecords } from './history.js';
 import { userTimezone } from './profile.js';
 import { monthlySummarySystemPrompt } from './prompts.js';

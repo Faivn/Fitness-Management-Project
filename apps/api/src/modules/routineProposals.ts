@@ -11,7 +11,7 @@ import {
 import type { AppContext } from '../context.js';
 import { must, mustOne } from '../db/helpers.js';
 import { aiUnavailable, conflict, fromDbError, unprocessable } from '../http/errors.js';
-import { AiUnavailableError, type ChatMessage } from '../lib/groq.js';
+import { AiUnavailableError, type ChatMessage } from '../lib/ai.js';
 import { getFitnessContext } from './aiContext.js';
 import { appendMessage, ensureConversation } from './conversations.js';
 import { routineRevisionPrompt, routineSystemPrompt } from './prompts.js';

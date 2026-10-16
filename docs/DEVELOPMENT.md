@@ -15,7 +15,7 @@ apps/
   api/           TypeScript API for Vercel Functions
     api/router.ts    single function entry (see vercel.json)
     src/modules/     domain use cases (thin handlers in src/routes.ts)
-    src/lib/         Supabase (user-scoped) and Groq clients
+    src/lib/         Supabase (user-scoped) and OpenAI clients
     test/            end-to-end API tests on an embedded Postgres
 packages/
   shared/        Zod schemas, DTO types and pure business rules (+ tests)
@@ -52,13 +52,31 @@ npm run typecheck
 
 `npm test` builds `@mova/shared` and runs the shared-rule tests, the API end-to-end tests and the mobile component tests (jest-expo). `npm run test:db` applies every migration to an embedded Postgres and checks RLS, history integrity and idempotency.
 
+## Public web preview (Vercel)
+
+The website is the Expo web build, deployed as one static Vercel project from the **repository root** (`vercel.json`).
+
+```bash
+npm run build:web
+```
+
+This produces `apps/mobile/dist`. Vercel runs the same command.
+
+- **Without backend variables**, the site is a **read-only sample preview**. Every screen shows a banner: sample data, nothing saved, AI not connected. Entry flow: Welcome → Get started → workspace, with no sign-in.
+- **To go live**, set `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `EXPO_PUBLIC_API_URL` in the Vercel project, then redeploy. Visitors then get a private workspace through a Supabase anonymous session (enable "Anonymous sign-ins" in Supabase Auth settings).
+- To refresh the sample snapshot:
+
+```bash
+npm run sample:generate
+```
+
 ## Configuration
 
 ### 1. Supabase
 
 1. Create a **development** Supabase project, and a separate production project later (§8.0.3).
 2. Apply the migrations: `npx supabase link --project-ref <ref>`, then `npx supabase db push`.
-3. Under Authentication → URL configuration, add the app's redirect URLs (`mova://` and the Expo dev URLs). Email/password sign-in is used; while testing you can turn off email confirmation.
+3. Under Authentication → Providers, enable **Anonymous sign-ins**; this is how "Get started" opens a workspace without a sign-in step. Add a CAPTCHA or rate limits before public launch. Under URL configuration, add the web URL and `mova://`. Email/password sign-in is optional, for existing accounts.
 4. Generate typed database bindings once the project exists: `npx supabase gen types typescript --linked > apps/api/src/db/database.types.ts`. These are not generated yet; see "Known gaps".
 
 ### 2. API (`apps/api/.env`, and Vercel project environment variables)
@@ -69,8 +87,9 @@ Copy `apps/api/.env.example` to `apps/api/.env` and fill in:
 |---|---|---|
 | `SUPABASE_URL` | No | Project URL |
 | `SUPABASE_PUBLISHABLE_KEY` | No | Publishable/anon key, used together with each user's JWT so RLS applies |
-| `GROQ_API_KEY` | **Yes** | Server only. Never put it in the app or in Git |
-| `GROQ_MODEL` | No | Default `openai/gpt-oss-120b` |
+| `OPENAI_API_KEY` | **Yes** | Server only. Never put it in the app or in Git |
+| `OPENAI_MODEL` | No | Default `gpt-5.5` |
+| `OPENAI_SUPPORTS_TEMPERATURE` | No | `true` only if the chosen model accepts `temperature` |
 | `APP_ORIGIN` | No | Comma-separated browser origins for CORS (Expo web/dev). Native apps don't send an Origin header |
 | `API_ENV` | No | `development` / `preview` / `production` |
 
@@ -101,7 +120,7 @@ Without configuration the app shows a "not configured" screen listing the missin
 
 ## Manual QA script (§11.4 essential scenarios)
 
-1. Fresh install → Welcome → Get started → create an account → you land on Overview without a questionnaire.
+1. Fresh visit → Welcome → Get started → you land on Overview with no sign-in and no questionnaire.
 2. Companion: "I want to train four times a week and improve my running" → approve the suggested goals.
 3. Workouts → Create with AI → review → edit a field → Check my schedule → Approve and schedule.
 4. Workouts → Build manually → save as a draft (no sessions created).
@@ -115,7 +134,7 @@ Without configuration the app shows a "not configured" screen listing the missin
 
 ## Known gaps and blockers
 
-- **No live services connected yet.** No Supabase project, Vercel project or Groq key is configured in this repository, so sign-in, the deployed API and real AI responses have **not** been exercised end to end. Everything that can be tested offline has been: embedded Postgres, scripted AI, and web and iOS bundling.
+- **No live services connected yet.** No Supabase project, API deployment or OpenAI key is configured, so anonymous sessions, the deployed API and real AI responses have **not** been exercised end to end. The public site runs as the read-only sample preview until they are. Everything that can be tested offline has been: embedded Postgres, scripted AI, and web and iOS bundling.
 - **Generated Supabase types** are not committed (spec §8.0.3). They need a linked project; until then, DB rows are mapped to typed DTOs by hand in `apps/api/src/db/mappers.ts`.
 - **Mobile UI tests** (§11.2) cover the key components so far (status labels, the planned-vs-actual card, unknown values, proposal and conflict labels, and the routine editor against the shared schema). Full screen-flow tests with mocked API responses are still to be added.
 - **Native builds** have not been produced: this machine has no Xcode or Android SDK. The iOS JavaScript bundle builds successfully (`npx expo export --platform ios`).
