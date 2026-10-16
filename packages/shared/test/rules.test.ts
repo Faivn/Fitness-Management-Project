@@ -10,6 +10,7 @@ import {
   detectConflicts,
   fastingStatus,
   generateOccurrences,
+  groupMealsByWeekday,
   hydrationTotalMl,
   localDateOf,
   summarisePeriod,
@@ -258,5 +259,15 @@ describe('optional modules', () => {
   it('prefers a manually started fast', () => {
     const s = fastingStatus(null, { startedAt: '2026-10-16T00:00:00Z', plannedHours: 12 }, new Date('2026-10-16T06:00:00Z'), 'UTC');
     expect(s).toMatchObject({ state: 'fasting', basis: 'manual', fraction: 0.5 });
+  });
+});
+
+describe('groupMealsByWeekday', () => {
+  it('shows a recurring Monday–Sunday week, earliest date wins, ordered by slot', () => {
+    // 2026-10-16 is a Friday; 2026-10-19 a Monday; 2026-10-23 the next Friday.
+    const e = (date: string, sortOrder: number, name: string) => ({ date, sortOrder, name });
+    const out = groupMealsByWeekday([e('2026-10-23', 1, 'later friday'), e('2026-10-16', 2, 'dinner'), e('2026-10-16', 1, 'breakfast'), e('2026-10-19', 1, 'monday')]);
+    expect(out.map(([wd]) => wd)).toEqual([0, 4]);
+    expect(out[1]![1].map((x) => x.name)).toEqual(['breakfast', 'dinner']);
   });
 });

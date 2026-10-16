@@ -12,10 +12,10 @@ export const USERS = {
 export const testEnv: Env = {
   SUPABASE_URL: 'http://supabase.test',
   SUPABASE_PUBLISHABLE_KEY: 'test-publishable-key-0000',
-  OPENAI_API_KEY: 'test-openai-key',
-  OPENAI_MODEL: 'test-model',
-  OPENAI_TIMEOUT_MS: 5000,
-  OPENAI_SUPPORTS_TEMPERATURE: false,
+  GROQ_API_KEY: 'test-groq-key-0000',
+  GROQ_BASE_URL: 'https://groq.test/openai/v1',
+  GROQ_MODEL: 'test-model',
+  GROQ_TIMEOUT_MS: 5000,
   APP_ORIGIN: 'http://localhost:8081',
   API_ENV: 'test',
 };
@@ -32,11 +32,16 @@ export class FakeAi implements AiClient {
     this.queue.set(name, list);
   }
 
-  async structured<T>({ name, schema, messages }: { name: string; schema: ZodType<T>; messages: ChatMessage[] }): Promise<T> {
+  async structured<T>({ name, schema, messages, onText }: { name: string; schema: ZodType<T>; messages: ChatMessage[]; onText?: (soFar: string) => void }): Promise<T> {
     this.calls.push({ name, messages });
     const next = this.queue.get(name)?.shift();
     if (next === undefined) throw new AiUnavailableError('no scripted response', 'provider_error');
     if (next instanceof Error) throw next;
+    if (onText) {
+      // Emulate token streaming: cumulative JSON text in small chunks.
+      const full = JSON.stringify(next);
+      for (let i = 9; i < full.length + 9; i += 9) onText(full.slice(0, i));
+    }
     // Real client validates too — model output is untrusted.
     const r = schema.safeParse(next);
     if (!r.success) throw new AiUnavailableError('invalid scripted output', 'invalid_output');
@@ -77,10 +82,28 @@ export async function createHarness(opts: { now?: string } = {}) {
     return { status: res.status, body: text ? JSON.parse(text) : null };
   }
 
+  /** Streaming call: returns the parsed NDJSON events. */
+  async function callStream(path: string, body: unknown, as: keyof typeof USERS | null = 'alice') {
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (as) headers.authorization = `Bearer token-${as}`;
+    const res = await handleRequest(new Request(`http://api.test/api/v1/${path}`, { method: 'POST', headers, body: JSON.stringify(body) }), {
+      env: testEnv,
+      verifyToken: async (_env, token) => (tokens[token] ? { id: tokens[token]!, email: null } : null),
+      userClient: (_env, _token, user) => new PgTestClient(db, columns, user.id).asSupabase(),
+      ai: () => ai,
+      now: () => now,
+      log: () => {},
+    });
+    const text = await res.text();
+    const events = res.headers.get('content-type')?.includes('ndjson') ? text.split('\n').filter(Boolean).map((l) => JSON.parse(l)) : [];
+    return { status: res.status, contentType: res.headers.get('content-type'), events, text };
+  }
+
   return {
     db,
     ai,
     call,
+    callStream,
     setNow(iso: string) {
       now = new Date(iso);
     },

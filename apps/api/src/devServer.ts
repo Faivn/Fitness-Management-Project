@@ -18,6 +18,17 @@ createServer(async (req, res) => {
   });
   const response = await handleRequest(request);
   res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+  if (response.body && /ndjson/.test(response.headers.get('content-type') ?? '')) {
+    // Streaming route: forward chunks as they arrive.
+    const reader = response.body.getReader();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(Buffer.from(value));
+    }
+    res.end();
+    return;
+  }
   res.end(Buffer.from(await response.arrayBuffer()));
 }).listen(port, () => {
   console.log(`Mova API listening on http://localhost:${port}/api/v1`);

@@ -1,6 +1,6 @@
 /**
  * DEVELOPMENT TOOL ONLY (used by generateSampleSnapshot.ts and never by the
- * deployed API). A deterministic stand-in for OpenAI so sample data can be
+ * deployed API). A deterministic stand-in for the AI provider so sample data can be
  * generated without an API key. Every response is clearly labelled as a
  * sample, and still goes through the same Zod validation and approval flow
  * as real model output.

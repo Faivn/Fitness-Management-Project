@@ -32,6 +32,11 @@ async function token(): Promise<string | null> {
   return data.session?.access_token ?? null;
 }
 
+/** AI-backed endpoints can legitimately take longer than ordinary reads and writes. */
+function timeoutFor(path: string): number {
+  return /^(ai\/|routine-proposals|meal-plan-proposals|monthly-reviews\/generate)/.test(path) ? 70_000 : 25_000;
+}
+
 export async function api<T>(method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
   if (sampleMode) {
     try {
@@ -50,14 +55,22 @@ export async function api<T>(method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
   const t = await token();
   if (!t) throw new ApiError(401, 'unauthorized', 'Sign in to continue.');
   let res: Response;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutFor(path));
   try {
     res = await fetch(`${config.apiUrl}/api/v1/${path}`, {
       method,
+      signal: controller.signal,
       headers: { authorization: `Bearer ${t}`, 'content-type': 'application/json', accept: 'application/json' },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-  } catch {
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      throw new ApiError(0, 'timeout', 'Mova took too long to respond. Nothing you entered has been lost — try again.');
+    }
     throw new ApiError(0, 'network', "Couldn't reach Mova. Check your connection — nothing you entered has been lost.");
+  } finally {
+    clearTimeout(timer);
   }
   const text = await res.text();
   const json = text ? (JSON.parse(text) as unknown) : null;

@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Banner, Button, Chip, Mascot, Row, Screen, Segmented, Text, TextField } from '@/components';
+import { Appear, Banner, Button, ThinkingIndicator, Chip, Mascot, Row, Screen, Segmented, Text, TextField } from '@/components';
 import { AIDisclaimer } from '@/components/domain';
 import { useGenerateRoutineProposal, useGoals, useRoutines } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
@@ -87,7 +87,16 @@ export default function RoutineWithAi() {
         onChangeText={draft.setValue}
         multiline
       />
-      {generate.isError ? <Banner tone="error">{errorMessage(generate.error)}</Banner> : null}
+      {generate.isError ? (
+        <Appear>
+          <Banner tone="error">{errorMessage(generate.error)}</Banner>
+        </Appear>
+      ) : null}
+      {generate.isPending ? (
+        <Appear>
+          <ThinkingIndicator label="Drafting your routine" />
+        </Appear>
+      ) : null}
       <Button
         label="Draft my routine"
         variant="brand"

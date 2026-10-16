@@ -24,8 +24,9 @@ export const colors = {
   onInk: '#FFFFFF',
 
   canvas: '#FFFFFF',
-  page: '#FAF9FB',
-  surfaceSubtle: '#F3F3F5',
+  // Cards are borderless, so the page is a soft tint that white cards stand out against.
+  page: '#F6F4F9',
+  surfaceSubtle: '#EEECF2',
   surfaceTertiary: '#C4C3CA',
   hairline: '#E2E2E7',
 
@@ -64,12 +65,12 @@ export const radii = {
 export const typography = {
   display: { fontSize: 32, lineHeight: 36, fontWeight: '700' as const, letterSpacing: -0.4 },
   title: { fontSize: 24, lineHeight: 28, fontWeight: '700' as const, letterSpacing: -0.2 },
-  heading: { fontSize: 18, lineHeight: 24, fontWeight: '600' as const },
+  heading: { fontSize: 20, lineHeight: 26, fontWeight: '700' as const }, // heading-sm
   body: { fontSize: 16, lineHeight: 24, fontWeight: '400' as const },
-  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' as const },
+  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '500' as const }, // label-md weight
   small: { fontSize: 14, lineHeight: 20, fontWeight: '400' as const },
-  label: { fontSize: 14, lineHeight: 18, fontWeight: '600' as const },
-  caption: { fontSize: 12, lineHeight: 16, fontWeight: '500' as const },
+  label: { fontSize: 14, lineHeight: 20, fontWeight: '500' as const },
+  caption: { fontSize: 12, lineHeight: 16, fontWeight: '400' as const },
 } as const;
 
 /** Minimum touch target (WCAG / §10 accessibility). */

@@ -10,13 +10,17 @@ interface ScreenProps {
   onRefresh?: () => void;
   edges?: Array<'top' | 'bottom' | 'left' | 'right'>;
   footer?: React.ReactNode;
+  /** Absolutely positioned content (e.g. a floating button) drawn above the scroll area. */
+  overlay?: React.ReactNode;
+  /** Extra space at the end of the scroll content so an overlay never covers the last item. */
+  endInset?: number;
 }
 
 /** Page container: safe area, page background, consistent gutters. */
-export function Screen({ children, scroll = true, refreshing, onRefresh, edges = ['left', 'right'], footer }: ScreenProps) {
+export function Screen({ children, scroll = true, refreshing, onRefresh, edges = ['left', 'right'], footer, overlay, endInset = 0 }: ScreenProps) {
   const content = scroll ? (
     <ScrollView
-      contentContainerStyle={styles.scroll}
+      contentContainerStyle={[styles.scroll, endInset ? { paddingBottom: spacing['2xl'] + endInset } : null]}
       keyboardShouldPersistTaps="handled"
       refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} /> : undefined}
     >
@@ -28,6 +32,7 @@ export function Screen({ children, scroll = true, refreshing, onRefresh, edges =
   return (
     <SafeAreaView edges={edges} style={styles.safe}>
       {content}
+      {overlay}
       {footer ? <View style={styles.footer}>{footer}</View> : null}
     </SafeAreaView>
   );
@@ -95,10 +100,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.canvas,
     gap: spacing.sm,
   },
+  // No outline: separation comes from the white fill against the tinted page.
   card: {
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.hairline,
+    borderRadius: radii.sm,
     padding: spacing.base,
     gap: spacing.sm,
   },

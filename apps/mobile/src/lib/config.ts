@@ -1,7 +1,7 @@
 /**
  * Public client configuration (compiled into the bundle). Only the Supabase
  * URL, the publishable key and the API base URL belong here — never the
- * service-role key or the OpenAI key, which stay on the server.
+ * service-role key or the Groq key, which stay on the server.
  */
 export const config = {
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL ?? '',

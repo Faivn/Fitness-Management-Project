@@ -47,7 +47,7 @@ describe('security and transport', () => {
   it('serves a public health check without configuration details', async () => {
     const r = await h.call('GET', 'health', undefined, null);
     expect(r.status).toBe(200);
-    expect(JSON.stringify(r.body)).not.toMatch(/key|supabase|openai/i);
+    expect(JSON.stringify(r.body)).not.toMatch(/key|supabase|groq/i);
   });
 
   it('rejects requests without a valid token', async () => {

@@ -1,14 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Banner, Button, Mascot, Text } from '@/components';
-import { useCompleteOnboarding } from '@/hooks/api';
-import { errorMessage } from '@/lib/api';
+import { Button, Mascot, Text } from '@/components';
 import { useAuth } from '@/lib/auth';
 import { sampleMode } from '@/lib/config';
-import { deviceTimeZone } from '@/lib/format';
 import { colors, spacing } from '@/theme/tokens';
 import { WELCOME_SEEN_KEY } from '@/lib/onboarding';
 
@@ -17,29 +13,15 @@ import { WELCOME_SEEN_KEY } from '@/lib/onboarding';
  * are gathered later, in conversation, only when needed.
  */
 export default function Welcome() {
-  const { startWorkspace } = useAuth();
-  const complete = useCompleteOnboarding();
-  const [startError, setStartError] = useState<string | null>(null);
-  const [starting, setStarting] = useState(false);
+  const { session } = useAuth();
 
-  // WF-01 step 4–5: "Get started" enters the workspace directly — no
-  // questionnaire and no sign-in step.
+  // WF-01 step 4: "Get started" → create an account or sign in (kept separate
+  // from fitness profiling), then the workspace.
   async function getStarted() {
-    setStartError(null);
     await AsyncStorage.setItem(WELCOME_SEEN_KEY, '1').catch(() => undefined);
-    if (sampleMode) {
-      router.replace('/(tabs)');
-      return;
-    }
-    setStarting(true);
-    try {
-      await startWorkspace();
-      complete.mutate(deviceTimeZone(), { onSuccess: () => router.replace('/(tabs)') });
-    } catch (e) {
-      setStartError(e instanceof Error ? e.message : 'Something went wrong.');
-    } finally {
-      setStarting(false);
-    }
+    if (sampleMode) router.replace('/(tabs)');
+    else if (session) router.replace('/');
+    else router.replace('/sign-in?mode=sign-up');
   }
 
   return (
@@ -61,9 +43,15 @@ export default function Welcome() {
         <Text variant="small" color="inkTertiary" align="center">
           Your plans and activity history belong to your workspace. You can change or ignore any suggestion.
         </Text>
-        {startError ? <Banner tone="error" title="We couldn't open your workspace">{`${startError} Try again.`}</Banner> : null}
-        {complete.isError ? <Banner tone="error" title="We couldn't open your workspace">{`${errorMessage(complete.error)} Try again.`}</Banner> : null}
-        <Button label="Get started" variant="primary" fullWidth loading={starting || complete.isPending} onPress={getStarted} />
+        <Button label="Get started" variant="primary" fullWidth onPress={getStarted} />
+        {!sampleMode ? (
+          <Button
+            label="I already have an account"
+            variant="ghost"
+            fullWidth
+            onPress={() => AsyncStorage.setItem(WELCOME_SEEN_KEY, '1').finally(() => router.replace('/sign-in'))}
+          />
+        ) : null}
       </View>
     </SafeAreaView>
   );

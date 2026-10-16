@@ -1,11 +1,11 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { fastingStatus, formatVolume, hydrationProgress } from '@mova/shared';
-import { Banner, Button, Card, EmptyState, ErrorState, LoadingState, Row, Screen, Section, Text } from '@/components';
-import { AIEntryBar, MascotNote, MealSlotCard, SessionCard } from '@/components/domain';
+import { Banner, Button, Card, EmptyState, ErrorState, ExpandableCard, FAB_CLEARANCE, FloatingChatButton, IconTile, LoadingState, PressableCard, Row, RuneIcon, Screen, Section, StatusBadge, Text, TextAction, TileRow, tileKindFor } from '@/components';
+import { MascotNote } from '@/components/domain';
 import { useOverview, useProfile } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
-import { formatDate } from '@/lib/format';
+import { ACTIVITY_LABELS, formatDate, formatTimeRange } from '@/lib/format';
 import { colors, radii, spacing } from '@/theme/tokens';
 
 /**
@@ -29,30 +29,56 @@ export default function Overview() {
   const volumeUnit = profile.data?.volumeUnit ?? 'ml';
 
   return (
-    <Screen refreshing={overview.isRefetching} onRefresh={() => overview.refetch()}>
+    <Screen
+      refreshing={overview.isRefetching}
+      onRefresh={() => overview.refetch()}
+      overlay={<FloatingChatButton />}
+      endInset={FAB_CLEARANCE}
+    >
       <View style={{ gap: spacing.xs }}>
         <Text variant="caption" color="inkTertiary">
-          {formatDate(o.localDate, true).toUpperCase()}
+          {formatDate(o.localDate).toUpperCase()}
         </Text>
-        <Text variant="title">Today</Text>
+        <Text variant="title">Your day</Text>
       </View>
 
-      <AIEntryBar />
-
       {o.needsAttention.length > 0 ? (
-        <Section title="Needs an update">
-          <Text variant="small" color="inkSecondary">
-            These planned sessions have passed without an outcome. Log them, move them or mark them missed — no pressure.
-          </Text>
+        <ExpandableCard
+          title="Needs an update"
+          summary={`${o.needsAttention.length} ${o.needsAttention.length === 1 ? 'session needs' : 'sessions need'} attention`}
+        >
           {o.needsAttention.map((s) => (
-            <SessionCard key={s.id} session={s} showDate />
+            <TileRow
+              key={s.id}
+              kind={tileKindFor(s.activityType)}
+              title={s.title}
+              subtitle={formatDate(s.plannedDate)}
+              onPress={() => router.push(`/session/${s.id}`)}
+              accessibilityLabel={`${s.title}, ${formatDate(s.plannedDate)}, needs an update`}
+            />
           ))}
-        </Section>
+        </ExpandableCard>
       ) : null}
 
-      <Section title="Workouts & activities" action={<Button label="Log activity" size="sm" variant="secondary" onPress={() => router.push('/activity/log')} />}>
+      <Section title="Today's workout" action={<TextAction label="See all" onPress={() => router.push('/workouts')} />}>
         {active.length > 0 ? (
-          active.map((s) => <SessionCard key={s.id} session={s} />)
+          active.map((s) => (
+            <PressableCard key={s.id} accessibilityLabel={`${s.title}, ${s.status}`} onPress={() => router.push(`/session/${s.id}`)}>
+              <Row style={{ justifyContent: 'space-between' }}>
+                <Text variant="caption" color="inkTertiary">
+                  {ACTIVITY_LABELS[s.activityType]?.toUpperCase()}
+                </Text>
+                <StatusBadge status={s.plannedDate ? s.status : s.source === 'historical_entry' ? 'historical_entry' : 'spontaneous'} />
+              </Row>
+              <Text variant="bodyStrong">{s.title}</Text>
+              <Row style={{ justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <Text variant="small" color="inkSecondary">
+                  {formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ?? 'Unplanned'}
+                </Text>
+                <RuneIcon name="arrow-up-right" size={18} />
+              </Row>
+            </PressableCard>
+          ))
         ) : o.isRestDay ? (
           <MascotNote mood="rest">Rest day. Recovery is part of the plan.</MascotNote>
         ) : o.hasActiveRoutine ? (
@@ -68,29 +94,37 @@ export default function Overview() {
       </Section>
 
       {o.meals.length > 0 ? (
-        <Section title="Meal timetable" action={<Button label="Plan" size="sm" variant="ghost" onPress={() => router.push(`/meal/${o.mealPlanId}`)} />}>
-          <Text variant="caption" color="inkTertiary">
-            Planned meals — not a food log.
-          </Text>
+        <ExpandableCard title="Today's meals" summary={mealCountLabel(o.meals.length)}>
           {o.meals.map((m) => (
-            <MealSlotCard key={m.id} entry={m} />
+            <TileRow key={m.id} kind="meal" eyebrow={m.slot.toUpperCase() + (m.isSmoothie ? ' · SMOOTHIE' : '')} title={m.mealName} />
           ))}
-        </Section>
+          <TextAction label="Open meal plan" onPress={() => router.push(`/meal/${o.mealPlanId}`)} />
+        </ExpandableCard>
       ) : null}
 
-      {o.hydration ? (
-        <Section title="Hydration">
-          <HydrationCard totalMl={o.hydration.totalMl} target={o.hydration.target} unit={volumeUnit} />
-        </Section>
-      ) : null}
-
-      {o.fasting ? (
-        <Section title="Fasting">
-          <FastingCard fasting={o.fasting} timezone={o.timezone} />
-        </Section>
+      {o.hydration || o.fasting ? (
+        <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' }}>
+          {o.hydration ? (
+            <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
+              <HydrationCard totalMl={o.hydration.totalMl} target={o.hydration.target} unit={volumeUnit} />
+            </View>
+          ) : null}
+          {o.fasting ? (
+            <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
+              <FastingCard fasting={o.fasting} timezone={o.timezone} />
+            </View>
+          ) : null}
+        </View>
       ) : null}
     </Screen>
   );
+}
+
+const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+
+/** "Four meals" — the number of meals planned for the day, in words up to ten. */
+function mealCountLabel(n: number): string {
+  return `${COUNT_WORDS[n] ?? n} ${n === 1 ? 'meal' : 'meals'}`;
 }
 
 function ProgressBar({ fraction, label }: { fraction: number; label: string }) {
@@ -99,7 +133,7 @@ function ProgressBar({ fraction, label }: { fraction: number; label: string }) {
       accessibilityRole="progressbar"
       accessibilityLabel={label}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(fraction * 100) }}
-      style={{ height: 10, borderRadius: radii.pill, backgroundColor: colors.surfaceSubtle, overflow: 'hidden' }}
+      style={{ height: spacing.sm, borderRadius: radii.pill, backgroundColor: colors.surfaceSubtle, overflow: 'hidden' }}
     >
       <View style={{ width: `${Math.round(fraction * 100)}%`, height: '100%', backgroundColor: colors.brand }} />
     </View>
@@ -109,16 +143,29 @@ function ProgressBar({ fraction, label }: { fraction: number; label: string }) {
 function HydrationCard({ totalMl, target, unit }: { totalMl: number; target: { dailyTarget: number; unit: 'ml' | 'l' | 'fl_oz' } | null; unit: 'ml' | 'l' | 'fl_oz' }) {
   const p = target ? hydrationProgress(totalMl, target.dailyTarget, target.unit) : null;
   return (
-    <Card>
-      <Row style={{ justifyContent: 'space-between' }}>
-        <Text variant="bodyStrong">{formatVolume(totalMl, unit)}</Text>
-        <Text variant="small" color="inkTertiary">
-          {p ? `of ${formatVolume(p.targetMl, unit)}` : 'No daily goal set'}
-        </Text>
+    <Card style={{ flex: 1 }}>
+      <Row>
+        <IconTile kind="water" size={32} />
+        <Text variant="bodyStrong">Water</Text>
       </Row>
+      <StatLine left={formatVolume(totalMl, unit)} right={p ? formatVolume(p.targetMl, unit) : 'No goal set'} />
       {p ? <ProgressBar fraction={p.fraction} label="Water intake toward today's goal" /> : null}
-      <Button label="Add water" size="sm" variant="secondary" onPress={() => router.push('/hydration')} />
+      <TextAction label="Add water" icon="plus" onPress={() => router.push('/hydration')} />
     </Card>
+  );
+}
+
+/** Current value on the left, target/next on the right — one line, one size, so progress reads left to right. */
+function StatLine({ left, right, hint }: { left: string; right: string; hint?: string }) {
+  return (
+    <Row style={{ justifyContent: 'space-between' }} accessible accessibilityLabel={hint ?? `${left}, ${right}`}>
+      <Text variant="label" numberOfLines={1}>
+        {left}
+      </Text>
+      <Text variant="small" color="inkTertiary" numberOfLines={1}>
+        {right}
+      </Text>
+    </Row>
   );
 }
 
@@ -132,23 +179,26 @@ function FastingCard({ fasting, timezone }: { fasting: NonNullable<ReturnType<ty
     );
   }
   const status = fastingStatus(fasting.schedule, fasting.activeFast, new Date(), timezone);
+  const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   return (
-    <Card>
+    <Card style={{ flex: 1 }}>
+      <Row>
+        <IconTile kind="fasting" size={32} />
+        <Text variant="bodyStrong">Fasting</Text>
+      </Row>
       {status.state === 'fasting' ? (
         <>
-          <Text variant="bodyStrong">{status.basis === 'manual' ? 'Fast in progress' : 'In your fasting window'}</Text>
+          <StatLine left="In progress" right={`to ${time(status.endsAt)}`} />
           <ProgressBar fraction={status.fraction} label="Fasting window progress" />
-          <Text variant="small" color="inkTertiary">
-            Until {new Date(status.endsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Text>
         </>
       ) : (
-        <Text variant="bodyStrong">
-          Not fasting
-          {status.nextFastStartsAt ? ` · next window ${new Date(status.nextFastStartsAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
-        </Text>
+        <StatLine
+          left="Not fasting"
+          right={status.nextFastStartsAt ? time(status.nextFastStartsAt) : 'No window'}
+          hint={status.nextFastStartsAt ? `Not fasting, next window starts ${time(status.nextFastStartsAt)}` : 'Not fasting, no window planned'}
+        />
       )}
-      <Button label="Open fasting" size="sm" variant="secondary" onPress={() => router.push('/fasting')} />
+      <TextAction label="View fasting" onPress={() => router.push('/fasting')} />
     </Card>
   );
 }

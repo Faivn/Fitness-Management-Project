@@ -1,4 +1,5 @@
 import type { MealEntry, ShoppingItem } from '../schemas/mealPlan.js';
+import { dayOfWeek } from './dates.js';
 import { roundForDisplay } from './units.js';
 
 export interface ConsolidatedItem extends ShoppingItem {
@@ -71,3 +72,26 @@ export function groupMealsByDay<T extends { date: string; sortOrder: number }>(e
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([d, list]) => [d, list.sort((x, y) => x.sortOrder - y.sortOrder)]);
 }
+
+/**
+ * Present a dated plan as a recurring Monday–Sunday week. Entries are stored
+ * with dates, so when a weekday occurs more than once the earliest date wins.
+ * Returns only weekdays that have meals; index 0 = Monday … 6 = Sunday.
+ */
+export function groupMealsByWeekday<T extends { date: string; sortOrder: number }>(entries: T[]): Array<[number, T[]]> {
+  const earliest = new Map<number, string>();
+  for (const e of entries) {
+    const wd = (dayOfWeek(e.date) + 6) % 7;
+    const cur = earliest.get(wd);
+    if (cur === undefined || e.date < cur) earliest.set(wd, e.date);
+  }
+  const byWeekday = new Map<number, T[]>();
+  for (const e of entries) {
+    const wd = (dayOfWeek(e.date) + 6) % 7;
+    if (earliest.get(wd) !== e.date) continue;
+    byWeekday.set(wd, [...(byWeekday.get(wd) ?? []), e]);
+  }
+  return [...byWeekday.entries()].sort(([a], [b]) => a - b).map(([wd, list]) => [wd, list.sort((x, y) => x.sortOrder - y.sortOrder)]);
+}
+
+export const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;

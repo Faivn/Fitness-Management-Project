@@ -4,7 +4,7 @@ import { allowedOrigins, ConfigError, getEnv, type Env } from './config/env.js';
 import type { AppContext } from './context.js';
 import { ApiError, unauthorized, validationError } from './http/errors.js';
 import { errorResponse, json, makeRequest, readJson } from './http/router.js';
-import { createOpenAiClient, type AiClient } from './lib/ai.js';
+import { createGroqClient, type AiClient } from './lib/ai.js';
 import { createUserClient, verifyAccessToken, type VerifiedUser } from './lib/supabase.js';
 import { buildRoutes } from './routes.js';
 
@@ -79,13 +79,18 @@ export async function handleRequest(request: Request, deps: AppDeps = {}): Promi
       env,
       user,
       db: deps.userClient ? deps.userClient(env, token, user) : createUserClient(env, token),
-      ai: deps.ai ? deps.ai(env) : createOpenAiClient(env),
+      ai: deps.ai ? deps.ai(env) : createGroqClient(env),
       now: deps.now ?? (() => new Date()),
     };
 
     const body = await readJson(request);
     const result = await match.route.handler(makeRequest(ctx, match.params, url.searchParams, body));
     status = match.route.status;
+    // Streaming routes return a ready Response (their own body); everything else is JSON.
+    if (result instanceof Response) {
+      for (const [k, v] of Object.entries(cors)) result.headers.set(k, v);
+      return result;
+    }
     return json(result, status, cors);
   } catch (e) {
     const err =

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ConversationMessage, GoalDraft } from '@mova/shared';
-import { Banner, Button, Card, Chip, Row, Text, TextField } from '@/components';
+import { Appear, Banner, Button, Card, Chip, Row, Text, TextField, ThinkingIndicator } from '@/components';
 import { AIDisclaimer, ProposalBanner } from '@/components/domain';
 import { Mascot } from '@/components/Mascot';
 import { useAiTurn, useApproveGoals, useConversation, useConversations, useGoalProposal, useRejectProposal } from '@/hooks/api';
@@ -29,19 +29,38 @@ export default function Companion() {
   const turn = useAiTurn();
   const draft = useDraft('companion-message', { text: '', clientMessageId: newIdempotencyKey() });
   const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  // Messages already on screen when a conversation loads appear in place; later ones animate in.
+  const known = useRef<{ id?: string; ids: Set<string> | null }>({ ids: null });
+  const streamedLast = useRef(false);
+  const following = useRef(true);
 
   // Resume the most recent conversation by default.
   useEffect(() => {
     if (!conversationId && !params.id && conversations.data?.[0]) setConversationId(conversations.data[0].id);
   }, [conversations.data, conversationId, params.id]);
 
+  // Opening a conversation (or starting one) lands on the latest message and follows from there.
+  const loaded = !!conversation.data;
+  useEffect(() => {
+    following.current = true;
+    const t = setTimeout(() => scroll.current?.scrollToEnd({ animated: false }), 50);
+    return () => clearTimeout(t);
+  }, [conversationId, loaded]);
+
   const messages = conversation.data?.messages ?? [];
+  if (known.current.id !== conversationId) known.current = { id: conversationId, ids: null };
+  if (known.current.ids === null && (conversation.data || !conversationId)) known.current.ids = new Set(messages.map((m) => m.id));
+  const isNew = (id: string) => known.current.ids !== null && !known.current.ids.has(id);
+  const streaming = turn.isPending ? turn.streamingText : '';
+  if (streaming) streamedLast.current = true;
   const pendingText = turn.isPending ? turn.variables?.message : undefined;
 
   function send(text = draft.value.text) {
     const message = text.trim();
     if (!message) return;
     const clientMessageId = text === draft.value.text ? draft.value.clientMessageId : newIdempotencyKey();
+    streamedLast.current = false;
+    following.current = true; // sending re-engages follow-along
     turn.mutate(
       { conversationId, message, clientMessageId },
       {
@@ -59,7 +78,17 @@ export default function Companion() {
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.page }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }} keyboardVerticalOffset={90}>
-        <ScrollView ref={scroll} contentContainerStyle={styles.thread} onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: true })}>
+        <ScrollView
+          ref={scroll}
+          contentContainerStyle={styles.thread}
+          scrollEventThrottle={64}
+          // Follow new content only while the reader is at the live edge.
+          onScroll={(e) => {
+            const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+            following.current = contentSize.height - (contentOffset.y + layoutMeasurement.height) < 80;
+          }}
+          onContentSizeChange={() => following.current && scroll.current?.scrollToEnd({ animated: !streaming })}
+        >
           <Row style={{ flexWrap: 'wrap' }}>
             <Button label="New conversation" size="sm" variant="ghost" onPress={() => setConversationId(undefined)} />
             <Button label="Create a routine" size="sm" variant="ghost" onPress={() => router.push('/routine/ai')} />
@@ -81,19 +110,23 @@ export default function Companion() {
               </View>
             </View>
           ) : null}
-          {messages.map((m) => (
-            <MessageBubble key={m.id} message={m} />
-          ))}
-          {pendingText ? <MessageBubble message={{ id: 'pending', role: 'user', content: pendingText, createdAt: '', metadata: null }} /> : null}
-          {turn.isPending ? (
-            <Row>
-              <Mascot mood="thinking" size={40} />
-              <Text variant="small" color="inkTertiary">
-                Thinking…
-              </Text>
-            </Row>
+          {messages.map((m) => {
+            // The reply that was just streamed is already on screen; swap it in place without re-animating.
+            const justStreamed = m.role === 'assistant' && isNew(m.id) && streamedLast.current;
+            return <MessageBubble key={m.id} message={m} animate={m.role === 'assistant' && isNew(m.id) && !justStreamed} cardDelay={justStreamed ? 0 : 120} />;
+          })}
+          {pendingText ? <MessageBubble message={{ id: 'pending', role: 'user', content: pendingText, createdAt: '', metadata: null }} animate /> : null}
+          {turn.isPending && !streaming ? (
+            <Appear>
+              <ThinkingIndicator />
+            </Appear>
           ) : null}
-          {turn.isError ? <Banner tone="error">{errorMessage(turn.error)}</Banner> : null}
+          {streaming ? <MessageBubble message={{ id: 'streaming', role: 'assistant', content: streaming, createdAt: '', metadata: null }} animate={false} streaming /> : null}
+          {turn.isError ? (
+            <Appear>
+              <Banner tone="error">{errorMessage(turn.error)}</Banner>
+            </Appear>
+          ) : null}
         </ScrollView>
         <View style={styles.composer}>
           <TextField
@@ -116,12 +149,16 @@ export default function Companion() {
   );
 }
 
-function MessageBubble({ message }: { message: ConversationMessage }) {
+function MessageBubble({ message, animate = false, streaming = false, cardDelay = 120 }: { message: ConversationMessage; animate?: boolean; streaming?: boolean; cardDelay?: number }) {
   const mine = message.role === 'user';
   const meta = message.metadata as (ConversationMessage['metadata'] & { routineProposalId?: string; mealPlanProposalId?: string }) | null;
   return (
-    <View style={{ alignItems: mine ? 'flex-end' : 'flex-start', gap: spacing.sm }}>
-      <View style={[styles.bubble, mine ? styles.mine : styles.theirs]}>
+    <Appear enabled={animate} style={{ alignItems: mine ? 'flex-end' : 'flex-start', gap: spacing.sm }}>
+      <View
+        style={[styles.bubble, mine ? styles.mine : styles.theirs]}
+        // The finished reply is announced once; partial text is not read out token by token.
+        accessibilityLiveRegion={!mine && !streaming && animate ? 'polite' : 'none'}
+      >
         <Text variant="body" color={mine ? 'onInk' : 'ink'}>
           {message.content}
         </Text>
@@ -135,12 +172,20 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
           ))}
         </View>
       ) : null}
-      {meta?.goalProposalId ? <GoalProposalCard id={meta.goalProposalId} /> : null}
+      {meta?.goalProposalId ? (
+        <Appear variant="card" enabled={animate} delay={cardDelay} style={{ alignSelf: 'stretch' }}>
+          <GoalProposalCard id={meta.goalProposalId} />
+        </Appear>
+      ) : null}
       {meta?.routineProposalId ? (
-        <Button label="Review routine proposal" size="sm" variant="secondary" onPress={() => router.push(`/proposal/routine/${meta.routineProposalId}`)} />
+        <Appear variant="card" enabled={animate} delay={cardDelay}>
+          <Button label="Review routine proposal" size="sm" variant="secondary" onPress={() => router.push(`/proposal/routine/${meta.routineProposalId}`)} />
+        </Appear>
       ) : null}
       {meta?.mealPlanProposalId ? (
-        <Button label="Review meal plan" size="sm" variant="secondary" onPress={() => router.push(`/proposal/meal/${meta.mealPlanProposalId}`)} />
+        <Appear variant="card" enabled={animate} delay={cardDelay}>
+          <Button label="Review meal plan" size="sm" variant="secondary" onPress={() => router.push(`/proposal/meal/${meta.mealPlanProposalId}`)} />
+        </Appear>
       ) : null}
       {meta?.suggestedNextStep === 'create_routine' ? (
         <Button label="Draft a routine from this" size="sm" variant="brand" onPress={() => router.push('/routine/ai')} />
@@ -151,7 +196,7 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
       {meta?.suggestedNextStep === 'monthly_review' ? (
         <Button label="Open monthly review" size="sm" variant="brand" onPress={() => router.push('/review/new')} />
       ) : null}
-    </View>
+    </Appear>
   );
 }
 

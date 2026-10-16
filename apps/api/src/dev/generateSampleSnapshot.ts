@@ -25,10 +25,10 @@ const OUT = join(dirname(fileURLToPath(import.meta.url)), '../../../mobile/src/s
 const env: Env = {
   SUPABASE_URL: 'http://sample.invalid',
   SUPABASE_PUBLISHABLE_KEY: 'sample-generator-not-a-key',
-  OPENAI_API_KEY: undefined,
-  OPENAI_MODEL: 'sample',
-  OPENAI_TIMEOUT_MS: 1000,
-  OPENAI_SUPPORTS_TEMPERATURE: false,
+  GROQ_API_KEY: undefined,
+  GROQ_BASE_URL: 'https://api.groq.com/openai/v1',
+  GROQ_MODEL: 'sample',
+  GROQ_TIMEOUT_MS: 1000,
   APP_ORIGIN: '',
   API_ENV: 'development',
 };

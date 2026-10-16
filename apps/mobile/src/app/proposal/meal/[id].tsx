@@ -2,7 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { groupMealsByDay, mealPlanSchema, type MealPlanDraft } from '@mova/shared';
-import { Banner, Button, Card, ErrorState, LoadingState, Row, Screen, Section, Text, TextField } from '@/components';
+import { Appear, Banner, Button, Card, ErrorState, LoadingState, Row, Screen, Section, Text, TextField } from '@/components';
 import { AIDisclaimer, ProposalBanner } from '@/components/domain';
 import { useApproveMealPlan, useEditMealProposal, useMealProposal, useRejectProposal, useReviseMealProposal } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
@@ -59,7 +59,9 @@ export default function MealProposalReview() {
       }
     >
       <Stack.Screen options={{ title: 'Review meal plan' }} />
-      <ProposalBanner version={p.version} status={p.status} />
+      <Appear variant="card">
+        <ProposalBanner version={p.version} status={p.status} />
+      </Appear>
       {p.clarifyingQuestions.length ? (
         <Card tone="brand">
           <Text variant="label">A few questions first</Text>

@@ -17,6 +17,7 @@ set check_function_bodies = off;
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at := now();
@@ -252,6 +253,7 @@ create trigger workout_sessions_updated_at before update on public.workout_sessi
 create or replace function public.protect_original_planned_date()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   if old.original_planned_date is distinct from new.original_planned_date then

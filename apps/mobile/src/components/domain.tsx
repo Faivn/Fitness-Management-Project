@@ -89,7 +89,7 @@ export function WeekStrip({
             <Text variant="bodyStrong" color={sel ? 'onInk' : 'ink'}>
               {Number(dd)}
             </Text>
-            <View style={[styles.dot, { backgroundColor: count ? (sel ? colors.brand : colors.ink) : 'transparent' }]} />
+            <View style={[styles.dot, { backgroundColor: count ? (sel ? colors.brand : colors.inkTertiary) : colors.surfaceSubtle }]} />
           </Pressable>
         );
       })}
@@ -219,8 +219,8 @@ export function MascotNote({ mood, children }: { mood: React.ComponentProps<type
 
 const styles = StyleSheet.create({
   actual: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.hairline, paddingTop: spacing.sm, gap: 2 },
-  week: { flexDirection: 'row', justifyContent: 'space-between' },
-  day: { alignItems: 'center', gap: 2, paddingVertical: spacing.sm, width: TOUCH_TARGET, borderRadius: radii.md },
+  week: { flexDirection: 'row', gap: spacing.xs },
+  day: { flex: 1, flexBasis: 0, alignItems: 'center', gap: 2, paddingVertical: spacing.sm, minHeight: TOUCH_TARGET + spacing.lg, borderRadius: radii.sm, backgroundColor: colors.canvas },
   daySelected: { backgroundColor: colors.ink },
   dot: { width: 6, height: 6, borderRadius: 3 },
   conflicts: { backgroundColor: colors.warningWash, borderRadius: radii.md, padding: spacing.base, gap: spacing.xs },

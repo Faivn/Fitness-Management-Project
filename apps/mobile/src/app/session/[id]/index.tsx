@@ -1,8 +1,8 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { canReschedule, type WorkoutSessionDetail } from '@mova/shared';
-import { Banner, Button, Card, ErrorState, LoadingState, NumberField, Row, Screen, Section, Segmented, StatusBadge, Text, TextField } from '@/components';
+import { Banner, Button, Card, Divider, ErrorState, ExpandableCard, LoadingState, NumberField, Row, RuneIcon, Screen, Section, Segmented, statusLabel, Text, TextField } from '@/components';
 import { ChangeTimeline } from '@/components/domain';
 import { useCancelSession, useFinishSession, useMarkMissed, useProfile, useSession, useStartSession } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
@@ -45,19 +45,14 @@ export default function SessionDetail() {
   return (
     <Screen refreshing={session.isRefetching} onRefresh={() => session.refetch()}>
       <Stack.Screen options={{ title: s.title }} />
-      <Row style={{ justifyContent: 'space-between' }}>
-        <Text variant="caption" color="inkTertiary">
-          {ACTIVITY_LABELS[s.activityType]} · {s.source === 'ai' ? 'From AI routine' : s.source === 'manual' ? 'Planned' : s.source === 'spontaneous' ? 'Spontaneous' : 'Added afterwards'}
-        </Text>
-        <StatusBadge status={s.plannedDate ? s.status : s.source === 'historical_entry' ? 'historical_entry' : 'spontaneous'} />
-      </Row>
-      <Text variant="title">{s.title}</Text>
-
       <Card>
-        <Text variant="label">Plan</Text>
+        <Text variant="caption" color="inkTertiary">
+          {ACTIVITY_LABELS[s.activityType]?.toUpperCase()} · {statusLabel(s.plannedDate ? s.status : s.source === 'historical_entry' ? 'historical_entry' : 'spontaneous').toUpperCase()}
+        </Text>
+        <Text variant="heading">Your workout plan</Text>
         {s.plannedDate ? (
-          <Text variant="body">
-            {formatDate(s.plannedDate, true)}
+          <Text variant="small" color="inkTertiary">
+            {formatDate(s.plannedDate)}
             {formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ? ` · ${formatTimeRange(s.plannedTime, s.plannedDurationMinutes)}` : ''}
           </Text>
         ) : (
@@ -65,14 +60,16 @@ export default function SessionDetail() {
             Not planned in advance.
           </Text>
         )}
+        {s.exercises.length ? <Divider /> : null}
         {s.exercises.map((e) => (
-          <Text key={e.id} variant="small" color="inkSecondary">
-            {e.displayName} — {e.targetSets} × {e.targetRepsMin && e.targetRepsMax ? `${e.targetRepsMin}–${e.targetRepsMax}` : (e.targetRepsMin ?? e.targetRepsMax ?? '?')}
+          <Text key={e.id} variant="body">
+            {e.displayName} · {e.targetSets} × {e.targetRepsMin && e.targetRepsMax ? (e.targetRepsMin === e.targetRepsMax ? `${e.targetRepsMin}` : `${e.targetRepsMin}–${e.targetRepsMax}`) : (e.targetRepsMin ?? e.targetRepsMax ?? '?')}
             {e.targetWeight ? ` @ ${e.targetWeight} ${e.weightUnit}` : ''}
           </Text>
         ))}
       </Card>
 
+      {s.actualDate || s.status !== 'scheduled' ? (
       <Card tone={s.actualDate ? 'canvas' : 'subtle'}>
         <Text variant="label">What happened</Text>
         {s.actualDate ? (
@@ -89,11 +86,12 @@ export default function SessionDetail() {
         {s.setLogs.length ? <SetSummary s={s} /> : null}
         {s.notes ? <Text variant="small">{s.notes}</Text> : null}
       </Card>
+      ) : null}
 
       {err ? <Banner tone="error">{errorMessage(err)}</Banner> : null}
 
       {actionable ? (
-        <Section title="Actions">
+        <View style={{ gap: spacing.md }}>
           {isStrength ? (
             <Button
               label={s.status === 'in_progress' || s.status === 'incomplete' ? 'Continue logging' : 'Start workout'}
@@ -109,11 +107,11 @@ export default function SessionDetail() {
             <ActivityCompletion session={s} />
           )}
           {canReschedule(s.status) ? (
-            <Row style={{ flexWrap: 'wrap' }}>
-              <Button label="Move to another day" variant="secondary" onPress={() => router.push(`/session/${s.id}/reschedule`)} />
-              {s.status === 'scheduled' ? <Button label="Mark as missed" variant="ghost" onPress={() => setConfirm('missed')} /> : null}
-              <Button label="Cancel session" variant="ghost" onPress={() => setConfirm('cancel')} />
-            </Row>
+            <ExpandableCard title="More options">
+              <OptionRow icon="schedule" label="Move to another day" onPress={() => router.push(`/session/${s.id}/reschedule`)} />
+              {s.status === 'scheduled' ? <OptionRow icon="circle-alert" label="Mark as missed" onPress={() => setConfirm('missed')} /> : null}
+              <OptionRow icon="circle-x" label="Cancel session" onPress={() => setConfirm('cancel')} />
+            </ExpandableCard>
           ) : null}
           {confirm ? (
             <Card tone="subtle">
@@ -130,7 +128,7 @@ export default function SessionDetail() {
               </Row>
             </Card>
           ) : null}
-        </Section>
+        </View>
       ) : null}
 
       {s.originalPlannedDate ? (
@@ -139,6 +137,15 @@ export default function SessionDetail() {
         </Section>
       ) : null}
     </Screen>
+  );
+}
+
+function OptionRow({ icon, label, onPress }: { icon: 'schedule' | 'circle-alert' | 'circle-x'; label: string; onPress: () => void }) {
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 44 }}>
+      <RuneIcon name={icon} size={20} />
+      <Text variant="body">{label}</Text>
+    </Pressable>
   );
 }
 

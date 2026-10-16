@@ -15,6 +15,7 @@ returns jsonb
 language sql
 stable
 security invoker
+set search_path = public, pg_temp
 as $$
   select response from public.idempotency_keys
   where user_id = (select auth.uid()) and key = p_key;
@@ -24,6 +25,7 @@ create or replace function public._idem_put(p_key text, p_operation text, p_resp
 returns void
 language sql
 security invoker
+set search_path = public, pg_temp
 as $$
   insert into public.idempotency_keys (user_id, key, operation, response)
   values ((select auth.uid()), p_key, p_operation, p_response);
@@ -34,6 +36,7 @@ returns uuid
 language plpgsql
 stable
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v uuid := (select auth.uid());
@@ -62,6 +65,7 @@ create or replace function public._create_sessions_for_version(
 returns integer
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -117,6 +121,7 @@ create or replace function public._retire_future_sessions(p_routine_id uuid, p_f
 returns integer
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -142,6 +147,7 @@ create or replace function public._link_goals(p_routine_id uuid, p_plan jsonb)
 returns void
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -170,6 +176,7 @@ create or replace function public.apply_routine_proposal(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -264,6 +271,7 @@ create or replace function public.create_manual_routine(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -312,6 +320,7 @@ create or replace function public.save_routine_version(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -374,6 +383,7 @@ create or replace function public.reschedule_session(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -423,6 +433,7 @@ create or replace function public.set_session_outcome(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -476,6 +487,7 @@ create or replace function public.approve_meal_plan_proposal(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();
@@ -574,6 +586,7 @@ create or replace function public.correct_exercise_log(
 returns jsonb
 language plpgsql
 security invoker
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid := public._require_user();

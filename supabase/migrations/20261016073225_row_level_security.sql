@@ -93,6 +93,7 @@ returns boolean
 language sql
 stable
 security invoker
+set search_path = public, pg_temp
 as $$
   select exists (select 1 from public.workout_sessions s where s.id = p_session_id and s.user_id = (select auth.uid()));
 $$;

@@ -1,12 +1,13 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Banner, Button, Mascot, Screen, Segmented, Text, TextField } from '@/components';
 import { useAuth } from '@/lib/auth';
 
 /** Email + password sign-in (spec §8.0.2). Kept separate from fitness profiling. */
 export default function SignIn() {
+  const params = useLocalSearchParams<{ mode?: string }>();
   const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>(params.mode === 'sign-up' ? 'sign-up' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
@@ -25,7 +26,10 @@ export default function SignIn() {
         router.replace('/');
       } else {
         const { needsConfirmation } = await signUp(email.trim(), password);
-        if (needsConfirmation) setNotice('Check your email to confirm your account, then sign in.');
+        if (needsConfirmation) {
+          setNotice(`We've sent a confirmation link to ${email.trim()}. Open it, then sign in here.`);
+          setMode('sign-in');
+        }
         else router.replace('/');
       }
     } catch (e) {
@@ -38,7 +42,12 @@ export default function SignIn() {
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <Mascot mood="phone" size={96} />
-      <Text variant="title">{mode === 'sign-in' ? 'Welcome back' : 'Create your workspace'}</Text>
+      <Text variant="title">{mode === 'sign-in' ? 'Welcome back' : 'Create your account'}</Text>
+      <Text variant="small" color="inkSecondary">
+        {mode === 'sign-in'
+          ? 'Sign in to open your saved workspace.'
+          : 'Just an email and a password. Your workouts, plans and history are saved privately to your account.'}
+      </Text>
       <Segmented
         options={[
           { value: 'sign-in', label: 'Sign in' },

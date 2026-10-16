@@ -3,7 +3,7 @@ import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
-import { Banner, Button, Card, ErrorState, LoadingState, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
+import { Appear, Banner, Button, Card, ErrorState, LoadingState, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
 import { AIDisclaimer, ConflictList, ProposalBanner } from '@/components/domain';
 import { cleanPlan, RoutineEditor } from '@/components/RoutineEditor';
 import {
@@ -97,7 +97,9 @@ export default function RoutineProposalReview() {
       }
     >
       <Stack.Screen options={{ title: 'Review routine' }} />
-      <ProposalBanner version={p.version} status={p.status} />
+      <Appear variant="card">
+        <ProposalBanner version={p.version} status={p.status} />
+      </Appear>
       {p.mode !== 'new' ? <Banner tone="info" title={p.mode === 'replace' ? 'Replaces an existing routine' : 'Adjusts an existing routine'}>Completed workouts and their logs stay exactly as they are. Only future planned sessions change.</Banner> : null}
 
       {p.clarifyingQuestions.length > 0 ? (

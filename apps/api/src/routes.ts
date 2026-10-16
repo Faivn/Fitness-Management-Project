@@ -41,7 +41,7 @@ import {
 } from '@mova/shared';
 import type { AppContext } from './context.js';
 import { Router } from './http/router.js';
-import { aiTurn, getConversation, listConversations } from './modules/conversations.js';
+import { aiTurn, aiTurnStream, getConversation, listConversations } from './modules/conversations.js';
 import { endFast, getFastingState, setFastingSchedule, startFast } from './modules/fasting.js';
 import { approveGoalProposal, createGoal, getGoalProposal, listGoals, rejectProposal, updateGoal } from './modules/goals.js';
 import { getExerciseHistory, getHistory, getPersonalRecords, listExercises } from './modules/history.js';
@@ -123,6 +123,7 @@ export function buildRoutes(): Router<AppContext> {
   r.on('POST', 'goal-proposals/:id/approve', (q) => approveGoalProposal(q.ctx, idParam(q.params.id), q.input(approveGoalProposalSchema)));
   r.on('POST', 'goal-proposals/:id/reject', (q) => rejectProposal(q.ctx, 'goal_proposals', idParam(q.params.id)));
   r.on('POST', 'ai/turn', (q) => aiTurn(q.ctx, q.input(aiTurnSchema)));
+  r.on('POST', 'ai/turn/stream', (q) => aiTurnStream(q.ctx, q.input(aiTurnSchema), {}));
   r.on('GET', 'ai/conversations', ({ ctx }) => listConversations(ctx));
   r.on('GET', 'ai/conversations/:id', (q) => getConversation(q.ctx, idParam(q.params.id)));
 

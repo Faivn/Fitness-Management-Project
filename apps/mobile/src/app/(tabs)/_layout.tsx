@@ -1,27 +1,23 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Redirect, router, Tabs } from 'expo-router';
 import { Pressable, type ColorValue } from 'react-native';
 import { useReminderSync } from '@/hooks/useReminderSync';
 import { useAuth } from '@/lib/auth';
 import { sampleMode } from '@/lib/config';
+import { RuneIcon, type RuneIconName } from '@/components/RuneIcon';
 import { colors } from '@/theme/tokens';
 
-type IconName = React.ComponentProps<typeof Ionicons>['name'];
-
-function tabIcon(name: IconName, active: IconName) {
-  return ({ focused, color, size }: { focused: boolean; color: ColorValue; size: number }) => (
-    <Ionicons name={focused ? active : name} color={color as string} size={size} />
+function tabIcon(name: RuneIconName) {
+  // Active tab = ink colour (the label is also heavier); inactive = muted.
+  return ({ color, size }: { focused: boolean; color: ColorValue; size: number }) => (
+    <RuneIcon name={name} size={size} color={color === colors.ink ? 'ink' : 'inkTertiary'} />
   );
 }
 
 function HeaderButtons() {
   return (
     <>
-      <Pressable accessibilityRole="button" accessibilityLabel="Open the Mova companion" hitSlop={10} onPress={() => router.push('/companion')} style={{ marginRight: 16 }}>
-        <Ionicons name="chatbubble-ellipses-outline" size={22} color={colors.ink} />
-      </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="Settings" hitSlop={10} onPress={() => router.push('/settings')} style={{ marginRight: 16 }}>
-        <Ionicons name="settings-outline" size={22} color={colors.ink} />
+        <RuneIcon name="settings" size={22} />
       </Pressable>
     </>
   );
@@ -39,8 +35,7 @@ function MaybeReminderSync() {
 
 export default function TabsLayout() {
   const { session, loading } = useAuth();
-  // No session (e.g. browser data cleared): go back through the entry gate, which reopens a workspace.
-  if (!sampleMode && !loading && !session) return <Redirect href="/" />;
+  if (!sampleMode && !loading && !session) return <Redirect href="/sign-in" />;
   return (
     <>
     <MaybeReminderSync />
@@ -52,14 +47,15 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.page },
         headerShadowVisible: false,
         headerTitleStyle: { fontWeight: '700' },
+        tabBarLabelStyle: { fontWeight: '600' },
         headerRight: () => <HeaderButtons />,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Overview', tabBarIcon: tabIcon('today-outline', 'today') }} />
-      <Tabs.Screen name="workouts" options={{ title: 'Workouts', tabBarIcon: tabIcon('barbell-outline', 'barbell') }} />
-      <Tabs.Screen name="schedule" options={{ title: 'Schedule', tabBarIcon: tabIcon('calendar-outline', 'calendar') }} />
-      <Tabs.Screen name="meals" options={{ title: 'Meal plan', tabBarIcon: tabIcon('restaurant-outline', 'restaurant') }} />
-      <Tabs.Screen name="history" options={{ title: 'History', tabBarIcon: tabIcon('time-outline', 'time') }} />
+      <Tabs.Screen name="index" options={{ title: 'Overview', tabBarIcon: tabIcon('overview') }} />
+      <Tabs.Screen name="workouts" options={{ title: 'Workouts', tabBarIcon: tabIcon('workouts') }} />
+      <Tabs.Screen name="schedule" options={{ title: 'Schedule', tabBarIcon: tabIcon('schedule') }} />
+      <Tabs.Screen name="meals" options={{ title: 'Meal plan', tabBarIcon: tabIcon('meals') }} />
+      <Tabs.Screen name="history" options={{ title: 'History', tabBarIcon: tabIcon('history') }} />
     </Tabs>
     </>
   );
