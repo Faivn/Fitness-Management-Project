@@ -1,408 +1,453 @@
 ---
 version: alpha
-name: Klarna
-website: "https://www.klarna.com/us/"
+name: Oura Ring
+website: "https://ouraring.com"
 description: >-
-  A buy-now-pay-later payments system anchored on Klarna Black ("#0b051d") — a violet-tinted near-black that does the work of both text and border at frequency 1321 — paired with a deliberately rationed pink voltage Klarna Pink ("#ffa8cd") that appears once on the entire homepage as the navigation "Sign up" pill. Type runs two proprietary families: Klarna Title at 41–90px / weight 500–700 for the hero and section headings, and Klarna Text at 14–24px for the brand-tinted UI register, with everything else falling through to the platform stack (-apple-system / system-ui / Segoe UI / Roboto). The radius scale collapses to a 32px pill that appears 89 times across CTAs, scene cards, product mockups, and the dashboard chrome — Klarna's repeating geometry is the soft-pill, not the rectangle.
-
+  A consumer-health interface for a titanium sleep-tracking ring, anchored on warm sandstone canvases (#f7f1e8, #efe6db) over a graphite ink (#1c1b1a) and rendered in AkkuratLL grotesque at weights 300 through 700, with Editorial New serif italic dropped in once per heading as the brand's one ornamental gesture — the "Made for you", "voice", "your every day" phrases that turn marketing copy into magazine pull-quotes. The signature CTA is a full-pill dark-graphite button on cream; mustard (#af751b) and indigo (#4a4af4) sit as scoped brand voltages while photography of the ring on skin carries the warmth.
 seo:
-  title: "Klarna Design System for React — Klarna Pink #ffa8cd, Klarna Title, and 18 components"
-  metaDescription: "Klarna's payments design system as a DESIGN.md file. Pink #ffa8cd, Klarna Title, 20 colors, 18 components. For React, Next.js, and AI tools."
+  title: "Oura Ring Design System for React — AkkuratLL, Editorial New italic, 22 components"
+  metaDescription: "Oura Ring's consumer-health design system as a DESIGN.md file. Sandstone #f7f1e8 canvas, graphite #1c1b1a ink, AkkuratLL + Editorial New italic, 22 components for React and AI tools."
   highlights:
-    - "Ink-as-canvas inversion — Klarna Black #0b051d carries 1321 uses split between text (681) and border (635), the rare token that does both jobs at once"
-    - "Rationed pink voltage — Klarna Pink #ffa8cd appears exactly one time on the homepage, scoped to the navigation sign-up pill, with #ffd0e2 doing the soft-wash background work"
-    - "32px pill as house geometry — the 32px radius hits 89 times across buttons, cards, dashboard chrome, and the hero phone mockup, with 2px hairlines and 16px panels filling the rest"
-    - "Two-typeface economy — Klarna Title at 41–90px handles display, Klarna Text at 14–24px handles brand UI, and a platform-stack fallback runs every body paragraph at 14–16px / weight 400"
-    - "Hero at 90px / weight 700 with line-height 99px — display is the most-confident voice in the system, and the body register holds at weight 400 underneath"
+    - "Two-typeface duet — AkkuratLL grotesque handles 90% of the page; Editorial New serif italic appears exactly once per heading on the phrase that carries the emotional turn"
+    - "Sandstone canvas ladder — three warm cream tints (#fefaef, #f7f1e8, #efe6db) replace the white-card convention, with photography of the ring on skin doing the warmth work"
+    - "Full-pill CTAs at 48px height — primary action is dark graphite #1e2427 on cream sandstone, never the saturated indigo or mustard the design tokens reserve"
+    - "Weight 300 hero at 80–96px — the display tier sits airy and editorial; weight 700 is reserved for the small 18px sub-heads in caps"
+    - "Mustard and indigo as scarcity voltage — #af751b and #4a4af4 live in the token system as accents that the homepage barely deploys, letting graphite and cream carry the page"
   tags:
-    - "Banking & Payments"
-    - "Fintech & Crypto"
+    - "Consumer Electronics"
+    - "Healthcare & Wellness"
   lastUpdated: "2026-05-13"
   author:
     name: "Dov Azencot"
     url: "https://x.com/dovazencot"
   opening: |
-    Klarna's marketing surface opens on a dark violet-near-black hero "#0b051d" — the brand's "Klarna Black" — overlaid with a phone-mockup that carries the only saturated pink moment on the page: a soft pink-wash badge ("#ffd0e2") behind a checkout illustration. Inverted text "#ffffff" runs across the hero copy. Below the fold the canvas inverts: a white "#ffffff" page surface carries the "Use Klarna anywhere you shop" tile strip, the four product cards, and the "Pay with Klarna at your favorite brands" merchant grid, with "#0b051d" doing all the text work and "#c4c3ca" plus "#e2e2e7" carrying the input chrome and tile hairlines. The single brand voltage, Klarna Pink "#ffa8cd", appears exactly once — the "Sign up" pill in the top nav (`--colors-btn-brand`). Every other surface that needed a pink mood receives it via the softer "#ffd0e2" wash or, more often, a flat illustration of a phone screen.
+    Oura's storefront is built around an unusual contradiction for a wearable-health brand: the page rejects every fitness-tech cliché. There is no neon-green heart-rate gradient, no dashboard mockup behind glass, no slate-and-cyan dark canvas. The chassis is a warm sandstone (#f7f1e8) tinted just past cream, body type runs AkkuratLL at 16px / 24px line-height, and the hero h1 sits at 96px weight 500 with negative tracking — the editorial cadence of a magazine cover. Once per heading, a single phrase ("Made for you", "a voice", "your every day") flips to Editorial New serif italic. That one swap is the entire brand-voice signature.
 
-    This page packages the system into a single DESIGN.md file written to the Google Labs open specification. Inside: 20 color tokens grouped into brand (Klarna Pink, Klarna Eggplant, the Stickynote lime), surface (canvas, page, ink-inverse, the elevated panel), text (the brand's ink, a four-step grayscale ramp), and semantic (positive green, negative red, warning amber, the focus indigo "#7b57d8"); 11 typography levels split across Klarna Title for display, Klarna Text for brand UI, and the platform-stack `-apple-system` family for body and nav; a 6-step rounded vocabulary that's effectively three values (2px hairlines, 16px panels, 32px pills); a 9-step spacing scale anchored on the observed 4px / 8px / 16px / 32px / 48px / 80px rhythm; and 18 component entries covering the dark "Sign in" pill, the pink "Sign up" pill, the merchant tile, the product card, the testimonial purple card, the email-capture input, the footer-CTA strip, and the dashboard mockup chrome.
+    This page captures the homepage system as a DESIGN.md file — Google Labs' open spec for machine-readable design tokens. Inside: 22 color tokens grouped into ink, sandstone-canvas, hairline, brand-voltage, and accent layers; 12 typography tokens covering AkkuratLL across weights 200 through 700 plus the Editorial New italic display-emphasis pair; a 6-step radius scale that pivots between 12px medium chrome and full-pill CTAs; an 8px-based spacing rhythm dominated by 8px (39 occurrences) and 16px (13); and 22 components covering the top nav, hero card, ring product tiles, membership panel, dark "in the news" rail, footer email capture, and the inverted dark surface used for editorial section breaks.
 
-    Feed the file to Claude, Cursor, or GitHub Copilot and the agent reproduces Klarna's particular dialect — the dark hero that inverts to a white canvas, the once-per-page pink pill that signals "Sign up" and only "Sign up", the 32px pill geometry that hits 89 times, and the two-family Klarna Title / Klarna Text register — instead of inventing a generic fintech checkout theme with rounded purple gradients. The proprietary Klarna Title and Klarna Text faces are not licensed for redistribution; Inter Display at weight 700 with -0.2px tracking is the closest open-source approximation for the title role, and Inter Variable at weight 400 for the body register. The reason this system rewards study is the discipline of its brand-voltage allocation: where most BNPL competitors fill every CTA with a saturated pink or violet, Klarna ships one pink pill per page and lets the rest of the chrome speak in indigo-black.
+    Feed the file to Claude, Cursor, GitHub Copilot, or any agent that reads structured tokens. The agent reproduces Oura's actual voice — sandstone restraint, two-typeface italic duet, full-pill CTAs, photography-first warmth — instead of a generic health-tech theme of dark dashboards and neon vitals. Reference tokens directly in Tailwind config, audit an existing wellness storefront against this baseline, or read the file as a study in how to sell a sleep-tracking ring without ever showing a sleep chart on the homepage.
   related:
     - href: "/design"
       title: "Browse all design systems"
       description: "The full directory of DESIGN.md files on shadcn.io, with live mockups for each."
-    - href: "https://www.klarna.com/us/"
-      title: "Klarna — official site"
-      description: "The buy-now-pay-later payments product whose marketing surface this DESIGN.md captures."
+    - href: "https://ouraring.com"
+      title: "Oura Ring — official site"
+      description: "The Finnish smart-ring brand's own storefront — the source for this design system."
     - href: "https://github.com/google-labs-code/design.md"
       title: "The DESIGN.md specification"
       description: "Google Labs' open spec for machine-readable design system files."
   questions:
     - id: "primary-color"
-      title: "What is Klarna's primary brand color?"
-      answer: "Klarna's load-bearing token is Klarna Black ('#0b051d') — a violet-tinted near-black with oklch chroma 0.05 at hue 291 — which appears 1321 times on the homepage, split across text (681), border (635), and a handful of background fills (5). It lives in `--colors-text-default`, `--brand`, `--colors-klarna-black`, `--primaryActionBase`, `--colors-bg-inverse`, and the footer background. The saturated brand voltage Klarna Pink ('#ffa8cd', `--colors-bg-brand`) appears exactly once — on the 'Sign up' pill in the top nav — with the softer wash '#ffd0e2' (`--cta40`) carrying the secondary pink mood on illustrations and the testimonial card."
+      title: "What is Oura's primary brand color?"
+      answer: "Oura does not run a saturated brand voltage on the homepage. The dominant token is the warm cream-sandstone canvas #f7f1e8 (clustered frequency 512 across surface, hairline, and background), paired with graphite ink #1c1b1a for text and #1e2427 for the primary CTA fill. Mustard #af751b lives in the token system as `--color-mustard-500` and indigo #4a4af4 as `--color-fill-brand-indigo`, but the homepage deploys each only once or twice — both are scarcity accents rather than load-bearing brand voltages. The page is carried by sandstone and graphite, with photography of the ring on skin supplying the warmth that pigment would otherwise handle."
     - id: "typography"
-      title: "What typography does Klarna use, and what should I use if Klarna Title isn't available?"
-      answer: "Klarna runs two proprietary families: Klarna Title for display (hero at 90px / weight 700, h2 at 41–52px / weight 500, h3 at 49px / weight 700) and Klarna Text for the brand-tinted UI register (24px / weight 700 spans, 20px / weight 700 h4 cards, 16px / weight 500 labels with -0.048px tracking). Everything else — buttons, nav links, body paragraphs — falls through to the platform stack: -apple-system, system-ui, Segoe UI, Roboto, Arial. The body register sits at 14–16px / weight 400 / line-height 20–24px with normal letter-spacing. If the Klarna families are unavailable, Inter Display at weight 700 with -0.2px tracking approximates Klarna Title, and Inter Variable at weight 400 covers the platform-stack body."
-    - id: "voltage-rationing"
-      title: "Why does Klarna use the pink only once on the page?"
-      answer: "Klarna Pink ('#ffa8cd') is a scoped voltage, not a general-purpose accent. The extraction shows it appearing exactly one time on the entire homepage — as the 'Sign up' pill in the top navigation (`--colors-btn-brand`). Every other pink moment is the softer '#ffd0e2' (`--cta40`, `--ribbon-sale-background`, `--sale-background`), used as a flat tile-background on the testimonial card and the merchant grid wash. The discipline is intentional: most buy-now-pay-later competitors fill every CTA with a saturated pink or purple, and the chrome ends up shouting. Klarna ships one pink pill per band, paired with a dark 'Sign in' pill on Klarna Black, and lets the indigo-black do the visual work for the rest of the page."
-    - id: "radius-scale"
-      title: "Why does Klarna use 32px pill radii on so many surfaces?"
-      answer: "Klarna's radius scale collapses to three dominant values: 32px (frequency 89, used on pill CTAs, the hero phone-mockup card, the merchant tiles, the product feature cards, and the dashboard mockup chrome), 2px (frequency 42, used on hairline dividers, the radio-button outlines, the email-input chrome), and circular 100%/50% (frequency 80, used on the icon dots and the rating circles). 16px (15), 24px (5), 8px (5), and 100px (6) handle the intermediate cases. The 32px pill is the brand's repeating geometry — the same radius applied to a 40px-tall pill becomes a circular pill, applied to a 400px card becomes a soft-cornered scene-card. Avoid 12px or 20px corners (they don't appear in the system) and avoid sharp 0px on a card."
-    - id: "css-variables"
-      title: "What's the structure of Klarna's CSS variable layer?"
-      answer: "Klarna declares 536 custom properties on `:root`, organized around a multi-axis token model: `--colors-text-*` (default, body, link, accent, positive, negative, warning, disabled, inverse), `--colors-bg-*` (page, container, plain, brand, accent, subtle, positive, negative, warning, inverse), `--colors-btn-*` (primary, brand, secondary, tertiary, ghost, idle, disabled, danger), `--colors-border-*` (default, neutral, active, positive, negative, warning, accent), `--colors-klarna-*` (black '#0b051d', pink '#ffa8cd', off-white '#ffffff', herring '#e2e2e7', sticky-note '#e6ffa9', eggplant '#2f1f5a'), plus a parallel `--ribbon-*` taxonomy for the storefront-product-merchandising chips (sale, popular, trending, watched, rank, in-stock, out-of-stock, foreign-store, unknown-stock, ai-visualized, test) which is unusual for a marketing site and signals that the home page shares its variable layer with the Klarna shopping product."
-    - id: "known-gaps"
-      title: "What's missing from this DESIGN.md spec?"
-      answer: "Several surfaces are not captured: the in-app checkout widget (the merchant-side iframe with the Pay-in-4 / Pay-in-30 / Financing tabs) which uses a different sub-palette; the Klarna Card front and back (a physical-card product mockup that appears in the hero on a different breakpoint); the dashboard product UI behind the Sign-in pill, which has its own dark-canvas theme; the Klarna shopping-app product surface, which shares the same CSS variable layer but adds the `--ribbon-*` merchandising chips on a different background; motion specs for the hero phone-mockup hover-lift and the pink-pill press-state; hover-state colors for the merchant tiles and the testimonial card; and the regional sub-brand palettes (UK, EU, AU) which carry small accent shifts from the US homepage."
+      title: "What typography does Oura use, and what should I substitute if AkkuratLL is unavailable?"
+      answer: "Oura runs AkkuratLL as the default sans across the page (declared as `--font-sans` and `--default-font-family`) at weights 200, 300, 400, 500, 600, 700. Editorial New serif appears as `--font-serif`, deployed only on italic emphasis spans inside headings — phrases like 'Made for you', 'a voice', 'your every day'. If AkkuratLL is unavailable, Söhne, Untitled Sans, or Inter at the same weights are the closest grotesque substitutes. For Editorial New, PP Editorial New is the direct source; Cormorant Garamond italic or GT Sectra Display italic are acceptable approximations. Never substitute a slab or condensed display face — the italic-serif moment relies on humanist contrast against the sans, and a slab would shift the page from health-editorial to publication-magazine."
+    - id: "pill-cta"
+      title: "Why does Oura use full-pill CTAs at 48px height?"
+      answer: "The primary action surface is a 48px-tall capsule with a 33554432px (`9999px`-class) border-radius — full-pill geometry — fill `#1e2427` (near-black graphite), text `#f7f1e8` (cream sandstone), padding 12px 24px. The pill reads as a wearable-object signal: the same continuous-curve geometry as the ring itself. Where most consumer-electronics storefronts use squared or 8px-rounded rectangles for primary CTAs, Oura uses the full pill because the button is geometric kin to the product. The secondary CTA inverts to cream-on-graphite at the same height with a 1px hairline border."
+    - id: "italic-serif"
+      title: "Why does Editorial New italic appear only on a single phrase per heading?"
+      answer: "Across the homepage extraction, every Editorial New italic span sits at the same size and weight as its surrounding AkkuratLL heading — 96px / 500 at the hero, 80px / 300 inside section heads, 40px / 300 in mid-page beats. The italic break-out is editorial-magazine syntax: a sans-serif headline interrupted by a single italicized noun-phrase. It is the strongest voice signature in the system because it is scoped so narrowly — one phrase per heading, never two. Using it for body emphasis, button text, or product titles destroys the editorial scarcity that makes the moment land."
+    - id: "spacing-scale"
+      title: "What spacing rhythm does Oura use?"
+      answer: "The system snaps to an 8px base, with 8px (39 occurrences) and 16px (13) as the dominant breathing units. The primary button uses 12px 24px padding. Card chrome uses asymmetric 24px 0px 0px 24px / 0px 0px 24px 24px to render the top-half-rounded and bottom-half-rounded panel splits visible in the hero ring-card grid. Section vertical rhythm runs 32px and 48px. Token-level CSS variables expose a full 2 / 4 / 8 / 12 / 16 / 24 / 40 / 80px ladder under `--components-spacing-*`, but the rendered page leans on the lower half — 8 / 12 / 16 / 24."
+    - id: "use-in-project"
+      title: "Can I use this DESIGN.md to build my own React app?"
+      answer: "Yes — the file is structured to feed Claude, Cursor, or any AI agent that reads structured design tokens. The agent reproduces Oura's actual chassis: sandstone canvas, graphite ink, AkkuratLL + Editorial New italic duet, full-pill primary CTAs, 12px-rounded card chrome, photography-friendly warm tints. Every color, type style, radius, and spacing value is a quoted token ready to paste into Tailwind config, CSS variables, or your own component library. Pair with macro-photography of a product on skin or in soft warm light to land the brand voice fully — the chrome is calibrated to recede behind imagery, so without photography the system reads thinner than it should."
 
 colors:
-  primary: "#ffa8cd"
-  primary-wash: "#ffd0e2"
-  ink: "#0b051d"
-  ink-secondary: "#373544"
-  ink-tertiary: "#615f6d"
-  ink-disabled: "#96959f"
-  canvas: "#ffffff"
-  canvas-inverse: "#0b051d"
-  canvas-elevated: "#1d192a"
-  surface-subtle: "#f3f3f5"
-  surface-tertiary: "#c4c3ca"
-  hairline: "#e2e2e7"
-  hairline-strong: "#0b051d"
-  accent-eggplant: "#2c2242"
-  accent-lavender: "#aa89f2"
-  accent-stickynote: "#e6ffa9"
-  focus: "#7b57d8"
-  positive: "#046234"
-  negative: "#931414"
-  warning: "#664600"
-  on-primary: "#0b051d"
-  on-inverse: "#ffffff"
+  ink: "#1c1b1a"
+  ink-graphite: "#1e2427"
+  ink-deep: "#0c0c14"
+  ink-warm: "#4a4741"
+  ink-soft: "#838280"
+  ink-quiet: "#a8a5a0"
+  ink-disabled: "#d3d1ce"
+  canvas-cream: "#fefaef"
+  canvas-sandstone: "#f7f1e8"
+  canvas-sandstone-deep: "#efe6db"
+  on-ink: "#f7f1e8"
+  on-ink-pure: "#ffffff"
+  hairline: "#ececec"
+  hairline-warm: "#eadccf"
+  brand-mustard: "#af751b"
+  brand-mustard-soft: "#ffefd8"
+  brand-amber: "#ffb648"
+  brand-indigo: "#4a4af4"
+  brand-indigo-deep: "#2f2fc1"
+  brand-indigo-soft: "#a8a9fc"
+  accent-sky: "#b5e4fe"
+  accent-olive: "#5b6550"
 
 typography:
-  display-xl:
-    fontFamily: "'Klarna Title', 'Inter Display', system-ui, sans-serif"
-    fontSize: 90px
-    fontWeight: 700
-    lineHeight: 1.1
-    letterSpacing: "0"
+  display-hero:
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 96px
+    fontWeight: 500
+    lineHeight: 1
+    letterSpacing: "-2.4px"
+  display-hero-italic:
+    fontFamily: "\"Editorial New\", serif"
+    fontSize: 96px
+    fontWeight: 500
+    lineHeight: 1.25
+    letterSpacing: "-2.4px"
   display-lg:
-    fontFamily: "'Klarna Title', 'Inter Display', system-ui, sans-serif"
-    fontSize: 52px
-    fontWeight: 500
-    lineHeight: 1.05
-    letterSpacing: "0"
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 80px
+    fontWeight: 300
+    lineHeight: 1
+    letterSpacing: "-2px"
+  display-lg-italic:
+    fontFamily: "\"Editorial New\", serif"
+    fontSize: 80px
+    fontWeight: 300
+    lineHeight: 1
+    letterSpacing: "-2px"
   display-md:
-    fontFamily: "'Klarna Title', 'Inter Display', system-ui, sans-serif"
-    fontSize: 49px
-    fontWeight: 700
-    lineHeight: 1.0
-    letterSpacing: "0"
-  display-sm:
-    fontFamily: "'Klarna Title', 'Inter Display', system-ui, sans-serif"
-    fontSize: 41px
-    fontWeight: 500
-    lineHeight: 1.05
-    letterSpacing: "0"
-  heading-md:
-    fontFamily: "'Klarna Text', Roboto, Arial, sans-serif"
-    fontSize: 24px
-    fontWeight: 700
-    lineHeight: 1.05
-    letterSpacing: "-0.048px"
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 48px
+    fontWeight: 200
+    lineHeight: 1
+    letterSpacing: 0
+  heading-lg:
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 40px
+    fontWeight: 300
+    lineHeight: 1
+    letterSpacing: 0
+  heading-lg-italic:
+    fontFamily: "\"Editorial New\", serif"
+    fontSize: 40px
+    fontWeight: 300
+    lineHeight: 1
+    letterSpacing: 0
   heading-sm:
-    fontFamily: "'Klarna Text', Roboto, Arial, sans-serif"
-    fontSize: 20px
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 24px
+    fontWeight: 400
+    lineHeight: 1.25
+    letterSpacing: 0
+  eyebrow:
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 18px
     fontWeight: 700
-    lineHeight: 1.3
-    letterSpacing: "-0.2px"
+    lineHeight: 1.5
+    letterSpacing: 0
   body-lg:
-    fontFamily: "-apple-system, 'system-ui', 'Segoe UI', Roboto, Arial, sans-serif"
-    fontSize: 20px
-    fontWeight: 500
-    lineHeight: 1.2
-    letterSpacing: "0"
-  body-md:
-    fontFamily: "-apple-system, 'system-ui', 'Segoe UI', Roboto, Arial, sans-serif"
+    fontFamily: "AkkuratLL, sans-serif"
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.5
-    letterSpacing: "0"
-  body-sm:
-    fontFamily: "-apple-system, 'system-ui', 'Segoe UI', Roboto, Arial, sans-serif"
+    letterSpacing: 0
+  body-strong:
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 16px
+    fontWeight: 700
+    lineHeight: 1.5
+    letterSpacing: 0
+  caption:
+    fontFamily: "AkkuratLL, sans-serif"
     fontSize: 14px
     fontWeight: 400
-    lineHeight: 1.43
-    letterSpacing: "0"
-  label-md:
-    fontFamily: "'Klarna Text', Roboto, Arial, sans-serif"
-    fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.05
-    letterSpacing: "-0.048px"
-  caption:
-    fontFamily: "-apple-system, 'system-ui', 'Segoe UI', Roboto, Arial, sans-serif"
+    lineHeight: 1.5
+    letterSpacing: 0
+  caption-strong:
+    fontFamily: "AkkuratLL, sans-serif"
+    fontSize: 14px
+    fontWeight: 700
+    lineHeight: 1.5
+    letterSpacing: 0
+  micro:
+    fontFamily: "AkkuratLL, sans-serif"
     fontSize: 12px
     fontWeight: 400
-    lineHeight: 1.05
-    letterSpacing: "0"
+    lineHeight: 1.5
+    letterSpacing: 0
+  pull-quote:
+    fontFamily: "\"Editorial New\", serif"
+    fontSize: 30px
+    fontWeight: 100
+    lineHeight: 1.5
+    letterSpacing: 0
 
 rounded:
-  hairline: "2px"
-  sm: "8px"
-  md: "16px"
-  lg: "24px"
-  pill: "32px"
-  full: "9999px"
+  none: "0px"
+  xs: "4px"
+  sm: "6px"
+  md: "8px"
+  lg: "12px"
+  xl: "24px"
+  pill: "9999px"
 
 spacing:
-  xxs: "2px"
-  xs: "4px"
-  sm: "8px"
-  md: "12px"
+  xxxs: "2px"
+  xxs: "4px"
+  xs: "8px"
+  sm: "12px"
   base: "16px"
-  lg: "24px"
-  xl: "32px"
-  "2xl": "48px"
-  "3xl": "80px"
+  lg: "20px"
+  xl: "24px"
+  xxl: "32px"
+  band: "40px"
+  section: "48px"
 
 components:
   button-primary:
+    backgroundColor: "{colors.ink-graphite}"
+    textColor: "{colors.on-ink}"
+    typography: "{typography.body-strong}"
+    rounded: "{rounded.pill}"
+    padding: "12px 24px"
+    height: "48px"
+    border: "0"
+  button-primary-hover:
     backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-inverse}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.full}"
-    padding: "10px 20px"
-    height: "40px"
-  button-brand:
-    backgroundColor: "{colors.primary}"
-    textColor: "{colors.on-primary}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.full}"
-    padding: "10px 20px"
-    height: "40px"
+    textColor: "{colors.on-ink}"
+    rounded: "{rounded.pill}"
   button-secondary:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.full}"
-    padding: "10px 20px"
-    height: "40px"
-    border: "1px solid {colors.hairline-strong}"
-  button-ghost:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.full}"
-    padding: "10px 20px"
-    height: "40px"
-  text-input:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.md}"
-    padding: "8px 12px"
-    height: "40px"
-    border: "1px solid {colors.surface-tertiary}"
-  text-input-focused:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.md}"
-    padding: "8px 12px"
-    height: "40px"
-    border: "2px solid {colors.ink}"
+    backgroundColor: "{colors.canvas-sandstone}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.body-strong}"
+    rounded: "{rounded.pill}"
+    padding: "12px 24px"
+    height: "48px"
+    border: "1px solid {colors.hairline}"
+  button-on-dark:
+    backgroundColor: "{colors.on-ink-pure}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.body-strong}"
+    rounded: "{rounded.pill}"
+    padding: "12px 24px"
+    height: "48px"
+  button-text-link:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.caption-strong}"
+    rounded: "{rounded.none}"
   top-nav:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.hairline}"
-    padding: "8px 16px"
-    height: "60px"
-    border: "1px solid {colors.hairline}"
+    backgroundColor: "{colors.canvas-sandstone}"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.body-lg}"
+    height: "64px"
+    padding: "12px 24px"
+    border: "0"
   nav-link:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.hairline}"
-    padding: "0px 16px"
-    height: "26px"
-  card-hero-mockup:
-    backgroundColor: "{colors.canvas-inverse}"
-    textColor: "{colors.on-inverse}"
-    typography: "{typography.body-md}"
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.body-lg}"
+    padding: "12px 0px"
+    rounded: "{rounded.none}"
+  hero-section:
+    backgroundColor: "{colors.canvas-sandstone}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.display-hero}"
+    padding: "48px 24px"
+    rounded: "{rounded.xl}"
+  ring-product-card:
+    backgroundColor: "{colors.canvas-sandstone-deep}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.heading-sm}"
+    rounded: "{rounded.xl}"
+    padding: "20px"
+    border: "0"
+  ring-product-card-top:
+    backgroundColor: "{colors.canvas-sandstone-deep}"
+    textColor: "{colors.ink-graphite}"
+    rounded: "{rounded.xl}"
+    padding: "24px 0px 0px 24px"
+  ring-product-card-bottom:
+    backgroundColor: "{colors.canvas-sandstone-deep}"
+    textColor: "{colors.ink-graphite}"
+    rounded: "{rounded.xl}"
+    padding: "0px 0px 24px 24px"
+  membership-panel:
+    backgroundColor: "{colors.canvas-cream}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.heading-lg}"
+    rounded: "{rounded.xl}"
+    padding: "48px 24px"
+  pull-quote-band:
+    backgroundColor: "{colors.canvas-sandstone}"
+    textColor: "{colors.ink-graphite}"
+    typography: "{typography.display-lg}"
+    padding: "20px 48px 28px"
+  editorial-rail-dark:
+    backgroundColor: "{colors.ink-deep}"
+    textColor: "{colors.on-ink-pure}"
+    typography: "{typography.heading-sm}"
+    rounded: "{rounded.xl}"
+    padding: "32px"
+  press-card-dark:
+    backgroundColor: "{colors.ink-graphite}"
+    textColor: "{colors.on-ink-pure}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.lg}"
+    padding: "20px"
+  pill-tag:
+    backgroundColor: "{colors.canvas-cream}"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.caption-strong}"
     rounded: "{rounded.pill}"
-    padding: "48px"
-  card-product:
-    backgroundColor: "{colors.canvas}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.pill}"
-    padding: "16px"
+    padding: "8px 16px"
+    height: "32px"
+  text-input:
+    backgroundColor: "{colors.ink-warm}"
+    textColor: "{colors.on-ink-pure}"
+    typography: "{typography.body-lg}"
+    rounded: "{rounded.lg}"
+    padding: "8px 48px 8px 20px"
+    height: "40px"
     border: "1px solid {colors.hairline}"
-  card-merchant-tile:
-    backgroundColor: "{colors.surface-subtle}"
-    textColor: "{colors.ink}"
-    typography: "{typography.label-md}"
-    rounded: "{rounded.pill}"
-    padding: "16px"
-  card-testimonial-light:
-    backgroundColor: "{colors.surface-subtle}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.pill}"
-    padding: "32px"
-  card-testimonial-lavender:
-    backgroundColor: "{colors.accent-lavender}"
-    textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
-    rounded: "{rounded.pill}"
-    padding: "32px"
-  badge-soft-pink:
-    backgroundColor: "{colors.primary-wash}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "4px 8px"
-  pill-stickynote:
-    backgroundColor: "{colors.accent-stickynote}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.full}"
-    padding: "4px 8px"
-  section-header-light:
-    backgroundColor: "{colors.surface-subtle}"
-    textColor: "{colors.ink}"
-    typography: "{typography.display-sm}"
-    rounded: "{rounded.hairline}"
-    padding: "80px 0px"
-  footer:
-    backgroundColor: "{colors.canvas-inverse}"
-    textColor: "{colors.on-inverse}"
-    typography: "{typography.body-sm}"
-    rounded: "{rounded.hairline}"
-    padding: "80px 0px"
-  hairline-divider:
+  newsletter-form:
+    backgroundColor: "{colors.canvas-sandstone}"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.body-lg}"
+    padding: "16px 24px"
+  hairline-rule:
     backgroundColor: "{colors.hairline}"
-    textColor: "{colors.ink}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.hairline}"
-    padding: "0"
     height: "1px"
+    border: "0"
+  eyebrow-label:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink-warm}"
+    typography: "{typography.eyebrow}"
+    padding: "0px"
+  footer-dark:
+    backgroundColor: "{colors.ink-deep}"
+    textColor: "{colors.canvas-sandstone}"
+    typography: "{typography.body-lg}"
+    padding: "48px 24px"
+    border: "0"
+  footer-link:
+    backgroundColor: "transparent"
+    textColor: "{colors.canvas-sandstone}"
+    typography: "{typography.caption}"
+    padding: "8px 0px"
 ---
 
 ## Overview
 
-Klarna's homepage opens on Klarna Black "#0b051d" — a violet-tinted near-black at oklch hue 291, never pure black — and the very next section flips to a pure white "#ffffff" canvas with the same indigo doing every job that used to be inverted text. The token is genuinely bidirectional: 681 uses as text, 635 as border, 5 as background fill. The single saturated brand voltage, Klarna Pink "#ffa8cd" (`--colors-bg-brand`, `--colors-btn-brand`), appears exactly once on the page — the "Sign up" pill in the top navigation, paired with a dark "Sign in" pill on Klarna Black. Every other pink moment is the softer wash "#ffd0e2" (`--cta40`, `--sale-background`), reserved for tile backgrounds and the soft-pink badge atop the hero phone-mockup illustration. A lavender "#aa89f2" carries the testimonial card on the "People love Klarna" band; the brand's sticky-note lime "#e6ffa9" lives in `--colors-klarna-sticky-note` but doesn't appear on the home surface. The structural ramp runs "#c4c3ca" (frequency 254) for inputs, "#373544" for secondary text, "#615f6d" for tertiary, and "#e2e2e7" for hairlines.
+Oura's storefront is the most editorial interface in the smart-wearable category — a sandstone-cream chassis (`{colors.canvas-sandstone}` — #f7f1e8) carrying warm graphite ink (`{colors.ink-graphite}` — #1e2427), with one Editorial New serif italic phrase dropped into every heading as the brand's only ornamental gesture. Where most fitness-wearable storefronts open with a dark dashboard mockup behind glass and a neon-cyan heart-rate gradient, Oura opens with a 96px AkkuratLL hero at weight 500 and an italicized "Made for you" serif span — the page reads as a magazine cover, not a product spec sheet.
 
-**Black-as-voltage inversion**: Where most buy-now-pay-later competitors (Affirm, Afterpay, Sezzle) push a saturated pink or violet on every CTA and use a neutral text color underneath, Klarna inverts the assignment — the indigo-black IS the voltage, and the pink is rationed to a single sign-up pill per page. Klarna Black does the work of both text and border at the same time, which is the rare token assignment that genuinely earns "load-bearing." **32px pill as repeating geometry**: The 32px radius appears 89 times on the captured surface — applied to a 40px-tall element it becomes a circular pill, applied to a 400px card it becomes the soft-cornered scene container, applied to the hero phone-mockup it becomes the wide brand frame. Klarna's house shape is the same value at every scale. **Two-family economy with platform fallback**: Klarna Title handles display 41–90px, Klarna Text handles brand UI 14–24px, and everything else falls through to `-apple-system, system-ui, Segoe UI, Roboto, Arial` at 14–16px / weight 400 — three layers of typography with no overlap.
+The type system is bi-modal. **AkkuratLL** grotesque sans handles 90% of the page across weights 200, 300, 400, 500, 600, 700 — body, navigation, button labels, product names, footer columns. **Editorial New** serif italic appears as `--font-serif` at the same point sizes as its surrounding sans head, scoped to one noun-phrase per heading: "Made for you" at 96px / 500, "a voice" at 40px / 300, "your every day" at 80px / 300. This is the system's strongest editorial decision — one typeface holds the page; one italic phrase holds a single emotional turn per section.
+
+**Italic-as-emphasis**: Oura's interface inherits its voice from print-magazine typography — a sans-serif headline interrupted by a single italicized phrase that names the brand promise. Where most consumer-electronics brands separate display and emphasis with weight (regular vs bold), Oura separates them with style (grotesque vs italic-serif). Where the typical health-tech storefront amplifies authority with deep slate panels and chart cards, Oura runs warm cream panels and lets a macro-photograph of the ring on a knuckle carry the entire technical claim.
 
 **Key Characteristics:**
-- Bidirectional ink token — Klarna Black "#0b051d" carries 1321 uses split between text (681), border (635), and background (5), the rare token that does all three jobs.
-- Single pink pill per page — Klarna Pink "#ffa8cd" appears exactly once (the "Sign up" nav CTA), with "#ffd0e2" doing the soft-wash work everywhere else.
-- 32px pill geometry — 89 occurrences of the same radius across CTAs, scene cards, the hero phone-mockup, merchant tiles, and product feature cards.
-- Klarna Title at 90px / weight 700 — the hero "Pay your way with Klarna" headline is the most-confident voice in the system, with body holding at weight 400 underneath.
-- Dark hero, light page — the marketing surface inverts: hero is Klarna Black with "#ffffff" text, the rest of the page is "#ffffff" with "#0b051d" text.
-- Lavender testimonial card — the "People love Klarna" band swaps in "#aa89f2" as a chromatic interlude, but only on the testimonial tile, never on a button.
-- Storefront-merchandising variable layer — the CSS layer declares 11 `--ribbon-*` chip tokens (sale, popular, trending, watched, rank, in-stock, out-of-stock) reused from the Klarna shopping product, an unusual residue on a marketing home page.
+- Warm cream-sandstone canvas (`{colors.canvas-sandstone}` — #f7f1e8) used 512 times across surface, border, and background — the dominant chassis tone. Tinted just enough to read as paper, not screen.
+- Graphite ink (`{colors.ink-graphite}` — #1e2427) for the primary CTA fill, paired with the deeper `{colors.ink}` (#1c1b1a) for body text. Two near-blacks, neither pure.
+- Full-pill geometry (`{rounded.pill}` — 9999px-class) on every primary CTA at 48px height — the same continuous-curve grammar as the titanium ring itself.
+- AkkuratLL is the default sans across weights 200 through 700; Editorial New italic appears exactly once per heading, never on body, never on buttons.
+- Dual chrome-card geometry on the hero ring-grid: `24px 0px 0px 24px` for the top-rounded panel and `0px 0px 24px 24px` for its bottom-rounded sibling — the split corner grammar that lets product imagery span two stacked panels.
+- Photography carries warmth: macro-shots of the ring on skin under low warm light, no clinical white-bench studio, no abstract data-visualization renders.
+- Dark editorial rail (`{colors.ink-deep}` — #0c0c14) used for the "In the news" press section and the footer — the page inverts to a dark canvas exactly twice per scroll.
+- Section rhythm `48px 24px` interior padding inside cards; `0px 0px 32px` for stacked vertical breathing — denser than the 80px Apple-marketing standard, looser than a magazine column.
 
 ## Colors
 
-> **Source pages:** home (`/us/`), top nav and dark "Pay your way with Klarna" hero, the white-canvas "Use Klarna anywhere you shop" tile strip, the four-card product feature grid, the "People love Klarna" testimonial band, the "Pay with Klarna at your favorite brands" merchant grid.
+### Ink
+- **Graphite Ink** (`{colors.ink}` — #1c1b1a): frequency 1. Used as background on the dark inverted panels. The deepest near-black in the system — chosen instead of pure `#000000` to keep the page warm rather than pharmaceutical. Token surfaces in `--color-gray-550` / `--color-gray-600` / `--color-component-overlay-bg`.
+- **CTA Graphite** (`{colors.ink-graphite}` — #1e2427): frequency 3. Used as bg (1), gradient stops (2). The exact fill of `{component.button-primary}` and the dark press-card surface. Cooler than `{colors.ink}` by a few hue degrees — the small chromatic shift is intentional so buttons read as objects rather than ink stains.
+- **Deep Tile** (`{colors.ink-deep}` — #0c0c14): the inverted-canvas hex for the footer and the "In the news" editorial rail. The faint purple cast (oklch hue 284°) is what separates Oura's dark surface from a flat neutral.
+- **Warm Graphite** (`{colors.ink-warm}` — #4a4741): frequency 52. Used as text (39), bg (7), border (6). The workhorse body-text color and the nav-link rest tone — the warm-gray that everything below display size sits on. Token name `--color-sandstone-500`.
+- **Soft Graphite** (`{colors.ink-soft}` — #838280): frequency 3. Used as text (2) and border (1). A mid-gray reserved for sub-labels and meta information.
+- **Quiet Graphite** (`{colors.ink-quiet}` — #a8a5a0): frequency 24, all text. The disabled-state tone and the caption color on secondary metadata.
+- **Disabled** (`{colors.ink-disabled}` — #d3d1ce): a near-hairline gray used as the text color for disabled buttons and form labels.
 
-### Brand & Accent
-- **Klarna Pink** (`{colors.primary}` — "#ffa8cd") — frequency 1 (bg). Used as `--colors-bg-brand`, `--colors-badge-brand`, `--colors-btn-brand`, `--cta30`, `--cta60`, `--colors-klarna-pink`. Reserved for the single "Sign up" pill in the top nav — Klarna's rationed voltage, never as a body fill, never as a hairline.
-- **Klarna Pink Wash** (`{colors.primary-wash}` — "#ffd0e2") — frequency 1 (bg). `--cta40`, `--sale-background`, `--ribbon-sale-background`. The softer pink that carries tile-background and badge-fill duties when the brand needs a pink mood without spending the voltage.
-- **Accent Eggplant** (`{colors.accent-eggplant}` — "#2c2242") — frequency 1 (bg). `--brand90`, `--support-primary90`, `--colors-text-body`. A deep purple-violet two stops up from Klarna Black, used as a body text color on the rare dark-canvas card.
-- **Accent Lavender** (`{colors.accent-lavender}` — "#aa89f2") — frequency 1 (bg). `--brand40`, `--support-primary40`, `--info40`. The chromatic moment on the "People love Klarna" testimonial card — Klarna's only saturated purple on the home surface.
-- **Accent Stickynote** (`{colors.accent-stickynote}` — "#e6ffa9") — frequency 1 (bg). `--colors-klarna-sticky-note`, `--stickynote10`, `--ribbon-watched-background`. A pastel lime tied to the Klarna shopping merchandising layer; appears in the CSS layer but not on the captured home band.
+### Canvas
+- **Cream** (`{colors.canvas-cream}` — #fefaef): the lightest sandstone in the ladder. Tinted just past pure white. Used as the membership panel background and the pill-tag fill.
+- **Sandstone** (`{colors.canvas-sandstone}` — #f7f1e8): the dominant canvas tint, surfacing as `--color-sandstone-200` and clustering at frequency 512 with the gray-100 hairline neighbor. Used as the page floor, the hero card background, and the on-dark button text color.
+- **Sandstone Deep** (`{colors.canvas-sandstone-deep}` — #efe6db): the warm-tile background inside the hero ring-product cards. One step deeper than the page canvas — just enough chromatic separation for the card to read as a surface without a border.
+- **On Ink** (`{colors.on-ink}` — #f7f1e8): the text color for content sitting on the graphite CTA — the same sandstone hex as the page floor. The button label reads as cut-out cream against dark, not white-on-black.
+- **Pure White** (`{colors.on-ink-pure}` — #ffffff): frequency 17. Used as text (8), bg (5), border (3), shadow (1). Reserved for the dark editorial rail and footer where sandstone is too warm and the press headlines need pure-white legibility.
 
-### Surface
-- **Canvas** (`{colors.canvas}` — "#ffffff") — frequency 153 (text 44, bg 63, border 44). `--background-page`, `--background-primary`, `--colors-bg-page`. The page surface below the hero — every product band, every merchant tile sits on white.
-- **Canvas Inverse** (`{colors.canvas-inverse}` — "#0b051d") — frequency 5 as bg. `--colors-bg-inverse`, `--background-inverse`, `--footer-background`, `--illustration-background`. The dark hero, the footer, and the hero phone-mockup frame all run on this single token.
-- **Canvas Elevated** (`{colors.canvas-elevated}` — "#1d192a") — frequency 7 (bg). `--border95`. A near-black with a touch more violet than the canvas inverse, used on the rare elevated panel above the hero.
-- **Surface Subtle** (`{colors.surface-subtle}` — "#f3f3f5") — frequency 0 (declared in `--colors-bg-subtle`, `--background-secondary`, `--background-loading1`, `--ribbon-foreign-store-background`). The off-white tile fill for the four product feature cards and the merchant grid wash.
-- **Surface Tertiary** (`{colors.surface-tertiary}` — "#c4c3ca") — frequency 254 (text 129, border 125). `--input-decoration`, `--colors-border-neutral`, `--grayscale30`. The chrome of the email input and the secondary tile dividers.
+### Hairline
+- **Hairline** (`{colors.hairline}` — #ececec): frequency 512. Used as border (398), text (94), bg (19), gradient (1). The dominant 1px border tone — every product tile, button outline, and hairline rule sits on this exact warm gray. Functions across the page as separator-not-shadow.
+- **Warm Hairline** (`{colors.hairline-warm}` — #eadccf): a sandstone-tinted hairline used inside warm-tile sections where the cooler `{colors.hairline}` would visually pop. Scoped narrowly.
 
-### Text
-- **Ink** (`{colors.ink}` — "#0b051d") — frequency 1321 (text 681, border 635, bg 5). `--colors-text-default`, `--brand`, `--colors-klarna-black`, `--text-content-primary`, `--primary-action-base`. Carries every line of body copy on the white canvas and every primary CTA fill in the same token.
-- **Ink Secondary** (`{colors.ink-secondary}` — "#373544") — frequency 13. `--text-secondary`, `--text-content-secondary`, `--input-placeholder`, `--grayscale80`. The slightly-lifted ink for secondary captions and the email-input placeholder.
-- **Ink Tertiary** (`{colors.ink-tertiary}` — "#615f6d") — frequency 14. `--text-tertiary`, `--grayscale60`, `--border60`. The footer link color and the captions under merchant tile names.
-- **Ink Disabled** (`{colors.ink-disabled}` — "#96959f") — frequency 0 (declared in `--text-disabled`, `--colors-text-placeholder`, `--grayscale40`). Mid-gray neutral reserved for unavailable controls and disabled labels.
+### Brand Voltage
+- **Mustard** (`{colors.brand-mustard}` — #af751b): frequency 2, both gradient. Token `--color-mustard-500`. The mustard accent appears on the homepage only in a faint warm gradient — Oura keeps the most chromatic color in the system reserved for product-color callouts (the Oura Ring Gold finish) rather than as a UI voltage.
+- **Mustard Soft** (`{colors.brand-mustard-soft}` — #ffefd8): a cream-mustard tint used as a faint warm wash behind season-collection product callouts.
+- **Amber** (`{colors.brand-amber}` — #ffb648): frequency 1, gradient. The brighter mustard sibling reserved for membership badge highlights — the "Oura Membership gives your body a voice" panel uses this in micro-gradient.
+- **Indigo** (`{colors.brand-indigo}` — #4a4af4): the saturated brand-indigo. Token `--color-fill-brand-indigo`. Reserved for the embedded video player chrome and a small handful of in-app product moments — barely visible on the homepage itself.
+- **Indigo Deep** (`{colors.brand-indigo-deep}` — #2f2fc1): token `--color-primary-dark`. The darker indigo sibling used for indigo-on-light hover and focus states.
+- **Indigo Soft** (`{colors.brand-indigo-soft}` — #a8a9fc): token `--color-primary-light`. A washed lavender variant used for indigo-on-dark text and decorative chips.
 
-### Hairlines
-- **Hairline** (`{colors.hairline}` — "#e2e2e7") — frequency 12 (border 8, bg 2, shadow 2). `--border`, `--colors-border-default`, `--header-border`, `--colors-klarna-herring`. The 1px divider on tiles, the input-secondary border, the header-border separating nav from content.
-- **Hairline Strong** (`{colors.hairline-strong}` — "#0b051d") — same ink token doubling as a strong-border color on the "Sign in" pill and any element needing a 1px Klarna-Black outline.
-
-### Semantic
-- **Focus** (`{colors.focus}` — "#7b57d8") — `--focus`, `--brand50`, `--colors-badge-accent-inverse`. A violet-leaning indigo used on focus rings — chromatic enough to be visible against the page but tied to the brand's violet-axis palette.
-- **Positive** (`{colors.positive}` — "#046234") — `--colors-text-positive`, `--colors-bg-positive`. A forest green for in-stock badges and success state.
-- **Negative** (`{colors.negative}` — "#931414") — `--colors-text-negative`. A dark wine red for validation errors.
-- **Warning** (`{colors.warning}` — "#664600") — `--colors-text-warning`. A muted ochre for non-blocking warnings.
+### Accent
+- **Sky Wash** (`{colors.accent-sky}` — #b5e4fe): frequency 1, gradient. A pale-sky accent used only in the membership-panel atmospheric gradient — appears once per scroll. Outside the warm sandstone family entirely; the contrast is deliberate.
+- **Olive** (`{colors.accent-olive}` — #5b6550): frequency 1, all text. Token `--color-olive-700`. A muted olive reserved for occasional health-claim headlines on the women's-health and longevity sub-rails. Never as a button fill.
 
 ## Typography
 
 ### Font Family
 
-Klarna runs two proprietary families: **Klarna Title** for display (hero, h2, h3) and **Klarna Text** for the brand-tinted UI register (the 24px / 700 spans, the 20px / 700 h4 cards, the 16px / 500 brand label with -0.048px letter-spacing). Everything else — buttons, body paragraphs, nav links, footer copy — falls through to the platform stack `-apple-system, system-ui, Segoe UI, Roboto, Arial, sans-serif`. The economy is a deliberate three-layer arrangement: Klarna Title carries the most-confident voice, Klarna Text carries the brand UI accents, and the platform stack carries everything that should look native on each operating system.
+The system runs **AkkuratLL** as the default sans across the entire page — declared as both `--font-sans` and `--default-font-family`. Weights 200, 300, 400, 500, 600, 700 are all in use, with the heaviest end (700) reserved for the small 18px eyebrow labels in caps and the very thin 200 / 300 reserved for the 80–96px hero display. **Editorial New** serif appears as `--font-serif`, deployed only on `<em>` spans inside headings — one italicized noun-phrase per section.
 
-When the Klarna families are unavailable, fall back to **Inter Display** at weight 700 with -0.2px letter-spacing for the title role, and **Inter Variable** at weight 400 for the platform-stack body. Avoid Helvetica, Roboto Slab, and SF Pro Display — they each carry too much geometric stiffness for the slight humanist softening Klarna Title brings to its 90px hero.
+The split is editorial:
+- AkkuratLL 400 → body, captions, footer, button labels
+- AkkuratLL 300 → display tier at 40px and 80px sizes
+- AkkuratLL 500 → the 96px hero only
+- AkkuratLL 700 → the 18px eyebrow heads and 14px body-strong
+- Editorial New italic 300 / 500 → exactly one noun-phrase per heading ("Made for you", "a voice", "your every day")
 
 ### Hierarchy
 
 | Token | Size | Weight | Line Height | Letter Spacing | Use |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 90px | 700 | 1.1 | 0 | Hero "Pay your way with Klarna" headline on the dark canvas |
-| `{typography.display-lg}` | 52px | 500 | 1.05 | 0 | "Use Klarna anywhere you shop" section opener |
-| `{typography.display-md}` | 49px | 700 | 1.0 | 0 | "300K+ users love Klarna" stat headline |
-| `{typography.display-sm}` | 41px | 500 | 1.05 | 0 | "Why use Klarna" mid-section heading |
-| `{typography.heading-md}` | 24px | 700 | 1.05 | -0.048px | Card title in Klarna Text |
-| `{typography.heading-sm}` | 20px | 700 | 1.3 | -0.2px | h4 inside the product feature cards |
-| `{typography.body-lg}` | 20px | 500 | 1.2 | 0 | Lead paragraph beneath a section heading |
-| `{typography.body-md}` | 16px | 400 | 1.5 | 0 | Marketing paragraph body |
-| `{typography.body-sm}` | 14px | 400 | 1.43 | 0 | Card description, footer link copy, the body workhorse |
-| `{typography.label-md}` | 16px | 500 | 1.05 | -0.048px | Klarna Text label on merchant tiles and product card pills |
-| `{typography.caption}` | 12px | 400 | 1.05 | 0 | Hero disclaimer, footer fine print, badge text |
+| `{typography.display-hero}` | 96px | 500 | 1 | -2.4px | The single homepage hero h1 — "Sleeker. Smarter. Made for you." |
+| `{typography.display-hero-italic}` | 96px | 500 | 1.25 | -2.4px | The italicized phrase inside the hero — "Made for you" |
+| `{typography.display-lg}` | 80px | 300 | 1 | -2px | Pull-quote headlines mid-page — "Built for accuracy" |
+| `{typography.display-lg-italic}` | 80px | 300 | 1 | -2px | The italicized phrase inside an 80px head — "your every day" |
+| `{typography.display-md}` | 48px | 200 | 1 | 0 | Pull-quote band at weight 200 — the airy mid-page beats |
+| `{typography.heading-lg}` | 40px | 300 | 1 | 0 | Section heads on membership and longevity sub-rails |
+| `{typography.heading-lg-italic}` | 40px | 300 | 1 | 0 | The italicized phrase inside a 40px head — "a voice" |
+| `{typography.heading-sm}` | 24px | 400 | 1.25 | 0 | Card and panel sub-heads |
+| `{typography.eyebrow}` | 18px | 700 | 1.5 | 0 | All-caps eyebrow labels — "FORM MEETS FUNCTION" |
+| `{typography.body-lg}` | 16px | 400 | 1.5 | 0 | Default running text — AkkuratLL 16/24 |
+| `{typography.body-strong}` | 16px | 700 | 1.5 | 0 | Button labels and inline emphasis |
+| `{typography.caption}` | 14px | 400 | 1.5 | 0 | Press-card body, secondary captions |
+| `{typography.caption-strong}` | 14px | 700 | 1.5 | 0 | Press headlines, pill-tag labels |
+| `{typography.micro}` | 12px | 400 | 1.5 | 0 | Fine-print, footer legal, breadcrumbs |
+| `{typography.pull-quote}` | 30px | 100 | 1.5 | 0 | Editorial New serif pull-quote at weight 100 — the lightest type in the system |
 
 ### Principles
-- **Title for display, Text for brand UI, platform for body.** The three layers don't overlap — never set body paragraphs in Klarna Title, never set a nav link in Klarna Text. The platform stack is the largest territory.
-- **Negative tracking only on Klarna Text.** The -0.048px and -0.2px tracking values are scoped to the Klarna Text family. Klarna Title runs at 0 tracking; platform-stack body runs at 0 tracking. Don't paint negative letter-spacing across all three layers.
-- **Weight 700 on display.** The hero 90px and the 49px h3 hit weight 700; the secondary display tiers (52px, 41px) drop to weight 500. The brand specifically uses 700 as the loudest voice and never goes higher.
-- **Body holds at 400.** Every paragraph, every footer line, every nav link runs at weight 400 / 14–16px. Bumping body to 500 reads as the wrong category — Klarna's body register stays restrained underneath the loud display.
 
-### Note on Font Substitutes
-Klarna Title and Klarna Text are proprietary and not licensed for redistribution. Inter Display at weight 700 with -0.2px tracking is the closest open-source approximation for the title role; Inter Variable at weight 400 with 0 tracking is canonical for the platform-stack body. For the Klarna Text brand UI, Inter Variable at weight 500 / 700 with -0.048px tracking is the closest match.
+Oura's hero h1 sits at weight 500 with -2.4px tracking — the heavy tracking-tighten is what gives the 96px headline its compressed magazine cadence. The mid-page beats drop the weight to 300 and 200, so the page literally lightens as it scrolls. Editorial New italic appears at the same point size as its surrounding sans head, never resized — the only thing that changes is the typeface and the slant. Letter-spacing stays at 0 below 40px; negative tracking is reserved for display sizes 40px and up. Line-heights run tight at 1 for display tiers, loose at 1.5 for body — the rhythm reads as an editorial spread, not a SaaS dashboard.
+
+If AkkuratLL is unavailable, **Söhne** or **Untitled Sans** at the same weights are the closest substitutes. For Editorial New, **PP Editorial New** is the direct source and **Cormorant Garamond italic** or **GT Sectra Display italic** are acceptable approximations. Never substitute a slab-serif or condensed display face — the italic-serif moment relies on humanist contrast against the sans, and a slab would shift the page from health-editorial to publication-magazine.
 
 ## Layout
 
 ### Spacing System
-- **Base unit**: 4px, with 8px / 16px / 32px doing most of the mid-range work and 48px / 80px carrying the vertical section rhythm.
-- **Tokens**: `{spacing.xxs}` 2px · `{spacing.xs}` 4px · `{spacing.sm}` 8px · `{spacing.md}` 12px · `{spacing.base}` 16px · `{spacing.lg}` 24px · `{spacing.xl}` 32px · `{spacing.2xl}` 48px · `{spacing.3xl}` 80px.
-- **Section padding**: 80px vertical on marketing bands (the observed `80px 0px` spacing repeats 8 times); 48px between the product card and its description; 32px inside the testimonial card.
-- **Card internal padding**: 32px on testimonial cards; 16–24px on product feature cards and merchant tiles; 48px on the hero phone-mockup frame.
-- **Nav padding**: `8px 16px` per nav link; the top-nav bar itself sits at 60px tall with a 16px horizontal gutter.
+- **Base unit:** 8px.
+- **Tokens:** `{spacing.xxxs}` 2px · `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.base}` 16px · `{spacing.lg}` 20px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px · `{spacing.band}` 40px · `{spacing.section}` 48px.
+- **Dominant rhythm:** 8px (39 occurrences) and 16px (13) — the body breathing units.
+- **Button padding:** `12px 24px` — the canonical pill CTA padding, 12 occurrences across the page.
+- **Card chrome:** asymmetric `24px 0px 0px 24px` for top-rounded panels and `0px 0px 24px 24px` for bottom-rounded siblings — 6 occurrences each, the split-corner grammar that lets the hero ring grid render as two stacked panels with a continuous photograph.
+- **Section vertical rhythm:** `0px 0px 32px` between stacked cards; `20px 48px 28px` inside the pull-quote band.
 
 ### Grid & Container
-- The home surface runs a centered max-width with 32px–80px outer gutters on desktop; the hero phone-mockup card spans the full 1440px wide-breakpoint width.
-- The "Use Klarna anywhere you shop" tile strip runs a 4-up grid that collapses to 2-up at tablet and 1-up at mobile.
-- The merchant grid runs a 6-up grid (Amazon, Macy's, Walmart, Target, eBay, Wayfair, plus several more) at desktop, collapsing to 3-up then 2-up at narrower breakpoints.
+- **Max content width:** ~1440px (the `--breakpoint-xxl` token).
+- **Hero ring grid:** two-up card pair at desktop, stacking vertically at mobile.
+- **Press rail:** 2–3-up dark cards at desktop, 1-up at mobile.
+- **Footer:** 4-column dark link list at desktop, accordion at mobile.
 
 ### Whitespace Philosophy
-Klarna runs vertical air at an 80px section rhythm — most marketing bands sit with 80px of vertical padding above and below the content, and the hero phone-mockup card receives a 48px internal pad. The dark hero does heavy contrast work against the light bands below it, so the section breaks rely on canvas-color change rather than added whitespace. Inside cards, the rhythm tightens to 16–24px.
+The warm canvas + 24px-rounded card chrome + 48px section padding create a magazine-spread pacing — Oura reads as an editorial feature on the ring rather than a marketing storefront. Section gaps stay generous (48px) so each card breathes; internal card padding stays compact (20–24px) so the ring photography sits as close to the headline as possible without crowding.
 
 ## Elevation & Depth
 
 | Level | Treatment | Use |
 |---|---|---|
-| 0 | Flat white canvas | Default surface "#ffffff" |
-| 1 | Flat tile fill "#f3f3f5" | Product feature cards, merchant tile backgrounds |
-| 2 | Lavender or pink-wash tile | Testimonial card "#aa89f2", soft-pink badge "#ffd0e2" |
-| 3 | Klarna Black scene frame | The hero phone-mockup card "#0b051d" carrying inverse-text product UI |
+| Flat | No shadow, no border | Hero card, body sections, top nav |
+| Hairline | 1px `{colors.hairline}` border | Secondary buttons, text inputs, divider rules |
+| Tile lift | Surface color step (`{colors.canvas-sandstone}` → `{colors.canvas-sandstone-deep}`) | Hero ring cards, membership panel — color step replaces shadow |
+| Dark inversion | `{colors.ink-deep}` background on cream | "In the news" press rail, footer |
+| Drop shadow | `0 4px 4px #00000026` (`--drop-shadow-lg`) | Reserved for the membership-panel imagery overlay — used twice on the page |
 
-### Decorative Depth
-Klarna's depth system is largely flat — the hero is a single dark band with a phone illustration sitting flat against it, and the bands below alternate between a white "#ffffff" canvas and a subtle "#f3f3f5" tile fill. There are no atmospheric gradients on the home surface, and box-shadows are scoped to the rare hovering testimonial card (extracted as a low-alpha black at 6 shadow uses). The deep canvas-vs-tile contrast does the work of elevation: a 32px-radius "#f3f3f5" tile against the "#ffffff" page reads as one step up without a shadow.
+The elevation philosophy is **surface-step as separation**: where most consumer-electronics storefronts use shadow tiers to ladder cards, Oura uses a 2-step warm-tint ladder (canvas → canvas-deep) and lets the chromatic shift do the lifting. The drop shadow is reserved for product photography composition only, never for chrome. The dark editorial rail at `{colors.ink-deep}` provides the strongest elevation moment per scroll — the entire surface flips to near-black, then returns to sandstone.
 
 ## Shapes
 
@@ -410,129 +455,112 @@ Klarna's depth system is largely flat — the hero is a single dark band with a 
 
 | Token | Value | Use |
 |---|---|---|
-| `{rounded.hairline}` | 2px | Hairline dividers, the radio-button outlines, the email-input chrome (frequency 42) |
-| `{rounded.sm}` | 8px | Small product cells, secondary tag chips (frequency 5) |
-| `{rounded.md}` | 16px | Mid-size panels, the four product feature cards inside the section (frequency 15) |
-| `{rounded.lg}` | 24px | Larger product cards, the secondary panel inside the hero (frequency 5) |
-| `{rounded.pill}` | 32px | The brand's house geometry — pill CTAs, scene cards, dashboard mockup chrome, merchant tiles (frequency 89) |
-| `{rounded.full}` | 9999px | Circular pill buttons at 40px height, status dots, the rating circles (frequency 80) |
+| `{rounded.none}` | 0px | Section dividers, hairline rules, full-bleed photography |
+| `{rounded.xs}` | 4px | Form-field inner radii, micro-chip borders |
+| `{rounded.sm}` | 6px | Eyebrow-pill chips, secondary tag rows |
+| `{rounded.md}` | 8px | Mid-chrome — press-card corners, dropdown panels |
+| `{rounded.lg}` | 12px | Default panel chrome — text inputs, secondary cards |
+| `{rounded.xl}` | 24px | Hero ring cards, membership panel, editorial dark rail |
+| `{rounded.pill}` | 9999px | Every primary CTA, every pill-tag — the full-pill grammar |
 
-### Geometry Notes
-The 32px pill is Klarna's repeating signature — the same radius appears 89 times on the home surface, applied at every scale: on a 40px-tall pill it produces a fully circular pill (the "Sign in" CTA), on a 400px-wide card it produces a soft-cornered scene-card (the testimonial), on a 600px hero illustration it produces the wide brand frame around the phone-mockup. The 2px hairline radius is the second-most-frequent shape (42 uses), used on hairline strokes and the email-input border. The brand deliberately skips 12px, 20px, and 40px — those values don't appear in the system.
+The two radii that carry the page are `{rounded.xl}` (24px) and `{rounded.pill}` (full). 24px appears 6 times in the extraction across card chrome. Full-pill geometry shows up 26 times — every interactive element that reads as an "action". The mid-tier radii (4 / 6 / 8 / 12) appear in form fields and dropdown chrome but never on the dominant card surfaces.
+
+### Photography
+Oura's photography is the brand's load-bearing visual asset:
+- Macro-shots of the ring on a single knuckle, low warm light, soft focus background
+- Hand-skin tones — never face crops, often partial gesture or just-fingers framing
+- The ring on its charging base in cream-tinted soft-light scenes
+- Lifestyle shots of the ring under a watch cuff or against a cream linen surface
+
+When photography is absent, the system falls back to warm-tile surfaces (`{colors.canvas-sandstone-deep}`) or dark inverted panels. Photography is never decorative — every shot carries the product.
 
 ## Components
 
+### Top Navigation
+
+**`top-nav`** — Sandstone nav bar pinned to the top of every page. Height 64px, `{colors.canvas-sandstone}` background, no border. Carries the Oura wordmark at left, primary horizontal menu (Why Oura, Shop, Membership, Health, App) and a search / sign-in / cart cluster at right. Menu items in `{typography.body-lg}` (AkkuratLL 16px / 1.5) with `{colors.ink-warm}` text and 12px 0px padding per link.
+
+**`nav-link`** — Individual top-nav item. Transparent background, `{colors.ink-warm}` text, 12px vertical padding, `{rounded.none}` corners. No underline at rest.
+
 ### Buttons
 
-**`button-primary`** — the dark "Sign in" pill on Klarna Black, used as the primary auth CTA in the top nav.
-- Background `{colors.ink}` ("#0b051d"), text `{colors.on-inverse}` ("#ffffff"), type `{typography.body-md}` (16px / 400, platform stack), padding `10px 20px`, height 40px, rounded `{rounded.full}` 9999px.
+**`button-primary`** — The signature graphite pill CTA. Background `{colors.ink-graphite}` (#1e2427), text `{colors.on-ink}` (sandstone #f7f1e8), type `{typography.body-strong}` (AkkuratLL 16px / 700), padding `12px 24px`, height 48px, `{rounded.pill}` full pill. Used for "Discover Oura Ring 4", "Get started", "Shop now".
 
-**`button-brand`** — the pink "Sign up" pill, Klarna's rationed voltage, exactly one per page.
-- Background `{colors.primary}` ("#ffa8cd"), text `{colors.on-primary}` ("#0b051d") — the ink reads against pink rather than the inverse, padding `10px 20px`, height 40px, rounded `{rounded.full}`.
+**`button-primary-hover`** — Hover state darkens to `{colors.ink}` (#1c1b1a). The only state change documented in the system at the page-chrome level.
 
-**`button-secondary`** — the white-with-black-outline alternative.
-- Background `{colors.canvas}` ("#ffffff"), text `{colors.ink}`, 1px `{colors.hairline-strong}` border, same pill geometry as primary. Used on the "Learn more" CTA below the hero.
+**`button-secondary`** — Sandstone pill button with hairline outline. Background `{colors.canvas-sandstone}`, text `{colors.ink-graphite}`, 1px `{colors.hairline}` border, same padding and height as primary. Used for "Learn more" and "Compare rings".
 
-**`button-ghost`** — the unbordered text-only CTA, used inside the merchant grid tile.
-- Background `{colors.canvas}`, text `{colors.ink}`, no border, same pill geometry.
+**`button-on-dark`** — Inverted CTA for dark editorial surfaces. Background `{colors.on-ink-pure}` (white), text `{colors.ink-graphite}`, same pill geometry and 48px height. Used inside the "In the news" dark rail.
 
-### Inputs & Forms
-
-**`text-input`** — standard form field.
-- Background `{colors.canvas}`, text `{colors.ink}`, 1px `{colors.surface-tertiary}` border, padding `8px 12px`, height 40px, rounded `{rounded.md}` 16px.
-- Focus state `text-input-focused`: border swaps to a 2px `{colors.ink}` outline rather than a colored focus ring.
-
-### Navigation
-
-**`top-nav`** — full-width nav at the top of every page, white-canvas with a 1px hairline below.
-- Background `{colors.canvas}` ("#ffffff"), text `{colors.ink}`, padding `8px 16px`, height 60px, with a 1px `{colors.hairline}` bottom border. Logo wordmark on the left, primary nav (Pay later, Pay in 4, Business, Klarna Card, Sign in, Sign up) on the right.
-
-**`nav-link`** — individual nav cell.
-- Type `{typography.body-md}` (16px / 400, platform stack), padding `0 16px`, height 26px. Hover state lifts to a subtle "#f3f3f5" pill background but holds the same 16px / 400 text size.
+**`button-text-link`** — Inline text button, no background. Used for "Read more" beneath press cards. Type `{typography.caption-strong}` (AkkuratLL 14px / 700), `{colors.ink-warm}` text.
 
 ### Cards & Containers
 
-**`card-hero-mockup`** — the phone-mockup card occupying the right half of the hero band.
-- Background `{colors.canvas-inverse}` ("#0b051d"), text `{colors.on-inverse}` ("#ffffff"), padding 48px, rounded `{rounded.pill}` 32px. Composites a phone screen showing the Klarna checkout flow with a soft-pink badge ("#ffd0e2") over the screenshot.
+**`hero-section`** — Sandstone hero card containing the 96px h1 and the inline italic phrase. Background `{colors.canvas-sandstone}`, padding `48px 24px`, `{rounded.xl}` corners. Holds a left-aligned text column and a right-aligned ring photograph.
 
-**`card-product`** — the four "Why use Klarna" product feature cards.
-- Background `{colors.canvas}` ("#ffffff"), text `{colors.ink}`, padding 16px, rounded `{rounded.pill}` 32px, 1px `{colors.hairline}` border.
+**`ring-product-card`** — The atomic catalogue unit on the hero ring grid. Background `{colors.canvas-sandstone-deep}` (one step deeper than the page canvas), `{rounded.xl}` corners, padding 20px. Carries a centered ring photograph, a 24px AkkuratLL product name (e.g., "Oura Ring 4", "Oura Ring · Ceramic"), a short price line, and a `{component.button-primary}` at the bottom.
 
-**`card-merchant-tile`** — the cells in the "Pay with Klarna at your favorite brands" grid.
-- Background `{colors.surface-subtle}` ("#f3f3f5"), text `{colors.ink}`, type `{typography.label-md}` (16px / 500, Klarna Text, -0.048px), padding 16px, rounded `{rounded.pill}`. Each tile holds a merchant logo at center and an optional product photo.
+**`ring-product-card-top`** — The top half of a vertically split ring-card panel. Same sandstone-deep fill, asymmetric padding `24px 0px 0px 24px` to carry the top-rounded geometry. The lower half (with `0px 0px 24px 24px`) stacks beneath it so a continuous ring photograph can span both panels.
 
-**`card-testimonial-light`** — the off-white testimonial tile in the "People love Klarna" band.
-- Background `{colors.surface-subtle}`, text `{colors.ink}`, padding 32px, rounded `{rounded.pill}`. Holds a quote, attribution, and a 5-star rating.
+**`ring-product-card-bottom`** — The bottom-rounded sibling. Mirror padding `0px 0px 24px 24px`.
 
-**`card-testimonial-lavender`** — the lavender testimonial tile, Klarna's only saturated-purple band on the home surface.
-- Background `{colors.accent-lavender}` ("#aa89f2"), text `{colors.ink}`, padding 32px, rounded `{rounded.pill}`. Sits adjacent to the off-white testimonial card to break up the white repetition.
+**`membership-panel`** — Cream panel with the centered 80px-300 pull-quote ("Oura Membership gives your body a voice"). Background `{colors.canvas-cream}`, `{rounded.xl}` corners, padding `48px 24px`. The italic span inside the headline sits in `{typography.display-lg-italic}` (Editorial New 80px / 300).
 
-### Pills, Tags, and Chips
+**`pull-quote-band`** — Editorial mid-page band carrying the 80px / 300 weight pull quote with an italic phrase. Background `{colors.canvas-sandstone}`, padding `20px 48px 28px`.
 
-**`badge-soft-pink`** — the soft-wash pink badge overlaid on the hero phone-mockup.
-- Background `{colors.primary-wash}` ("#ffd0e2"), text `{colors.ink}`, type `{typography.caption}`, padding `4px 8px`, rounded `{rounded.full}`. Carries the "Pay in 4 interest-free installments" callout.
+**`editorial-rail-dark`** — The dark "In the news" rail. Background `{colors.ink-deep}` (#0c0c14), text `{colors.on-ink-pure}` (white), type `{typography.heading-sm}` (AkkuratLL 24px / 400), `{rounded.xl}` corners, padding 32px. Carries 2–3 press cards inside.
 
-**`pill-stickynote`** — the sticky-note lime pill, declared in `--colors-klarna-sticky-note` but absent from the home capture.
-- Background `{colors.accent-stickynote}` ("#e6ffa9"), text `{colors.ink}`, type `{typography.caption}`, padding `4px 8px`, rounded `{rounded.full}`. The token exists in the CSS layer for the Klarna shopping merchandising chips.
+**`press-card-dark`** — Individual press headline card inside the dark editorial rail. Background `{colors.ink-graphite}` (#1e2427), text `{colors.on-ink-pure}`, type `{typography.caption}` (AkkuratLL 14px / 400), `{rounded.lg}` corners, padding 20px. Carries a publication name, a 1–2 line headline, and a `{component.button-text-link}`.
 
-### Signature Components
+**`pill-tag`** — A small cream-pill label used for product variant chips ("New", "Best for sleep"). Background `{colors.canvas-cream}`, text `{colors.ink-warm}`, type `{typography.caption-strong}` (14px / 700), `{rounded.pill}`, padding `8px 16px`, height 32px.
 
-**`section-header-light`** — section opener band on the white canvas.
-- Background `{colors.surface-subtle}` or `{colors.canvas}`, text `{colors.ink}`, type `{typography.display-sm}` (41px / 500, Klarna Title), padding `80px 0px`.
+### Inputs & Forms
 
-**`footer`** — site-wide footer on Klarna Black.
-- Background `{colors.canvas-inverse}` ("#0b051d"), text `{colors.on-inverse}` ("#ffffff"), type `{typography.body-sm}` (14px / 400), padding `80px 0px`. Holds the Pay later / Business / Resources / About columns plus regional links and the Klarna app QR.
+**`text-input`** — Email-capture form field used in the footer. Background `{colors.ink-warm}` (#4a4741), text `{colors.on-ink-pure}` (white), 1px `{colors.hairline}` border, type `{typography.body-lg}` (AkkuratLL 16px), `{rounded.lg}` corners, padding `8px 48px 8px 20px` (the extra right padding accommodates the submit-arrow icon), height 40px.
 
-**`hairline-divider`** — the 1px line separating bands and the inside-tile dividers.
-- Background `{colors.hairline}` ("#e2e2e7"), height 1px, no padding. Carries 635 of the 1321 Klarna Black uses when it switches to a strong dark divider on the dark canvas instead.
+**`newsletter-form`** — Pre-footer email-capture row. Single `{component.text-input}` field with an inline submit arrow on the right. Padding `16px 24px`.
+
+### Decoration
+
+**`hairline-rule`** — 1px horizontal rule in `{colors.hairline}`. Replaces every place a drop shadow would normally separate sections in other systems.
+
+**`eyebrow-label`** — Small all-caps eyebrow text above section headings. Type `{typography.eyebrow}` (AkkuratLL 18px / 700), `{colors.ink-warm}` text. Used for category labels like "FORM MEETS FUNCTION".
+
+### Footer
+
+**`footer-dark`** — Dark footer with 4-column link list. Background `{colors.ink-deep}` (#0c0c14), text `{colors.canvas-sandstone}` (the cream-on-dark inversion is the brand's strongest contrast moment), type `{typography.body-lg}` (AkkuratLL 16px / 1.5), padding `48px 24px`. The footer inverts to dark because the hero opens on cream — the page bookends with a sandstone-to-near-black arc.
+
+**`footer-link`** — Individual footer link. Transparent background, `{colors.canvas-sandstone}` text, type `{typography.caption}` (AkkuratLL 14px / 400), 8px vertical padding. Hover state is undocumented in the extraction.
 
 ## Do's and Don'ts
 
 ### Do
-- Reserve `{colors.primary}` ("#ffa8cd") for one CTA per page — the "Sign up" pill in the top nav. The voltage is what it is because the rest of the chrome is monochrome.
-- Use `{colors.ink}` ("#0b051d") for both text and border on the light canvas — the token's frequency split (681 text, 635 border) is the brand's bidirectional ink assignment.
-- Apply the 32px pill radius (`{rounded.pill}`) at every card scale — buttons at 40px height become circular pills, product cards at 200px+ become soft-cornered scene-cards, the hero phone-mockup card carries the same value.
-- Set display tiers in Klarna Title at weight 700 for the hero and weight 500 for secondary display headings — the brand uses 700 as its loudest voice and never goes higher.
-- Hold body copy at 14–16px / weight 400 in the platform stack — Klarna Title and Klarna Text are the brand registers, but the body workhorse is the OS font.
-- Pair the dark "Sign in" pill with the pink "Sign up" pill side by side in the nav — two CTAs, two voltages, one auth pair.
-- Render the testimonial band with one lavender "#aa89f2" tile and one off-white "#f3f3f5" tile — the lavender is the only saturated purple permitted on the home surface.
+- Anchor every page on the cream-sandstone canvas `{colors.canvas-sandstone}` (#f7f1e8). Pure white reads as health-tech-lab; the warm tint is the brand differentiator.
+- Use `{colors.ink-graphite}` (#1e2427) for the primary CTA fill and `{colors.ink}` (#1c1b1a) for body text — the two-near-black system. Never `#000000`, which reads as pharmaceutical.
+- Render every primary action surface at `{rounded.pill}` (9999px-class). The full-pill geometry is the system's strongest tactile signal — the same continuous curve as the titanium ring itself.
+- Reserve Editorial New italic for exactly one noun-phrase per heading. "Made for you", "a voice", "your every day" — that scoping is what makes the italic moment land.
+- Preserve the asymmetric `24px 0px 0px 24px` / `0px 0px 24px 24px` card-pair grammar for the hero ring grid. The split-corner panels carry a continuous ring photograph across two stacked surfaces.
+- Use the 2-step warm-tint ladder (`{colors.canvas-sandstone}` → `{colors.canvas-sandstone-deep}`) for card elevation. Color step replaces shadow.
+- Apply hairline borders (`1px solid {colors.hairline}`) instead of drop shadows for every UI elevation moment. Drop-shadow is reserved for photography composition.
+- Invert to `{colors.ink-deep}` (#0c0c14) exactly twice per scroll — once at the editorial press rail, once at the footer. The dark surface earns its weight through scarcity.
 
 ### Don't
-- Don't use Klarna Pink "#ffa8cd" on more than one CTA per page — the moment a second pink pill appears, the voltage flattens and the brand reads as a generic BNPL competitor.
-- Don't use pure black anywhere as text or fill — Klarna's "black" is "#0b051d" (violet-tinted, oklch hue 291). A pure-black hex breaks the violet-axis palette and reads as the wrong category.
-- Don't paint body copy in Klarna Title or Klarna Text — those families are display and brand UI only. Body and nav fall through to the platform stack `-apple-system, system-ui, Segoe UI, Roboto, Arial`.
-- Don't set Klarna Title at weight 400 or 600 — the brand specifically uses 500 (secondary display) and 700 (hero). Snapping to 600 reads as Inter at Inter-default settings and removes the typographic tell.
-- Don't apply the -0.048px or -0.2px letter-spacing globally — those negative-tracking values are scoped to Klarna Text only. Platform-stack body and nav run at 0 tracking.
-- Don't use a 12px or 20px corner radius on a card — the brand's scale collapses to 2 / 8 / 16 / 24 / 32 / 9999, and the 32px pill is the dominant geometry. Intermediate radii read as a different system.
-- Don't fill `{colors.accent-stickynote}` ("#e6ffa9") on a CTA — it's reserved for the Klarna shopping merchandising chips (`--ribbon-watched-background`) and reads wrong on a marketing surface as a button color.
-
-## Responsive Behavior
-
-### Breakpoints
-
-| Name | Width | Key Changes |
-|---|---|---|
-| Wide | ≥ 1440px | Hero display at 90px, product grid 4-up, merchant grid 6-up |
-| Desktop | 1024–1440px | Hero display at 72px, product grid 4-up, merchant grid 5-up |
-| Tablet | 768–1023px | Hero display at 52px, product grid 2-up, merchant grid 3-up |
-| Mobile | < 768px | Hero display at 41px, product grid 1-up, merchant grid 2-up, hamburger nav |
-
-### Touch Targets
-- Pill buttons at 40px height clear the 40×40px minimum on desktop; on mobile the buttons stay at 40px since the pill height is already at the floor of the WCAG target spec.
-- Form fields hold at 40px minimum height across all breakpoints.
-
-### Collapsing Strategy
-- Display tiers stair-step 90 → 72 → 52 → 41px through the breakpoints.
-- Product feature grid stair-steps 4-up → 2-up → 1-up.
-- Merchant tile grid stair-steps 6-up → 5-up → 3-up → 2-up.
-- Top-nav inline links collapse into a hamburger drawer at <768px; the "Sign in" and "Sign up" pills stay visible in the collapsed header.
+- Don't use pure black (#000000) for body text — it reads as pharmaceutical against sandstone and breaks the warm-graphite continuity. Reserve true black only for the `--color-black` gradient-stop token, never for surface fills.
+- Don't paint the brand-indigo `{colors.brand-indigo}` (#4a4af4) across primary CTAs — the homepage barely deploys this color and using it as a button fill destroys the graphite-and-cream restraint. Indigo is scoped to embedded video chrome and in-app moments.
+- Don't run Editorial New italic on more than one phrase per heading. Two italicized spans in a single h1 read as decoration rather than emphasis; the scarcity is the design.
+- Don't render the primary CTA at 8px or 12px radius — every "action" element uses the full pill. A `{rounded.md}` (8px) button immediately reads as a different brand.
+- Don't substitute a slab-serif or condensed display face for Editorial New. The italic-serif moment relies on humanist contrast against AkkuratLL; a slab would shift the page from health-editorial to publication-magazine.
+- Don't add `box-shadow` to product cards or panels. The system uses surface-color steps for separation; shadows immediately read as Material-Design dashboard.
+- Don't invert the membership panel to dark. Oura's mid-page editorial moments stay on cream because the brand reserves the dark-canvas inversion for the press rail and footer — using it three times destroys the bookend.
+- Don't pair the brand-mustard `{colors.brand-mustard}` (#af751b) with the brand-indigo `{colors.brand-indigo}` (#4a4af4) on a single surface — both are scarcity voltages and live in separate sub-rails. Putting them together creates a saturated chord the rest of the page is calibrated to avoid.
 
 ## Known Gaps
 
-- **Checkout widget palette:** the merchant-side iframe with the Pay-in-4, Pay-in-30, and Financing tabs uses a different sub-palette (and a different button geometry) than the home marketing surface, and is not captured here.
-- **Klarna Card product mockup:** the physical card-front and card-back illustrations appear on different breakpoints and during different campaign cycles; only the phone-mockup hero is captured in this snapshot.
-- **Dashboard product UI:** the authenticated dashboard behind the "Sign in" pill carries a separate dark-canvas theme with the same Klarna Black "#0b051d" but a different component vocabulary, and is not part of this marketing-system spec.
-- **Klarna shopping app surface:** the shopping product reuses the same CSS variable layer (notice the `--ribbon-*` chip tokens declared on the marketing home) but renders a different storefront-merchandising chrome on top. The shopping-app palette would need its own DESIGN.md.
-- **Motion specs:** the hero phone-mockup hover-lift, the pink-pill press-state, and the testimonial-card auto-rotation use a transition system that was not extractable from the captured marketing surfaces.
-- **Hover and pressed states:** only the primary button geometry is captured. Card hover, nav-link hover, and merchant-tile hover specs were not reliably extractable from the home snapshot.
-- **Regional sub-brand palettes:** Klarna US, UK, EU, AU, and the local-currency sub-sites each carry small accent shifts on top of the core Klarna Black + Klarna Pink system; only the US homepage is captured here.
+- AkkuratLL and Editorial New are licensed typefaces not available as public web fonts. Substitutes (Söhne / Untitled Sans for AkkuratLL; PP Editorial New / Cormorant Garamond italic for Editorial New) are documented in the typography section.
+- Oura's product macro-photography (warm-lit ring-on-skin shots, low-key linen surfaces, partial-gesture hand framing) is the brand's load-bearing visual asset, and photography direction is out of scope for a token document.
+- Cart flyout, checkout flow, account dashboard, and the in-app companion chrome are not extracted from the homepage capture.
+- The Oura Ring app's data-visualization chrome (sleep charts, readiness scores, cycle insights) is a separate component system from the marketing storefront and lives behind authentication — those tokens are not present in this extraction.
+- Motion behavior (hover-lift product tiles, scroll-snap pull-quote bands, video-loop hero) is undocumented.
+- The embedded video player chrome uses `{colors.brand-indigo}` (#4a4af4) at saturated weight — that is the only place the saturated indigo appears, and it is a third-party player surface rather than canonical Oura chrome.
+- Dark-mode counterparts for the cream sandstone surfaces were not surfaced — the system documented is the light-dominant variant the storefront ships by default.
+- Letter-spacing on body sizes is reported as "normal" by the extractor; the precise pixel offset is undocumented and may vary by platform.
