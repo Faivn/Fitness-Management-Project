@@ -1,6 +1,7 @@
 import type { Profile, PreferencesInput } from '@mova/shared';
 import type { AppContext } from '../context.js';
 import { mustOne } from '../db/helpers.js';
+import { ApiError, fromDbError } from '../http/errors.js';
 import { toProfile } from '../db/mappers.js';
 
 export async function getProfile(ctx: AppContext): Promise<Profile> {
@@ -52,4 +53,14 @@ export async function updatePreferences(ctx: AppContext, input: PreferencesInput
 
 export async function userTimezone(ctx: AppContext): Promise<string> {
   return (await getProfile(ctx)).timezone;
+}
+
+/** A guest erases their own demo workspace (database refuses registered accounts). */
+export async function deleteGuestWorkspace(ctx: AppContext): Promise<{ deleted: true }> {
+  const { error } = await ctx.db.rpc('delete_guest_account', {});
+  if (error) {
+    if (/not_a_guest/.test(error.message ?? '')) throw new ApiError(403, 'not_a_guest', 'Only demo sessions can be erased this way.');
+    throw fromDbError(error);
+  }
+  return { deleted: true };
 }

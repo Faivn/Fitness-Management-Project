@@ -7,6 +7,7 @@ import { createTestDatabase, PgTestClient } from '../../src/dev/pgliteSupabase.j
 export const USERS = {
   alice: '11111111-1111-4111-8111-111111111111',
   bob: '22222222-2222-4222-8222-222222222222',
+  guest: '33333333-3333-4333-8333-333333333333',
 } as const;
 
 export const testEnv: Env = {
@@ -53,11 +54,12 @@ export async function createHarness(opts: { now?: string } = {}) {
   const { db, columns } = await createTestDatabase();
   await db.exec(
     `insert into auth.users (id, email) values ('${USERS.alice}', 'alice@example.test'), ('${USERS.bob}', 'bob@example.test');
+     insert into auth.users (id, email, is_anonymous) values ('${USERS.guest}', null, true);
      update public.profiles set timezone = 'Africa/Lagos';`,
   );
   const ai = new FakeAi();
   let now = new Date(opts.now ?? '2026-10-16T08:00:00Z');
-  const tokens: Record<string, string> = { 'token-alice': USERS.alice, 'token-bob': USERS.bob };
+  const tokens: Record<string, string> = { 'token-alice': USERS.alice, 'token-bob': USERS.bob, 'token-guest': USERS.guest };
 
   async function call<T = any>(
     method: string,

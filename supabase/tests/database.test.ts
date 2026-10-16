@@ -354,3 +354,49 @@ describe('WF-10 meal plan approval', () => {
     expect(cols).toHaveLength(0);
   });
 });
+
+describe('guest (anonymous) demo sessions', () => {
+  const G1 = '33333333-3333-4333-8333-333333333333';
+  const G2 = '44444444-4444-4444-8444-444444444444';
+
+  beforeAll(async () => {
+    await db.exec(`insert into auth.users (id, email, is_anonymous) values ('${G1}', null, true), ('${G2}', null, true);`);
+  });
+
+  it('creates a profile for a guest like any other user and keeps guests isolated', async () => {
+    const mine = await asUser(G1, () => q(`select id from public.profiles`));
+    expect(mine).toEqual([{ id: G1 }]);
+    await asUser(G1, () => q(`insert into public.fitness_goals (user_id, title, priority) values ($1, 'Guest goal', 'high')`, [G1]));
+    const theirs = await asUser(G2, () => q(`select id from public.fitness_goals`));
+    expect(theirs).toHaveLength(0);
+  });
+
+  it('limits a guest to 20 AI calls an hour and never limits a registered user', async () => {
+    for (let i = 0; i < 20; i++) await asUser(G1, () => q(`select public.reserve_ai_call('companion')`));
+    await expect(asUser(G1, () => q(`select public.reserve_ai_call('companion')`))).rejects.toThrow(/demo_limit:hour/);
+    for (let i = 0; i < 25; i++) await asUser(U1, () => q(`select public.reserve_ai_call('companion')`));
+  });
+
+  it('does not let users write or read other users’ usage rows', async () => {
+    await expect(asUser(G2, () => q(`insert into public.ai_usage (user_id, kind) values ($1, 'x')`, [G2]))).rejects.toThrow();
+    const rows = await asUser(G2, () => q(`select user_id from public.ai_usage`));
+    expect(rows).toHaveLength(0);
+  });
+
+  it('lets a guest erase their own workspace but refuses registered accounts', async () => {
+    await expect(asUser(U1, () => q(`select public.delete_guest_account()`))).rejects.toThrow(/not_a_guest/);
+    await asUser(G1, () => q(`select public.delete_guest_account()`));
+    expect(await q(`select 1 from auth.users where id = $1`, [G1])).toHaveLength(0);
+    expect(await q(`select 1 from public.fitness_goals where user_id = $1`, [G1])).toHaveLength(0); // cascade
+    expect(await q(`select 1 from auth.users where id = $1`, [U1])).toHaveLength(1);
+  });
+
+  it('purges only stale guests, and is not callable by users', async () => {
+    await db.exec(`insert into auth.users (id, is_anonymous, created_at) values ('55555555-5555-4555-8555-555555555555', true, now() - interval '8 days')`);
+    await expect(asUser(G2, () => q(`select public.purge_stale_guests()`))).rejects.toThrow();
+    const [{ n }] = await q<{ n: number }>(`select public.purge_stale_guests() as n`);
+    expect(n).toBe(1);
+    expect(await q(`select 1 from auth.users where id = $1`, [G2])).toHaveLength(1); // recent guest kept
+    expect(await q(`select 1 from auth.users where id = $1`, [U2])).toHaveLength(1); // registered user kept
+  });
+});

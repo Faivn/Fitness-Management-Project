@@ -35,7 +35,7 @@ function MaybeReminderSync() {
 
 export default function TabsLayout() {
   const { session, loading } = useAuth();
-  if (!sampleMode && !loading && !session) return <Redirect href="/sign-in" />;
+  if (!sampleMode && !loading && !session) return <Redirect href="/" />;
   return (
     <>
     <MaybeReminderSync />

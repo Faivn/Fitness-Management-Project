@@ -4,6 +4,7 @@ import { Banner, Button, ErrorState, LoadingState, Screen, Section, Segmented, T
 import { useProfile, useUpdatePreferences } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { GUEST_RETENTION_DAYS } from '@/lib/config';
 import { deviceTimeZone } from '@/lib/format';
 import { ensureNotificationPermission } from '@/lib/reminders';
 
@@ -14,7 +15,9 @@ import { ensureNotificationPermission } from '@/lib/reminders';
 export default function Settings() {
   const profile = useProfile();
   const update = useUpdatePreferences();
-  const { signOut, session } = useAuth();
+  const { signOut, session, isGuest, endGuest } = useAuth();
+  const [erasing, setErasing] = useState(false);
+  const [eraseError, setEraseError] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string | null>(null);
   const [notes, setNotes] = useState<string | null>(null);
   const [permissionNote, setPermissionNote] = useState<string | null>(null);
@@ -118,12 +121,37 @@ export default function Settings() {
       </Section>
 
       <Section title="Account">
-        {session?.user.email ? (
-          <Text variant="small" color="inkSecondary">
-            Signed in as {session.user.email}
-          </Text>
-        ) : null}
-        <Button label="Sign out" variant="danger" onPress={() => signOut().then(() => router.replace('/sign-in'))} />
+        {isGuest ? (
+          <>
+            <Banner tone="info" title="You're using a demo workspace">
+              {`It has no email or password. Your plans and chats are stored privately in this browser and deleted automatically after ${GUEST_RETENTION_DAYS} days. Clearing this site's data or using another device starts a new, empty demo.`}
+            </Banner>
+            {eraseError ? <Banner tone="error">{eraseError}</Banner> : null}
+            <Button
+              label="Erase my demo data and start over"
+              variant="danger"
+              loading={erasing}
+              onPress={() => {
+                setEraseError(null);
+                setErasing(true);
+                endGuest()
+                  .then(() => router.replace('/welcome'))
+                  .catch((e) => setEraseError(errorMessage(e)))
+                  .finally(() => setErasing(false));
+              }}
+            />
+            <Button label="I have an account — sign in" variant="ghost" onPress={() => router.push('/sign-in')} />
+          </>
+        ) : (
+          <>
+            {session?.user.email ? (
+              <Text variant="small" color="inkSecondary">
+                Signed in as {session.user.email}
+              </Text>
+            ) : null}
+            <Button label="Sign out" variant="danger" onPress={() => signOut().then(() => router.replace('/'))} />
+          </>
+        )}
       </Section>
     </Screen>
   );

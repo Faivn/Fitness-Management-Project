@@ -1,6 +1,8 @@
 import type { Session } from '@supabase/supabase-js';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
+import { api } from './api';
 import { isConfigured, sampleMode } from './config';
 import { supabase } from './supabase';
 
@@ -10,6 +12,11 @@ interface AuthState {
   signIn(email: string, password: string): Promise<void>;
   signUp(email: string, password: string): Promise<{ needsConfirmation: boolean }>;
   signOut(): Promise<void>;
+  /** True for a no-account demo session (Supabase anonymous sign-in). */
+  isGuest: boolean;
+  startGuest(): Promise<void>;
+  /** Erases the guest workspace on the server, then ends the session. */
+  endGuest(): Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -27,16 +34,30 @@ function authError(message: string): Error {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isConfigured && !sampleMode);
+  const queryClient = useQueryClient();
+  const userId = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isConfigured || sampleMode) return;
     supabase.auth
       .getSession()
-      .then(({ data }) => setSession(data.session))
+      .then(({ data }) => {
+        userId.current = data.session?.user.id ?? null;
+        setSession(data.session);
+      })
       .finally(() => setLoading(false));
-    const { data } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
+    const { data } = supabase.auth.onAuthStateChange((_event, s) => {
+      // Cached server data belongs to one user: never show it to the next person on this device
+      // (e.g. after a guest erases their workspace and starts a new demo).
+      const next = s?.user.id ?? null;
+      if (next !== userId.current) {
+        userId.current = next;
+        queryClient.clear();
+      }
+      setSession(s);
+    });
     return () => data.subscription.unsubscribe();
-  }, []);
+  }, [queryClient]);
 
   const value = useMemo<AuthState>(
     () => ({
@@ -54,6 +75,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { needsConfirmation: !res.data.session };
       },
       async signOut() {
+        await supabase.auth.signOut();
+      },
+      isGuest: session?.user.is_anonymous === true,
+      async startGuest() {
+        const { error } = await supabase.auth.signInAnonymously().catch((e: Error) => ({ error: e }));
+        if (error) {
+          if (/anonymous/i.test(error.message)) throw new Error("The demo isn't available right now. If you have an account, sign in instead.");
+          throw authError(error.message);
+        }
+      },
+      async endGuest() {
+        await api('DELETE', 'guest');
         await supabase.auth.signOut();
       },
     }),

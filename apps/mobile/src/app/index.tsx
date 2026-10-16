@@ -11,9 +11,9 @@ import { WELCOME_SEEN_KEY } from '@/lib/onboarding';
 
 /**
  * Entry gate:
- *   first visit → Welcome → sign in / create account →
- *   first sign-in → short, optional first-use setup (WF-01 step 5) →
- *   workspace. Returning users go straight to their saved workspace.
+ *   first visit → Welcome → Get started (a guest demo session, no account) →
+ *   short, optional first-use setup (WF-01 step 5) → workspace.
+ *   Returning visitors (guest or signed-in) go straight to their saved workspace.
  */
 export default function Index() {
   const { session, loading } = useAuth();
@@ -28,7 +28,8 @@ export default function Index() {
 
   if (welcomeSeen === null || loading) return <LoadingState label="Opening your workspace…" />;
   if (sampleMode) return <Redirect href={welcomeSeen ? '/(tabs)' : '/welcome'} />;
-  if (!session) return <Redirect href={welcomeSeen ? '/sign-in' : '/welcome'} />;
+  // No account is needed: visitors without a session start a demo from the Welcome screen.
+  if (!session) return <Redirect href="/welcome" />;
 
   if (profile.isError) {
     // WF-01: an initialisation failure presents a clear retry path.

@@ -24,3 +24,6 @@ export const isConfigured = missingConfig.length === 0;
  * As soon as the three variables above are set, the app runs live.
  */
 export const sampleMode = process.env.EXPO_PUBLIC_SAMPLE_MODE === '1' || !isConfigured;
+
+/** How long a guest demo workspace is kept before it is deleted (see supabase migration guest_demo). */
+export const GUEST_RETENTION_DAYS = 7;

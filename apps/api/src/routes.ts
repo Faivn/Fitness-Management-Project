@@ -60,7 +60,7 @@ import {
 } from './modules/mealPlans.js';
 import { generateMonthlyReview, getMonthlyReview, listMonthlyReviews, saveMonthlyReview } from './modules/monthlyReviews.js';
 import { getOverview } from './modules/overview.js';
-import { completeOnboarding, getProfile, updatePreferences } from './modules/profile.js';
+import { completeOnboarding, deleteGuestWorkspace, getProfile, updatePreferences } from './modules/profile.js';
 import {
   approveRoutineProposal,
   checkProposalConflicts,
@@ -102,6 +102,7 @@ export function buildRoutes(): Router<AppContext> {
   // Profile & preferences (WF-01, WF-16)
   r.on('GET', 'profile', ({ ctx }) => getProfile(ctx));
   r.on('POST', 'profile/onboarding', (q) => completeOnboarding(q.ctx, q.input(completeOnboardingSchema).timezone));
+  r.on('DELETE', 'guest', ({ ctx }) => deleteGuestWorkspace(ctx));
   r.on('GET', 'preferences', ({ ctx }) => getProfile(ctx));
   r.on('PATCH', 'preferences', (q) => updatePreferences(q.ctx, q.input(preferencesSchema)));
 

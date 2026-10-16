@@ -181,3 +181,13 @@ Never set a service-role key anywhere, and never give `GROQ_API_KEY` an `EXPO_PU
 ## AI companion streaming
 
 `POST /api/v1/ai/turn/stream` is the streaming twin of `POST /api/v1/ai/turn` (newline-delimited JSON: `delta` events with the reply so far, then `done` with the saved conversation, or `error`). Groq only streams tokens when no `response_format` is set, so the stream route puts the JSON schema in the prompt and still validates the final output with Zod (one schema-enforced repair attempt). Approval flows are unchanged: goal, routine and meal-plan suggestions stay drafts until the user approves them. The app falls back to the plain endpoint if the stream route is unavailable. Motion respects the OS reduced-motion setting.
+
+## Guest demo (no account)
+
+"Get started" on the Welcome screen starts a **guest session** with Supabase anonymous sign-ins (`signInAnonymously`). A guest is a real `auth.users` row with `is_anonymous = true` and no email or password, so the API and row level security work exactly as for an account: a guest can only read and write their own rows, and the service-role key is never used.
+
+- **What persists:** the guest's session token lives in the browser's local storage, so a refresh or a later visit in the same browser returns to the same workspace. Another browser/device, or cleared site data, starts a new empty demo.
+- **Retention:** guests are deleted after 7 days (`purge_stale_guests()`, scheduled daily by pg_cron when that extension is enabled: run `select cron.schedule('purge-stale-guests', '17 3 * * *', 'select public.purge_stale_guests()');` once). Deleting the auth user cascades to every table. A guest can erase their workspace at once from Settings (`DELETE /api/v1/guest` → `delete_guest_account()`).
+- **Cost and abuse limits:** every AI call is recorded by `reserve_ai_call()` (migration `20261016120000_guest_demo.sql`). Guests are limited to 20 AI calls per hour, 60 per day, and the demo as a whole to 3000 per day; registered users are never limited. Supabase limits anonymous sign-ins to 30 per hour per IP (`auth.rate_limit.anonymous_users`); add a CAPTCHA in Auth settings if the demo is shared widely.
+- **Required Supabase settings:** Authentication → Sign In / Providers → **Allow anonymous sign-ins** on; run the guest_demo migration (SQL editor or `supabase db push`).
+- Existing email sign-in still works through "I already have an account" on the Welcome screen and in Settings.

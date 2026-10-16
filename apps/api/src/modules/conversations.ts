@@ -8,7 +8,7 @@ import {
 } from '@mova/shared';
 import type { AppContext } from '../context.js';
 import { must, mustOne } from '../db/helpers.js';
-import { aiUnavailable } from '../http/errors.js';
+import { ApiError, aiUnavailable } from '../http/errors.js';
 import { AiUnavailableError, partialJsonString, type ChatMessage } from '../lib/ai.js';
 import { getFitnessContext } from './aiContext.js';
 import { createGoalProposal } from './goals.js';
@@ -178,8 +178,9 @@ export async function aiTurnStream(ctx: AppContext, input: AiTurnInput, headers:
           throw e;
         }
         send({ type: 'done', ...(await finishTurn(ctx, turn.conversationId, output)) });
-      } catch {
-        send({ type: 'error', code: 'server_error', message: 'Something went wrong. Your message was kept.' });
+      } catch (e) {
+        if (e instanceof ApiError) send({ type: 'error', code: e.code, message: e.message });
+        else send({ type: 'error', code: 'server_error', message: 'Something went wrong. Your message was kept.' });
       } finally {
         controller.close();
       }

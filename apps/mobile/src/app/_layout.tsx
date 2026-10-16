@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GuestBanner } from '@/components/GuestBanner';
 import { SampleBanner } from '@/components/SampleBanner';
 import { ApiError } from '@/lib/api';
 import { AuthProvider } from '@/lib/auth';
@@ -29,6 +30,7 @@ export default function RootLayout() {
         <AuthProvider>
           <StatusBar style="dark" />
           <SampleBanner />
+          <GuestBanner />
           <Stack
             screenOptions={{
               headerTintColor: colors.ink,
