@@ -1,0 +1,27 @@
+{
+  "name": "@mova/engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mova domain engine: the product's use cases (routines, sessions, schedule, meals, hydration, fasting, history, AI proposals) written against a small database interface. Runs in the browser on local storage, or on a server against a real database.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mova/shared": "*",
+    "zod": "^4.6.7"
+  }
+}

@@ -1,0 +1,11 @@
+# Never upload local environment files, dependencies or build caches.
+.env
+.env.*
+!.env.example
+**/node_modules
+**/dist
+**/.expo
+**/.vercel
+supabase/.temp
+supabase/.branches
+**/coverage

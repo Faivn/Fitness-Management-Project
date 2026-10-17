@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Mova",
+    "slug": "mova",
+    "version": "0.1.0",
+    "scheme": "mova",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.mova.fitness"
+    },
+    "android": {
+      "package": "app.mova.fitness",
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F1E8",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-image",
+      [
+        "expo-notifications",
+        {
+          "color": "#AF751B"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
