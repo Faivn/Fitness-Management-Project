@@ -225,7 +225,7 @@ function DayMeals({ plan, day, onDay, todayDay }: { plan: MealPlan; day: number;
 }
 
 const styles = StyleSheet.create({
-  tabs: { paddingHorizontal: spacing.base },
+  tabs: { paddingHorizontal: spacing.base, paddingBottom: 12 }, // breathing space above the timer and meal cards
   tab: { flex: 1, minHeight: 44, justifyContent: 'center' },
   track: { height: 2, backgroundColor: colors.hairline },
   indicator: { height: 2, backgroundColor: colors.rose },
