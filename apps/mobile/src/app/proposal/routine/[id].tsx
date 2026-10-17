@@ -1,22 +1,22 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
-import { Appear, Banner, Button, Card, ErrorState, LoadingState, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
-import { AIDisclaimer, ConflictList, ProposalBanner } from '@/components/domain';
+import { Banner, Button, Card, Divider, ErrorState, IconButton, LoadingState, NumberField, Row, Screen, Section, SheetPage, Text, TextField } from '@/components';
+import { ClashPrompt } from '@/components/domain';
 import { cleanPlan, RoutineEditor } from '@/components/RoutineEditor';
 import {
   useApproveRoutineProposal,
-  useCheckProposalConflicts,
   useEditRoutineProposal,
   useProfile,
   useRejectProposal,
+  useReplaceClashingRoutines,
   useReviseRoutineProposal,
   useRoutineProposal,
 } from '@/hooks/api';
 import { ApiError, errorMessage, newIdempotencyKey } from '@/lib/api';
-import { ACTIVITY_LABELS, DAY_NAMES } from '@/lib/format';
+import { ACTIVITY_LABELS, DAY_NAMES, DAY_SHORT } from '@/lib/format';
 import { validate } from '@/lib/validation';
 import { spacing } from '@/theme/tokens';
 
@@ -24,18 +24,21 @@ import { spacing } from '@/theme/tokens';
  * WF-03 review: inspect, edit directly or refine by chat, see conflicts, then
  * approve the exact version shown. Applying is a separate, explicit step.
  */
-export default function RoutineProposalReview() {
+function RoutineProposalBody() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const proposal = useRoutineProposal(id);
   const profile = useProfile();
   const edit = useEditRoutineProposal();
   const revise = useReviseRoutineProposal();
-  const check = useCheckProposalConflicts();
+  const replace = useReplaceClashingRoutines();
   const approve = useApproveRoutineProposal();
   const reject = useRejectProposal('routine-proposals');
 
   const today = appToday(profile.data?.timezone ?? 'UTC');
+  // One training day at a time is edited: `editing` is the whole plan, `editingDay` is the day being changed.
   const [editing, setEditing] = useState<RoutinePlan | null>(null);
+  const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [asking, setAsking] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [instruction, setInstruction] = useState('');
   const [startDate, setStartDate] = useState(today);
@@ -66,7 +69,10 @@ export default function RoutineProposalReview() {
     const v = validate(routinePlanSchema, cleanPlan(editing));
     if (!v.ok) return setErrors(v.errors);
     setErrors({});
-    edit.mutate({ id, version: p.version, plan: v.data }, { onSuccess: () => setEditing(null) });
+    edit.mutate({ id, version: p.version, plan: v.data }, { onSuccess: () => {
+      setEditing(null);
+      setEditingDay(null);
+    } });
   }
 
   function doApprove(acceptConflicts: boolean) {
@@ -86,22 +92,12 @@ export default function RoutineProposalReview() {
       footer={
         draft && !editing && p.plan ? (
           <>
-            {conflicts && conflicts.length > 0 ? (
-              <Button label="Approve anyway — keep both" fullWidth loading={approve.isPending} onPress={() => doApprove(true)} />
-            ) : (
-              <Button label="Approve and schedule" fullWidth loading={approve.isPending} onPress={() => doApprove(false)} />
-            )}
-            <Button label="Reject proposal" variant="ghost" fullWidth loading={reject.isPending} onPress={() => reject.mutate(id, { onSuccess: () => router.back() })} />
+            <Button label="Approve and schedule" fullWidth loading={approve.isPending} onPress={() => doApprove(false)} />
+            <Button label="Reject" variant="ghost" fullWidth loading={reject.isPending} onPress={() => reject.mutate(id, { onSuccess: () => router.back() })} />
           </>
         ) : undefined
       }
     >
-      <Stack.Screen options={{ title: 'Review routine' }} />
-      <Appear variant="card">
-        <ProposalBanner version={p.version} status={p.status} />
-      </Appear>
-      {p.mode !== 'new' ? <Banner tone="info" title={p.mode === 'replace' ? 'Replaces an existing routine' : 'Adjusts an existing routine'}>Completed workouts and their logs stay exactly as they are. Only future planned sessions change.</Banner> : null}
-
       {p.clarifyingQuestions.length > 0 ? (
         <Card tone="brand">
           <Text variant="label">A few questions first</Text>
@@ -113,36 +109,41 @@ export default function RoutineProposalReview() {
         </Card>
       ) : null}
 
-      {p.plan && !editing ? <PlanSummary plan={p.plan} /> : null}
+      {p.plan && !editing ? <PlanSummary plan={p.plan} editable={draft} onEditDay={(i) => { setEditing(structuredClone(p.plan!)); setEditingDay(i); }} /> : null}
 
       {editing ? (
         <>
-          <RoutineEditor plan={editing} onChange={setEditing} errors={errors} weightUnit={profile.data?.weightUnit ?? 'kg'} />
+          <RoutineEditor plan={editing} only={editingDay ?? undefined} onChange={setEditing} errors={errors} weightUnit={profile.data?.weightUnit ?? 'kg'} />
           {edit.isError ? <Banner tone="error">{errorMessage(edit.error)}</Banner> : null}
           <Row>
-            <Button label="Save changes" loading={edit.isPending} onPress={saveEdits} />
-            <Button label="Discard edits" variant="ghost" onPress={() => setEditing(null)} />
+            <Button label="Save" loading={edit.isPending} onPress={saveEdits} />
+            <Button label="Cancel" variant="ghost" onPress={() => { setEditing(null); setEditingDay(null); }} />
           </Row>
         </>
       ) : null}
 
       {draft && !editing ? (
         <>
-          {p.plan ? <Button label="Edit details" variant="secondary" onPress={() => setEditing(structuredClone(p.plan!))} /> : null}
-          <Section title={p.plan ? 'Ask for changes' : 'Answer or add detail'}>
-            <TextField label="Instruction" placeholder="e.g. Move the run to Saturday and add a core exercise" value={instruction} onChangeText={setInstruction} multiline />
-            {revise.isError ? <Banner tone="error">{errorMessage(revise.error)}</Banner> : null}
-            <Button
-              label="Update proposal"
-              variant="secondary"
-              loading={revise.isPending}
-              disabled={!instruction.trim()}
-              onPress={() => revise.mutate({ id, version: p.version, instruction }, { onSuccess: () => setInstruction('') })}
-            />
-            <Text variant="caption" color="inkTertiary">
-              Your edits are kept.
-            </Text>
-          </Section>
+          <Divider />
+          {asking ? (
+            <Section title="Ask for a change">
+              <TextField label="What should change?" placeholder="e.g. Move the run to Saturday and add a core exercise" value={instruction} onChangeText={setInstruction} multiline />
+              {revise.isError ? <Banner tone="error">{errorMessage(revise.error)}</Banner> : null}
+              <Row>
+                <Button
+                  label="Send"
+                  loading={revise.isPending}
+                  disabled={!instruction.trim()}
+                  onPress={() => revise.mutate({ id, version: p.version, instruction }, { onSuccess: () => { setInstruction(''); setAsking(false); } })}
+                />
+                <Button label="Cancel" variant="ghost" onPress={() => { setAsking(false); setInstruction(''); }} />
+              </Row>
+            </Section>
+          ) : (
+            <Button label="Ask for a change" variant="secondary" onPress={() => setAsking(true)} />
+          )}
+
+          <Divider />
 
           {p.plan ? (
             <Section title="When should it start?">
@@ -151,19 +152,12 @@ export default function RoutineProposalReview() {
                   <TextField label="Start date" value={startDate} onChangeText={setStartDate} placeholder="YYYY-MM-DD" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <NumberField label="Weeks to schedule" allowDecimal={false} value={weeks} onChange={setWeeks} helper="1–12 weeks" />
+                  <NumberField label="Weeks" allowDecimal={false} value={weeks} onChange={setWeeks} placeholder="1–12" />
                 </View>
               </Row>
-              <Button
-                label="Check my schedule"
-                size="sm"
-                variant="secondary"
-                loading={check.isPending}
-                onPress={() => check.mutate({ id, schedule }, { onSuccess: (r) => setConflicts(r.conflicts) })}
-              />
-              {check.isError ? <Banner tone="error">{errorMessage(check.error)}</Banner> : null}
-              {conflicts && conflicts.length === 0 ? <Banner tone="success" title="No conflicts">These sessions fit around your existing plans.</Banner> : null}
-              {conflicts ? <ConflictList conflicts={conflicts} /> : null}
+              {conflicts && conflicts.length > 0 ? (
+                <ClashPrompt conflicts={conflicts} busy={approve.isPending || replace.isPending} onKeep={() => doApprove(true)} onReplace={() => replace.mutate(conflicts, { onSuccess: () => doApprove(true) })} />
+              ) : null}
               {approve.isError && !(approve.error instanceof ApiError && approve.error.code === 'schedule_conflict') ? (
                 <Banner tone="error">{errorMessage(approve.error)}</Banner>
               ) : null}
@@ -171,53 +165,55 @@ export default function RoutineProposalReview() {
           ) : null}
         </>
       ) : null}
-      <AIDisclaimer />
     </Screen>
   );
 }
 
-function PlanSummary({ plan }: { plan: RoutinePlan }) {
+/** One summary card with three plain points, then one card per training day, each with its own edit icon. */
+export default function RoutineProposalReview() {
+  return (
+    <SheetPage title="Review routine">
+      <RoutineProposalBody />
+    </SheetPage>
+  );
+}
+
+function PlanSummary({ plan, editable, onEditDay }: { plan: RoutinePlan; editable: boolean; onEditDay: (i: number) => void }) {
+  const days = [...new Set(plan.sessions.map((s) => s.dayOfWeek))].sort((a, b) => a - b);
+  const mins = plan.sessions.map((s) => s.durationMinutes).filter((m): m is number => !!m);
+  const types = [...new Set(plan.sessions.map((s) => ACTIVITY_LABELS[s.activityType]))];
+  const points = [
+    `${days.length} ${days.length === 1 ? 'day' : 'days'} a week: ${days.map((d) => DAY_SHORT[d]).join(', ')}`,
+    mins.length ? `About ${Math.round(mins.reduce((a, b) => a + b, 0) / mins.length)} min a session` : `${plan.sessions.length} ${plan.sessions.length === 1 ? 'session' : 'sessions'}`,
+    `Focus: ${types.join(', ')}`,
+  ];
   return (
     <View style={{ gap: spacing.md }}>
-      <Text variant="title">{plan.title}</Text>
-      {plan.purpose ? (
-        <Text variant="body" color="inkSecondary">
-          {plan.purpose}
-        </Text>
-      ) : null}
+      <Card style={{ gap: spacing.sm }}>
+        <Text variant="title">{plan.title}</Text>
+        {points.map((t) => (
+          <Text key={t} variant="small" color="inkSecondary">
+            • {t}
+          </Text>
+        ))}
+      </Card>
       {plan.sessions.map((s, i) => (
         <Card key={i}>
-          <Text variant="caption" color="inkTertiary">
-            {DAY_NAMES[s.dayOfWeek]}
-            {s.startTime ? ` · ${s.startTime}` : ''}
-            {s.durationMinutes ? ` · ${s.durationMinutes} min` : ''} · {ACTIVITY_LABELS[s.activityType]}
-          </Text>
-          <Text variant="heading">{s.title}</Text>
-          {s.focus ? (
-            <Text variant="small" color="inkSecondary">
-              {s.focus}
+          <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Text variant="caption" color="inkTertiary" style={{ flex: 1 }}>
+              {DAY_NAMES[s.dayOfWeek]}
+              {s.durationMinutes ? ` · ${s.durationMinutes} min` : ''} · {ACTIVITY_LABELS[s.activityType]}
             </Text>
-          ) : null}
+            {editable ? <IconButton icon="edit" label={`Edit ${DAY_NAMES[s.dayOfWeek]}`} variant="plain" size={32} onPress={() => onEditDay(i)} /> : null}
+          </Row>
+          <Text variant="heading">{s.title}</Text>
           {s.exercises.map((e, k) => (
             <Text key={k} variant="small">
-              {k + 1}. {e.name} — {e.targetSets} × {e.repsMin && e.repsMax ? `${e.repsMin}–${e.repsMax}` : (e.repsMin ?? e.repsMax ?? '?')}
-              {e.targetWeight ? ` @ ${e.targetWeight} ${e.weightUnit}` : ''}
-              {e.restSeconds ? ` · rest ${e.restSeconds}s` : ''}
+              {e.name} · {e.targetSets} × {e.repsMin && e.repsMax ? `${e.repsMin}–${e.repsMax}` : (e.repsMin ?? e.repsMax ?? '?')}
             </Text>
           ))}
         </Card>
       ))}
-      {plan.progressionGuidance ? (
-        <Card tone="subtle">
-          <Text variant="label">Progression</Text>
-          <Text variant="small">{plan.progressionGuidance}</Text>
-        </Card>
-      ) : null}
-      {plan.assumptions.length ? (
-        <Banner tone="info" title="Assumptions to check">
-          {plan.assumptions.map((a) => `• ${a}`).join('\n')}
-        </Banner>
-      ) : null}
       {plan.warnings.length ? (
         <Banner tone="warning" title="Please review">
           {plan.warnings.map((a) => `• ${a}`).join('\n')}

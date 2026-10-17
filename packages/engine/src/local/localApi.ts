@@ -3,6 +3,7 @@ import { ApiError, validationError } from '../http/errors.js';
 import { makeRequest } from '../http/router.js';
 import { buildRoutes } from '../routes.js';
 import type { AppContext } from '../context.js';
+import type { AiClient } from '../ai.js';
 import { createDemoAi } from './demoAi.js';
 import { createLocalDatabase, LOCAL_USER_ID, type LocalDatabase, type StorageAdapter } from './localDb.js';
 import { registerProcedures } from './rpc.js';
@@ -25,9 +26,9 @@ const routes = buildRoutes();
  * browser against a local-storage database, with a deterministic demo
  * assistant instead of a live AI. No network, accounts or secrets.
  */
-export function createLocalApi(opts: { storage: StorageAdapter; timezone: string; now?: () => Date; aiDelayMs?: number; sample?: boolean }): LocalApi {
+export function createLocalApi(opts: { storage: StorageAdapter; timezone: string; now?: () => Date; aiDelayMs?: number; sample?: boolean; ai?: AiClient }): LocalApi {
   const realNow = opts.now ?? (() => new Date());
-  const ai = createDemoAi({ delayMs: opts.aiDelayMs ?? 0 });
+  const ai = opts.ai ?? createDemoAi({ delayMs: opts.aiDelayMs ?? 0 });
   let database = createLocalDatabase({ storage: opts.storage, now: realNow });
 
   const api: LocalApi = {

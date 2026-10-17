@@ -28,7 +28,7 @@ export const copy = {
   },
   ai: {
     name: 'Mova companion',
-    disclaimer: 'Demo assistant: replies are simulated. Nothing is saved until you approve.',
+    disclaimer: 'The assistant can make mistakes. Tick a suggestion to save it.',
     placeholder: 'Message Mova',
     emptyTitle: 'Ask Mova',
     emptyBody: 'Goals, routines or meals.',

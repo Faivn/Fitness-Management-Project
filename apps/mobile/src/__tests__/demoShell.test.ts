@@ -30,6 +30,6 @@ describe('demo shell', () => {
 
   it('keeps shared UX copy in one module', () => {
     const copy = sources.find((s) => s.path === 'lib/copy.ts')!.text;
-    expect(copy).toMatch(/Demo assistant: replies are simulated/);
+    expect(copy).toMatch(/assistant can make mistakes/);
   });
 });

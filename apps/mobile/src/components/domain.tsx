@@ -161,21 +161,16 @@ export function ConflictList({ conflicts }: { conflicts: ScheduleConflict[] }) {
  */
 export function ClashPrompt({ conflicts, busy, onReplace, onKeep }: { conflicts: ScheduleConflict[]; busy?: boolean; onReplace: () => void; onKeep: () => void }) {
   if (!conflicts.length) return null;
+  const old = [...new Set(conflicts.map((c) => c.existing.title))];
+  const days = [...new Set(conflicts.map((c) => c.existing.plannedDate))].sort();
+  const shown = days.slice(0, 2).map((d) => formatDate(d)).join(', ');
+  const more = days.length > 2 ? ` and ${days.length - 2} more` : '';
   return (
     <View style={styles.conflicts} accessibilityRole="alert">
-      <Text variant="bodyStrong">This clashes with a routine you already have</Text>
-      {conflicts.slice(0, 4).map((c, i) => (
-        <Text key={i} variant="small" color="inkSecondary">
-          • {describeConflict(c)}
-        </Text>
-      ))}
-      {conflicts.length > 4 ? (
-        <Text variant="small" color="inkSecondary">
-          …and {conflicts.length - 4} more.
-        </Text>
-      ) : null}
+      <Text variant="bodyStrong">Same days as another routine</Text>
       <Text variant="small" color="inkSecondary">
-        Replace the old routine with this one? Its upcoming workouts are removed; your logged history stays.
+        This overlaps "{old.join('", "')}" on {shown}
+        {more}. Replace the old routine, or keep both?
       </Text>
       <Row style={{ alignItems: 'stretch', gap: spacing.md }}>
         <View style={{ flex: 1 }}>

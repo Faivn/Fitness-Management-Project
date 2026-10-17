@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { isLocalDate, type MonthlyReviewDraft } from '@mova/shared';
 import { Banner, Button, Card, Mascot, Row, Screen, Section, StatusBadge, Text, TextField } from '@/components';
-import { AIDisclaimer } from '@/components/domain';
 import { useGenerateReview, useProfile, useSaveReview } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
 import { formatDate, monthBounds } from '@/lib/format';
@@ -124,7 +123,6 @@ export default function NewReview() {
               onPress={() => save.mutate({ draftId: draft.draftId, summaryText: text, reflection: reflection || undefined, idempotencyKey: key })}
             />
           )}
-          <AIDisclaimer />
         </>
       ) : null}
     </Screen>

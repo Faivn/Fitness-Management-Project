@@ -1,6 +1,8 @@
 import {
   addDays,
+  completeMealPlan,
   consolidateShoppingList,
+  missingMealCells,
   mealPlanProposalOutputSchema,
   mealPlanSchema,
   type MealPlan,
@@ -50,7 +52,25 @@ export async function generateMealPlanProposal(
     { role: 'system', content: mealPlanSystemPrompt(fitness, input.startDate, input.days) },
     { role: 'user', content: `${input.request}\n(Plan dates: ${input.startDate} to ${addDays(input.startDate, input.days - 1)})` },
   ]);
-  const plan = out.plan && !out.needsClarification ? out.plan : null;
+  let plan = out.plan && !out.needsClarification ? out.plan : null;
+  if (plan) {
+    let missing = missingMealCells(plan, input.startDate, input.days);
+    if (missing.length) {
+      // The model stopped early. Ask once for the complete plan, then fill any gap that is left.
+      const dates = [...new Set(missing.map((m) => m.date))].join(', ');
+      const again = await runModel(ctx, [
+        { role: 'system', content: mealPlanSystemPrompt(fitness, input.startDate, input.days) },
+        { role: 'user', content: `${input.request}\n(Plan dates: ${input.startDate} to ${addDays(input.startDate, input.days - 1)})` },
+        { role: 'assistant', content: JSON.stringify(out) },
+        { role: 'user', content: `That plan is incomplete: no meals for ${dates}. Return the COMPLETE plan with every meal slot filled on EVERY date from ${input.startDate} to ${addDays(input.startDate, input.days - 1)}. Keep descriptions short.` },
+      ]);
+      if (again.plan && !again.needsClarification) {
+        const better = again.plan;
+        if (missingMealCells(better, input.startDate, input.days).length < missing.length) plan = better;
+      }
+    }
+    plan = completeMealPlan(plan, input.startDate, input.days);
+  }
   const row = await mustOne(
     ctx.db
       .from('meal_plan_proposals')
@@ -71,7 +91,7 @@ export async function generateMealPlanProposal(
     ctx,
     conversationId,
     'assistant',
-    plan ? `I've drafted "${plan.title}" for you to review. It isn't saved until you approve it.` : `Before I plan your meals: ${out.clarifyingQuestions.join(' ')}`,
+    plan ? `I've drafted "${plan.title}" for you.` : `Before I plan your meals: ${out.clarifyingQuestions.join(' ')}`,
     { mealPlanProposalId: row.id, clarifyingQuestions: out.clarifyingQuestions },
   );
   return toProposal(row);

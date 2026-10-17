@@ -111,7 +111,7 @@ function EditRoutineBody() {
               <TextField label="Start date" value={startDate} onChangeText={setStartDate} placeholder="YYYY-MM-DD" error={errors['schedule.startDate']} />
             </View>
             <View style={{ flex: 1 }}>
-              <NumberField label="Weeks" allowDecimal={false} value={weeks} onChange={setWeeks} helper="1–12" />
+              <NumberField label="Weeks" allowDecimal={false} value={weeks} onChange={setWeeks} placeholder="1–12" />
             </View>
           </Row>
         ) : null}

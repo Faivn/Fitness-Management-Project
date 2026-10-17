@@ -1,4 +1,4 @@
-import { ApiError as EngineApiError, createLocalApi, type LocalApi } from '@mova/engine';
+import { ApiError as EngineApiError, createDemoAi, createLocalApi, createRemoteAi, withFallback, type LocalApi } from '@mova/engine';
 import { randomUUID } from 'expo-crypto';
 import { deviceTimeZone } from './format';
 import { openDemoStorage } from './storage';
@@ -27,9 +27,30 @@ export class ApiError extends Error {
  * the local demo engine (browser storage, no network or accounts). To bring a
  * backend back, replace `local()` below with a `fetch` to it — no screen changes.
  */
+/**
+ * The companion talks to a live model through the app's own `/api/ai` endpoint (the key stays on the server).
+ * Replies are never simulated: if the endpoint is missing or has no key, the companion says it is unavailable.
+ * The offline demo assistant is opt-in only, for development: `localStorage['mova.demoAi'] = '1'`.
+ */
+function liveAi() {
+  // On localhost the endpoint is scripts/ai-proxy.mjs (it reads apps/api/.env); deployed, it is the same-origin /api/ai.
+  const local = globalThis.location?.hostname === 'localhost' || globalThis.location?.hostname === '127.0.0.1';
+  let url = local ? 'http://localhost:8787/api/ai' : '/api/ai';
+  let demo = false;
+  try {
+    // `mova.aiUrl` overrides the endpoint.
+    url = globalThis.localStorage?.getItem('mova.aiUrl') || url;
+    demo = globalThis.localStorage?.getItem('mova.demoAi') === '1';
+  } catch {
+    // storage unavailable: keep the defaults
+  }
+  const remote = createRemoteAi({ url });
+  return demo ? withFallback(remote, createDemoAi({ delayMs: 700 })) : remote;
+}
+
 let instance: Promise<LocalApi> | null = null;
 function local(): Promise<LocalApi> {
-  instance ??= openDemoStorage().then((storage) => createLocalApi({ storage, timezone: deviceTimeZone(), aiDelayMs: 700, sample: false }));
+  instance ??= openDemoStorage().then((storage) => createLocalApi({ storage, timezone: deviceTimeZone(), sample: false, ai: liveAi() }));
   return instance;
 }
 

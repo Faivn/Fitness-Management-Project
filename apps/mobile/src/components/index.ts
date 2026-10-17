@@ -8,6 +8,7 @@ export * from './Status';
 export * from './RuneIcon';
 export * from './controls';
 export * from './MealPlanView';
+export * from './FastingPanel';
 export * from './motion';
 export * from './HeaderBack';
 export * from './Composer';

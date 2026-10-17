@@ -1,5 +1,5 @@
 import type { MealEntry, ShoppingItem } from '../schemas/mealPlan.js';
-import { dayOfWeek } from './dates.js';
+import { addDays, dayOfWeek } from './dates.js';
 import { roundForDisplay } from './units.js';
 
 export interface ConsolidatedItem extends ShoppingItem {
@@ -92,6 +92,52 @@ export function groupMealsByWeekday<T extends { date: string; sortOrder: number 
     byWeekday.set(wd, [...(byWeekday.get(wd) ?? []), e]);
   }
   return [...byWeekday.entries()].sort(([a], [b]) => a - b).map(([wd, list]) => [wd, list.sort((x, y) => x.sortOrder - y.sortOrder)]);
+}
+
+interface CompletablePlan<E extends { date: string; slot: string; sortOrder: number }> {
+  startDate: string;
+  endDate: string;
+  slots: string[];
+  entries: E[];
+}
+
+/** Which (date, slot) cells of the requested range the plan has no meal for. */
+export function missingMealCells<E extends { date: string; slot: string; sortOrder: number }>(plan: CompletablePlan<E>, start: string, days: number): Array<{ date: string; slot: string }> {
+  const have = new Set(plan.entries.map((e) => `${e.date}|${e.slot}`));
+  const out: Array<{ date: string; slot: string }> = [];
+  for (let i = 0; i < days; i++) {
+    const date = addDays(start, i);
+    for (const slot of plan.slots) if (!have.has(`${date}|${slot}`)) out.push({ date, slot });
+  }
+  return out;
+}
+
+/**
+ * Make sure every requested day has a meal for every slot. A model that stops early (or runs out of room)
+ * leaves the last days empty; those cells are filled with the most recent meal planned for the same slot,
+ * so no day of the week is ever blank.
+ */
+export function completeMealPlan<E extends { date: string; slot: string; sortOrder: number }, P extends CompletablePlan<E>>(plan: P, start: string, days: number): P {
+  const end = addDays(start, days - 1);
+  const inRange = plan.entries.filter((e) => e.date >= start && e.date <= end);
+  const firstBySlot = new Map<string, E>();
+  for (const e of [...inRange].sort((a, b) => a.date.localeCompare(b.date))) if (!firstBySlot.has(e.slot)) firstBySlot.set(e.slot, e);
+  const lastBySlot = new Map<string, E>();
+  const entries: E[] = [];
+  for (let i = 0; i < days; i++) {
+    const date = addDays(start, i);
+    const have = inRange.filter((e) => e.date === date);
+    for (const e of have) {
+      lastBySlot.set(e.slot, e);
+      entries.push(e);
+    }
+    plan.slots.forEach((slot, order) => {
+      if (have.some((e) => e.slot === slot)) return;
+      const template = lastBySlot.get(slot) ?? firstBySlot.get(slot);
+      if (template) entries.push({ ...template, date, sortOrder: template.sortOrder ?? order });
+    });
+  }
+  return { ...plan, startDate: start, endDate: end, entries };
 }
 
 export const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as const;

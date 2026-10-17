@@ -320,6 +320,7 @@ describe('WF-10 meal planning', () => {
           { date: '2026-10-23', slot: 'Breakfast', sortOrder: 0, mealName: 'Moi moi', ingredients: [{ name: 'Beans', quantity: 200, unit: 'g' }] },
           { date: '2026-10-23', slot: 'Lunch', sortOrder: 1, mealName: 'Beans and plantain', ingredients: [{ name: 'Beans', quantity: 150, unit: 'g' }, { name: 'Plantain', quantity: 2 }] },
           { date: '2026-10-24', slot: 'Breakfast', sortOrder: 0, mealName: 'Banana smoothie', isSmoothie: true, ingredients: [{ name: 'Banana', quantity: 2 }] },
+          { date: '2026-10-24', slot: 'Lunch', sortOrder: 1, mealName: 'Jollof rice', ingredients: [{ name: 'Rice', quantity: 1, unit: 'cup' }] },
         ],
         shoppingList: [{ name: 'Beans', category: 'Pantry' }],
       },

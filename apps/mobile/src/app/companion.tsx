@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { ConversationMessage, GoalDraft } from '@mova/shared';
-import { Appear, Banner, Button, Card, Chip, Composer, IconButton, Row, RuneIcon, SheetPage, Text, TextAction, TextField, ThinkingIndicator } from '@/components';
-import { AIDisclaimer, ProposalBanner } from '@/components/domain';
+import type { ConversationMessage } from '@mova/shared';
+import { Appear, Banner, Composer, IconButton, SheetPage, Text, ThinkingIndicator } from '@/components';
+import { GoalSuggestions, MealSuggestion, RoutineSuggestion, ShimmerPill, StreamedText, SuggestionChips } from '@/components/ChatSuggestions';
 import { Mascot } from '@/components/Mascot';
-import { useAiTurn, useApproveGoals, useClearConversations, useConversation, useConversations, useGenerateMealPlan, useGenerateRoutineProposal, useGoalProposal, useProfile, useRejectProposal } from '@/hooks/api';
+import { useAiTurn, useClearConversations, useConversation, useConversations, useGenerateMealPlan, useGenerateRoutineProposal, useProfile } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
 import { copy } from '@/lib/copy';
 import { useDraft } from '@/lib/drafts';
@@ -29,7 +29,10 @@ export default function Companion() {
   // Messages already on screen when a conversation loads appear in place; later ones animate in.
   const known = useRef<{ id?: string; ids: Set<string> | null }>({ ids: null });
   const following = useRef(true);
-  const [picker, setPicker] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [streamed, setStreamed] = useState<Set<string>>(new Set());
+  // Drafts the assistant made from the conversation; each is a one-tap suggestion under the thread.
+  const [drafts, setDrafts] = useState<Array<{ kind: 'routine' | 'meal'; id: string }>>([]);
   const draftRoutine = useGenerateRoutineProposal();
   const draftMeals = useGenerateMealPlan();
   const profile = useProfile();
@@ -92,7 +95,14 @@ export default function Companion() {
           setConversationId(data.conversation.id);
           const last = [...data.conversation.messages].reverse().find((m) => m.role === 'assistant');
           const step = (last?.metadata as { suggestedNextStep?: string } | null)?.suggestedNextStep;
-          if (step === 'create_routine' || step === 'create_meal_plan' || step === 'monthly_review') setPicker(true);
+          const request = data.conversation.messages.filter((m) => m.role === 'user').map((m) => m.content).join('. ');
+          // Act straight away: draft what was asked for instead of asking the user to pick a button.
+          if (step === 'create_routine')
+            draftRoutine.mutate({ request: request || 'Three sessions a week', mode: 'new' }, { onSuccess: (p) => setDrafts((d) => [...d, { kind: 'routine', id: p.id }]) });
+          if (step === 'create_meal_plan')
+            draftMeals.mutate({ request: request || 'Weekly meal plan', startDate: appToday(profile.data?.timezone ?? 'UTC'), days: 7 }, { onSuccess: (p) => setDrafts((d) => [...d, { kind: 'meal', id: p.id }]) });
+          if (step === 'monthly_review') router.push('/review/new');
+          setSuggestionsOpen(false);
           draft.setValue({ text: '', clientMessageId: newIdempotencyKey() });
           void draft.clear();
         },
@@ -102,35 +112,11 @@ export default function Companion() {
     );
   }
 
-  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-  const nextStep = (lastAssistant?.metadata as { suggestedNextStep?: string } | null)?.suggestedNextStep;
-  const request = messages.filter((m) => m.role === 'user').map((m) => m.content).join('. ');
-  const options: Array<{ label: string; hint?: string; onPress: () => void; loading?: boolean }> = [];
-  if (nextStep === 'create_routine')
-    options.push({
-      label: copy.ai.draftRoutine,
-      hint: 'Uses what you told me',
-      loading: draftRoutine.isPending,
-      onPress: () => draftRoutine.mutate({ request: request || 'Three sessions a week', mode: 'new' }, { onSuccess: (p) => { setPicker(false); router.push(`/proposal/routine/${p.id}`); } }),
-    });
-  if (nextStep === 'create_meal_plan')
-    options.push({
-      label: copy.ai.draftMeals,
-      hint: 'Uses what you told me',
-      loading: draftMeals.isPending,
-      onPress: () =>
-        draftMeals.mutate(
-          { request: request || 'Weekly meal plan', startDate: appToday(profile.data?.timezone ?? 'UTC'), days: 7 },
-          { onSuccess: (p) => { setPicker(false); router.push(`/proposal/meal/${p.id}`); } },
-        ),
-    });
-  if (nextStep === 'monthly_review') options.push({ label: 'Open monthly review', onPress: () => { setPicker(false); router.push('/review/new'); } });
-  options.push(
-    { label: 'Create a workout routine', onPress: () => { setPicker(false); send('Help me create a workout routine'); } },
-    { label: 'Create a meal plan', onPress: () => { setPicker(false); send('Help me create a meal plan'); } },
-    { label: 'Suggest a goal', onPress: () => { setPicker(false); send('Suggest a goal for me'); } },
-    { label: 'Ask a fitness question', hint: 'Type it in the box', onPress: () => setPicker(false) },
-  );
+  // Drafted suggestions wait until the latest reply has finished typing itself out.
+  const latest = [...messages].reverse().find((m) => m.role === 'assistant');
+  const draftsReady = !latest || !isNew(latest.id) || streamed.has(latest.id);
+  const busy = turn.isPending || draftRoutine.isPending || draftMeals.isPending;
+  const SUGGESTIONS = ['Create a workout routine', 'Create a meal plan', 'Suggest a goal'];
 
   return (
     <SheetPage
@@ -167,72 +153,52 @@ export default function Companion() {
               key={m.id}
               message={m}
               animate={m.role === 'assistant' && isNew(m.id)}
+              onStreamed={(id) => setStreamed((prev) => (prev.has(id) ? prev : new Set(prev).add(id)))}
             />
           ))}
           {pendingText ? <MessageBubble message={{ id: 'pending', role: 'user', content: pendingText, createdAt: '', metadata: null }} animate /> : null}
-          {turn.isPending ? (
+          {busy ? (
             <Appear>
               <ThinkingIndicator />
             </Appear>
           ) : null}
-          {turn.isError ? (
+          {draftsReady ? drafts.map((d) => (d.kind === 'routine' ? <RoutineSuggestion key={d.id} id={d.id} /> : <MealSuggestion key={d.id} id={d.id} />)) : null}
+          {turn.isError || draftRoutine.isError || draftMeals.isError ? (
             <Appear>
-              <Banner tone="error">{errorMessage(turn.error)}</Banner>
+              <Banner tone="error">{errorMessage(turn.error ?? draftRoutine.error ?? draftMeals.error)}</Banner>
             </Appear>
           ) : null}
         </ScrollView>
         <View style={styles.composer}>
+          <ShimmerPill open={suggestionsOpen} onPress={() => setSuggestionsOpen((o) => !o)} />
+          {suggestionsOpen ? (
+            <SuggestionChips
+              items={SUGGESTIONS}
+              onPick={(t) => {
+                setSuggestionsOpen(false);
+                send(t);
+              }}
+            />
+          ) : null}
           <Composer
             value={draft.value.text}
             onChangeText={(text) => draft.setValue((d) => ({ ...d, text }))}
             onSend={() => send()}
-            onOptions={() => setPicker(true)}
-            sending={turn.isPending}
+            onOptions={() => setSuggestionsOpen((o) => !o)}
+            sending={busy}
             placeholder={copy.ai.placeholder}
           />
-          <AIDisclaimer />
         </View>
       </KeyboardAvoidingView>
-      <Modal visible={picker} transparent animationType="fade" onRequestClose={() => setPicker(false)}>
-        <Pressable accessibilityLabel="Close" style={styles.backdrop} onPress={() => setPicker(false)}>
-          <Pressable accessible={false} style={styles.sheet} onPress={() => undefined}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text variant="title" style={{ flex: 1 }}>
-                What would you like to do?
-              </Text>
-              <IconButton icon="close" label="Close" variant="plain" onPress={() => setPicker(false)} />
-            </View>
-            {options.map((o) => (
-              <Pressable
-                key={o.label}
-                accessibilityRole="button"
-                accessibilityLabel={o.label}
-                disabled={o.loading}
-                onPress={o.onPress}
-                style={({ pressed }) => [styles.option, { opacity: pressed || o.loading ? 0.7 : 1 }]}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text variant="bodyStrong">{o.loading ? 'Working…' : o.label}</Text>
-                  {o.hint ? (
-                    <Text variant="small" color="inkTertiary">
-                      {o.hint}
-                    </Text>
-                  ) : null}
-                </View>
-                <RuneIcon name="chevron-right" size={20} color="inkTertiary" />
-              </Pressable>
-            ))}
-            {draftRoutine.isError || draftMeals.isError ? <Banner tone="error">{errorMessage(draftRoutine.error ?? draftMeals.error)}</Banner> : null}
-          </Pressable>
-        </Pressable>
-      </Modal>
     </SafeAreaView>
     </SheetPage>
   );
 }
 
-function MessageBubble({ message, animate = false, cardDelay = 120 }: { message: ConversationMessage; animate?: boolean; cardDelay?: number }) {
+function MessageBubble({ message, animate = false, cardDelay = 120, onStreamed }: { message: ConversationMessage; animate?: boolean; cardDelay?: number; onStreamed?: (id: string) => void }) {
   const mine = message.role === 'user';
+  // New assistant replies type themselves out; anything attached to them appears once the text is complete.
+  const [done, setDone] = useState(mine || !animate);
   const meta = message.metadata as (ConversationMessage['metadata'] & { routineProposalId?: string; mealPlanProposalId?: string }) | null;
   return (
     <Appear enabled={animate} style={{ alignItems: mine ? 'flex-end' : 'flex-start', gap: spacing.sm }}>
@@ -241,11 +207,22 @@ function MessageBubble({ message, animate = false, cardDelay = 120 }: { message:
         // The finished reply is announced once; partial text is not read out token by token.
         accessibilityLiveRegion={!mine && animate ? 'polite' : 'none'}
       >
-        <Text variant="body" color={mine ? 'onInk' : 'ink'}>
-          {message.content}
-        </Text>
+        {mine ? (
+          <Text variant="body" color="onInk">
+            {message.content}
+          </Text>
+        ) : (
+          <StreamedText
+            text={message.content}
+            enabled={animate}
+            onDone={() => {
+              setDone(true);
+              onStreamed?.(message.id);
+            }}
+          />
+        )}
       </View>
-      {meta?.clarifyingQuestions?.length ? (
+      {done && meta?.clarifyingQuestions?.length ? (
         <View style={{ gap: spacing.xs, alignSelf: 'stretch' }}>
           {meta.clarifyingQuestions.map((q) => (
             <Text key={q} variant="small" color="inkSecondary">
@@ -254,72 +231,14 @@ function MessageBubble({ message, animate = false, cardDelay = 120 }: { message:
           ))}
         </View>
       ) : null}
-      {meta?.goalProposalId ? (
+      {done && meta?.goalProposalId ? (
         <Appear variant="card" enabled={animate} delay={cardDelay} style={{ alignSelf: 'stretch' }}>
-          <GoalProposalCard id={meta.goalProposalId} />
+          <GoalSuggestions id={meta.goalProposalId} />
         </Appear>
       ) : null}
-      {meta?.routineProposalId ? (
-        <Appear variant="card" enabled={animate} delay={cardDelay}>
-          <Button label={copy.ai.reviewRoutine} size="sm" variant="secondary" onPress={() => router.push(`/proposal/routine/${meta.routineProposalId}`)} />
-        </Appear>
-      ) : null}
-      {meta?.mealPlanProposalId ? (
-        <Appear variant="card" enabled={animate} delay={cardDelay}>
-          <Button label={copy.ai.reviewMeals} size="sm" variant="secondary" onPress={() => router.push(`/proposal/meal/${meta.mealPlanProposalId}`)} />
-        </Appear>
-      ) : null}
+      {done && meta?.routineProposalId ? <RoutineSuggestion id={meta.routineProposalId} /> : null}
+      {done && meta?.mealPlanProposalId ? <MealSuggestion id={meta.mealPlanProposalId} /> : null}
     </Appear>
-  );
-}
-
-/** Goal proposal: editable, and saved only on explicit approval (WF-02). */
-function GoalProposalCard({ id }: { id: string }) {
-  const proposal = useGoalProposal(id);
-  const approve = useApproveGoals();
-  const reject = useRejectProposal('goal-proposals');
-  const [goals, setGoals] = useState<GoalDraft[] | null>(null);
-  const [key] = useState(newIdempotencyKey);
-
-  if (!proposal.data) return null;
-  const p = proposal.data;
-  const list = goals ?? p.goals;
-  const editable = p.status === 'draft';
-
-  return (
-    <Card tone="assist" style={{ alignSelf: 'stretch' }}>
-      <ProposalBanner version={p.version} status={p.status} />
-      <Text variant="label">Suggested goals</Text>
-      {list.map((g, i) =>
-        editable ? (
-          <View key={i} style={{ gap: spacing.xs }}>
-            <TextField label={`Goal ${i + 1}`} value={g.title} onChangeText={(title) => setGoals(list.map((x, j) => (j === i ? { ...x, title } : x)))} />
-            <Row>
-              <Chip label={`Priority: ${g.priority}`} />
-              {g.isMeasurable && g.targetValue ? <Chip label={`Target ${g.targetValue} ${g.targetUnit ?? ''}`} /> : <Chip label="Aspiration" />}
-              <Button label="Remove" size="sm" variant="ghost" onPress={() => setGoals(list.filter((_, j) => j !== i))} />
-            </Row>
-          </View>
-        ) : (
-          <Text key={i} variant="body">
-            • {g.title}
-          </Text>
-        ),
-      )}
-      {editable ? (
-        <Row style={{ flexWrap: 'wrap' }}>
-          <Button
-            label="Approve goals"
-            disabled={list.length === 0 || list.some((g) => !g.title.trim())}
-            loading={approve.isPending}
-            onPress={() => approve.mutate({ id, version: p.version, goals: list, idempotencyKey: key }, { onSuccess: () => proposal.refetch() })}
-          />
-          <Button label="Not now" variant="ghost" loading={reject.isPending} onPress={() => reject.mutate(id, { onSuccess: () => proposal.refetch() })} />
-        </Row>
-      ) : null}
-      {approve.isError ? <Banner tone="error">{errorMessage(approve.error)}</Banner> : null}
-      {p.status === 'applied' ? <Banner tone="success">Goals saved. You can find them in Settings → Goals.</Banner> : null}
-    </Card>
   );
 }
 
@@ -329,7 +248,4 @@ const styles = StyleSheet.create({
   mine: { backgroundColor: colors.rose },
   theirs: { backgroundColor: colors.lilacWash },
   composer: { paddingHorizontal: spacing.base, paddingTop: spacing.sm, paddingBottom: spacing.sm, gap: spacing.xs },
-  backdrop: { flex: 1, backgroundColor: 'rgba(42, 34, 48, 0.45)', justifyContent: 'flex-end', padding: spacing.base },
-  sheet: { width: '100%', maxWidth: 520, alignSelf: 'center', backgroundColor: colors.surface, borderRadius: radii.sheet, padding: spacing.lg, gap: spacing.sm },
-  option: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56, paddingHorizontal: spacing.base, borderRadius: radii.lg, backgroundColor: colors.well },
 });

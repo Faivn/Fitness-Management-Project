@@ -5,5 +5,6 @@ export * from './http/router.js';
 export * from './routes.js';
 export { getFitnessContext } from './modules/aiContext.js';
 export * from './local/demoAi.js';
+export * from './local/remoteAi.js';
 export * from './local/localApi.js';
 export { memoryStorage, STORAGE_VERSION, type StorageAdapter } from './local/localDb.js';

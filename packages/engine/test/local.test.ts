@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, todayIn } from '@mova/shared';
-import { createLocalApi, memoryStorage } from '../src/index.js';
+import { z } from 'zod';
+import { createDemoAi, createLocalApi, createRemoteAi, memoryStorage, withFallback } from '../src/index.js';
 
 const TZ = 'Africa/Lagos';
 const key = (() => {
@@ -208,5 +209,31 @@ describe('core flows', () => {
     const { api } = await fresh();
     await expect(api.call('POST', 'hydration/entries', { quantity: -5, unit: 'ml', idempotencyKey: key() })).rejects.toMatchObject({ status: 400 });
     await expect(api.call('GET', 'nope')).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe('live AI through the server endpoint', () => {
+  const schema = z.object({ reply: z.string() });
+  const call = (ai: ReturnType<typeof createRemoteAi>) => ai.structured({ name: 't', schema, messages: [{ role: 'user', content: 'hi' }] });
+
+  it('parses and validates the model reply', async () => {
+    const ok = createRemoteAi({ url: '/api/ai', fetch: (async () => new Response(JSON.stringify({ text: 'Sure:\n{"reply":"hello"}' }), { status: 200 })) as typeof fetch });
+    expect(await call(ok)).toEqual({ reply: 'hello' });
+  });
+
+  it('rejects a reply that does not match the schema', async () => {
+    const bad = createRemoteAi({ url: '/api/ai', fetch: (async () => new Response(JSON.stringify({ text: '{"nope":1}' }), { status: 200 })) as typeof fetch });
+    await expect(call(bad)).rejects.toMatchObject({ reason: 'invalid_output' });
+  });
+
+  it('falls back to the demo assistant when the endpoint is not configured', async () => {
+    const off = createRemoteAi({ url: '/api/ai', fetch: (async () => new Response('{}', { status: 503 })) as typeof fetch });
+    const seen: unknown[] = [];
+    const ai = withFallback(off, createDemoAi(), (e) => seen.push(e));
+    const { api } = { api: createLocalApi({ storage: memoryStorage(), timezone: 'Africa/Lagos', sample: false, ai }) };
+    await api.ready;
+    const turn: any = await api.call('POST', 'ai/turn', { message: 'How much protein should I eat?', clientMessageId: 'live-ai-fallback-1' });
+    expect(turn.conversation.messages.length).toBe(2);
+    expect(seen.length).toBeGreaterThan(0);
   });
 });

@@ -118,7 +118,7 @@ export async function generateRoutineProposal(ctx: AppContext, input: GenerateRo
     conversationId,
     'assistant',
     plan
-      ? `I've drafted "${plan.title}" for you to review. Nothing is scheduled until you approve it.`
+      ? `I've drafted "${plan.title}" for you.`
       : `Before I draft a routine: ${out.clarifyingQuestions.join(' ') || 'could you tell me a bit more?'}`,
     { routineProposalId: row.id, clarifyingQuestions: out.clarifyingQuestions },
   );

@@ -15,7 +15,7 @@ import { colors, fonts } from '@/theme/tokens';
 const navTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: 'transparent' } };
 
 /** Pages shown as bottom sheets over the previous page (swipe down to close). */
-const SHEETS = ['companion', 'settings', 'history', 'schedule', 'routine/edit', 'routine/quick', 'catchup', 'shopping', 'records', 'exercise', 'session/[id]/index'] as const;
+const SHEETS = ['companion', 'settings', 'history', 'schedule', 'routine/edit', 'routine/quick', 'catchup', 'shopping', 'activity/schedule', 'proposal/routine/[id]', 'records', 'exercise', 'session/[id]/index'] as const;
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({

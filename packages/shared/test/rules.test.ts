@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   addDays,
+  completeMealPlan,
+  missingMealCells,
   calculatePersonalRecords,
   canReschedule,
   canTransition,
@@ -269,5 +271,40 @@ describe('groupMealsByWeekday', () => {
     const out = groupMealsByWeekday([e('2026-10-23', 1, 'later friday'), e('2026-10-16', 2, 'dinner'), e('2026-10-16', 1, 'breakfast'), e('2026-10-19', 1, 'monday')]);
     expect(out.map(([wd]) => wd)).toEqual([0, 4]);
     expect(out[1]![1].map((x) => x.name)).toEqual(['breakfast', 'dinner']);
+  });
+});
+
+describe('completing a meal plan the model left unfinished', () => {
+  const meal = (date: string, slot: string, n: number, name: string) => ({ date, slot, sortOrder: n, mealName: name, ingredients: [], isSmoothie: false });
+  // Four days were planned, the model stopped halfway through day 3, and day 4 is missing.
+  const plan = {
+    startDate: '2026-10-19',
+    endDate: '2026-10-22',
+    slots: ['Breakfast', 'Lunch'],
+    entries: [
+      meal('2026-10-19', 'Breakfast', 0, 'Oats'),
+      meal('2026-10-19', 'Lunch', 1, 'Salad'),
+      meal('2026-10-20', 'Breakfast', 0, 'Eggs'),
+      meal('2026-10-20', 'Lunch', 1, 'Soup'),
+      meal('2026-10-21', 'Breakfast', 0, 'Toast'),
+    ],
+  };
+
+  it('reports the empty cells', () => {
+    expect(missingMealCells(plan, '2026-10-19', 4)).toEqual([
+      { date: '2026-10-21', slot: 'Lunch' },
+      { date: '2026-10-22', slot: 'Breakfast' },
+      { date: '2026-10-22', slot: 'Lunch' },
+    ]);
+  });
+
+  it('fills every day and slot from the most recent meal for that slot, keeping what the model wrote', () => {
+    const done = completeMealPlan(plan, '2026-10-19', 4);
+    expect(missingMealCells(done, '2026-10-19', 4)).toEqual([]);
+    expect(done.endDate).toBe('2026-10-22');
+    const name = (d: string, s: string) => done.entries.find((e) => e.date === d && e.slot === s)?.mealName;
+    expect(name('2026-10-21', 'Breakfast')).toBe('Toast');
+    expect(name('2026-10-21', 'Lunch')).toBe('Soup');
+    expect(name('2026-10-22', 'Breakfast')).toBe('Toast');
   });
 });

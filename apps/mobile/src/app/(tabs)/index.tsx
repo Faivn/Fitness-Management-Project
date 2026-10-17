@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { fastingStatus, type WorkoutSession } from '@mova/shared';
 import { ErrorState, LoadingState, OverviewStatusSection, PressableCard, Row, RuneIcon, Screen, Text } from '@/components';
-import { useOverview, useSession } from '@/hooks/api';
+import { useOverview, useRoutines, useSession } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { ACTIVITY_LABELS, formatTimeRange } from '@/lib/format';
 import { overviewStatus } from '@/lib/overviewStatus';
@@ -17,6 +17,7 @@ import type { RuneIconName } from '@/components/RuneIcon';
  */
 export default function Overview() {
   const overview = useOverview();
+  const routines = useRoutines();
   if (overview.isPending) return <LoadingState label="Loading today…" />;
   if (overview.isError)
     return (
@@ -28,6 +29,8 @@ export default function Overview() {
   const o = overview.data;
   const active = o.sessions.filter((s) => s.status !== 'cancelled');
   const status = overviewStatus(o);
+  // A routine that exists but is switched off (draft) should be activated, not created again.
+  const hasDraft = (routines.data ?? []).some((r) => r.status !== 'active');
 
   return (
     <Screen refreshing={overview.isRefetching} onRefresh={() => overview.refetch()}>
@@ -36,11 +39,13 @@ export default function Overview() {
       <View style={styles.pair}>
       <View style={styles.half}>
       {active.length > 0 ? (
-        <TrainingCard session={active[0]} />
+        <TrainingCard session={active[0]!} more={active.length - 1} />
       ) : o.isRestDay ? (
         <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="Rest day" detail="Recovery is part of the plan." />
       ) : o.hasActiveRoutine ? (
         <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="Nothing scheduled today" detail="Your routine has no workout for today." />
+      ) : hasDraft ? (
+        <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="No active routine" detail="Activate one" onPress={() => router.navigate('/workouts')} accessibilityHint="Opens your routines" />
       ) : (
         <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="No routine yet" detail="Create one" onPress={() => router.push('/routine/edit')} />
       )}
@@ -61,7 +66,7 @@ export default function Overview() {
       {o.fasting ? (
         <FastingCard fasting={o.fasting} timezone={o.timezone} />
       ) : (
-        <PressableCard accessibilityLabel="Fasting, not set up. Opens fasting" onPress={() => router.push('/fasting')}>
+        <PressableCard accessibilityLabel="Fasting, not set up. Opens fasting" onPress={() => router.navigate('/meals?page=fasting')}>
           <Text variant="eyebrow" color="inkTertiary">Fasting</Text>
           <Text variant="small" color="inkSecondary">
             Not set up. Turn it on whenever you want an eating window.
@@ -143,12 +148,13 @@ const styles = StyleSheet.create({
 const cardBox = { backgroundColor: colors.canvas, borderRadius: radii.xl, padding: spacing.card } as const;
 
 /** Today's workout: filled dumbbell, "Training", the workout's title and how many exercises are planned. Opens the workout panel. */
-function TrainingCard({ session: s }: { session: WorkoutSession }) {
+function TrainingCard({ session: s, more }: { session: WorkoutSession; more: number }) {
   const detail = useSession(s.id);
   const n = detail.data?.exercises.length ?? 0;
   const info =
     n > 0 ? `${n} ${n === 1 ? 'exercise' : 'exercises'} planned` : formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ?? ACTIVITY_LABELS[s.activityType] ?? 'Planned';
-  return <InfoCard icon="dumbbell-fill" tone="training" label="Training" title={s.title} detail={info} onPress={() => router.push(`/session/${s.id}`)} accessibilityHint="Opens today's workout" />;
+  const detailText = more > 0 ? `${info} · +${more} more today` : info;
+  return <InfoCard icon="dumbbell-fill" tone="training" label="Training" title={s.title} detail={detailText} onPress={() => router.push(`/session/${s.id}`)} accessibilityHint="Opens today's workout" />;
 }
 
 /** Circular progress: a track ring with a graphite arc, value in the centre. */
@@ -196,7 +202,7 @@ function FastingCard({ fasting, timezone }: { fasting: NonNullable<ReturnType<ty
   const elapsed = on ? `${hours(total * fraction)} of ${hours(total)}` : 'Not fasting';
   const sub = on ? `Ends at ${time(status.endsAt)}` : status.nextFastStartsAt ? `Next window starts at ${time(status.nextFastStartsAt)}` : 'No window planned';
   return (
-    <PressableCard accessibilityLabel={`Fasting. ${elapsed}. ${sub}. Opens fasting`} onPress={() => router.push('/fasting')}>
+    <PressableCard accessibilityLabel={`Fasting. ${elapsed}. ${sub}. Opens fasting`} onPress={() => router.navigate('/meals?page=fasting')}>
       <Text variant="eyebrow" color="inkTertiary">
         Fasting
       </Text>

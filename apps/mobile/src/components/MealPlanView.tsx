@@ -85,17 +85,20 @@ export function ShoppingList({ planId, items, editable }: { planId: string; item
           <Text variant="label">{cat}</Text>
           {list.map((i) => (
             <Row key={i.id} style={styles.item}>
-              <Pressable
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: i.checked }}
-                accessibilityLabel={i.name}
-                disabled={!editable}
-                onPress={() => update.mutate({ id: i.id, checked: !i.checked })}
-                style={styles.check}
-              >
-                <View style={[styles.box, i.checked && { backgroundColor: colors.positive, borderColor: colors.positive }]}>{i.checked ? <RuneIcon name="check" size={14} color="onInk" /> : null}</View>
-              </Pressable>
-              <Text variant="body" style={{ flex: 1, textDecorationLine: i.checked ? 'line-through' : 'none', color: i.checked ? colors.inkTertiary : colors.ink }}>
+              {/* Ticking is only for the plan being shopped for; an archived plan's list is read-only. */}
+              {editable ? (
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: i.checked }}
+                  accessibilityLabel={i.name}
+                  disabled={!editable}
+                  onPress={() => update.mutate({ id: i.id, checked: !i.checked })}
+                  style={styles.check}
+                >
+                  <View style={[styles.box, i.checked && { backgroundColor: colors.positive, borderColor: colors.positive }]}>{i.checked ? <RuneIcon name="check" size={14} color="onInk" /> : null}</View>
+                </Pressable>
+              ) : null}
+              <Text variant="body" style={{ flex: 1, textDecorationLine: editable && i.checked ? 'line-through' : 'none', color: editable && i.checked ? colors.inkTertiary : colors.ink }}>
                 {i.name}
               </Text>
               {i.quantity !== null ? (
@@ -136,9 +139,11 @@ export function ShoppingList({ planId, items, editable }: { planId: string; item
         </Card>
       ) : null}
       {update.isError || add.isError || remove.isError ? <Banner tone="error">{errorMessage(update.error ?? add.error ?? remove.error)}</Banner> : null}
-      <Text variant="caption" color="inkTertiary">
-        Ticks are for shopping, not meals eaten.
-      </Text>
+      {editable ? (
+        <Text variant="caption" color="inkTertiary">
+          Ticks are for shopping, not meals eaten.
+        </Text>
+      ) : null}
     </View>
   );
 }

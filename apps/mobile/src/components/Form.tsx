@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pressable, StyleSheet, Switch, TextInput, View, type TextInputProps } from 'react-native';
+import { useRef, useState } from 'react';
+import { Modal, Pressable, StyleSheet, Switch, TextInput, useWindowDimensions, View, type TextInputProps } from 'react-native';
 import { colors, fonts, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
 import { useFieldFill } from './fieldTone';
 import { RuneIcon } from './RuneIcon';
@@ -79,20 +79,38 @@ export function Select<T extends string>({
   error?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [anchor, setAnchor] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const button = useRef<React.ComponentRef<typeof Pressable>>(null);
+  const win = useWindowDimensions();
   const fill = useFieldFill();
   const current = options.find((o) => o.value === value)?.label ?? '';
+  const listHeight = Math.min(options.length * TOUCH_TARGET + 2, win.height * 0.5);
+  // Open below the field, or above it when there is no room below.
+  const below = anchor.y + anchor.height + 4 + listHeight <= win.height - 12;
+  const top = below ? anchor.y + anchor.height + 4 : Math.max(12, anchor.y - listHeight - 4);
+
+  function toggle() {
+    if (open) return setOpen(false);
+    // Measured in window coordinates so the list can be drawn in a layer above every other element.
+    button.current?.measureInWindow((x, y, width, height) => {
+      setAnchor({ x, y, width, height });
+      setOpen(true);
+    });
+  }
+
   return (
-    <View style={[styles.field, open && { zIndex: 20 }]}>
+    <View style={styles.field}>
       <Text variant="label" style={{ fontWeight: '500' }}>
         {label}
       </Text>
-      <View>
       <Pressable
+        ref={button}
+        collapsable={false}
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${current}`}
         accessibilityHint="Opens the list of choices"
         accessibilityState={{ expanded: open }}
-        onPress={() => setOpen((o) => !o)}
+        onPress={toggle}
         style={[styles.input, styles.select, { backgroundColor: fill }, error ? { borderColor: colors.negative, borderWidth: 1 } : null]}
       >
         <Text variant="body" numberOfLines={1} style={{ flex: 1 }}>
@@ -100,31 +118,38 @@ export function Select<T extends string>({
         </Text>
         <RuneIcon name={open ? 'chevron-up' : 'chevron-down'} size={20} color="inkTertiary" />
       </Pressable>
-      {open ? (
-        <View accessibilityRole="menu" style={styles.options}>
-          {options.map((o) => {
-            const selected = o.value === value;
-            return (
-              <Pressable
-                key={o.value}
-                accessibilityRole="menuitem"
-                accessibilityState={{ selected }}
-                onPress={() => {
-                  onChange(o.value);
-                  setOpen(false);
-                }}
-                style={({ pressed }) => [styles.option, selected && { backgroundColor: colors.roseWash }, pressed && { opacity: 0.8 }]}
-              >
-                <Text variant="body" style={{ flex: 1, fontWeight: selected ? '600' : '400' }}>
-                  {o.label}
-                </Text>
-                {selected ? <RuneIcon name="check" size={16} color="rose" /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-      ) : null}
-      </View>
+      {/* The list lives in a transparent Modal: a separate top layer, so nothing can cover or clip it. */}
+      <Modal visible={open} transparent animationType="none" onRequestClose={() => setOpen(false)}>
+        <Pressable accessibilityLabel="Close list" style={StyleSheet.absoluteFill} onPress={() => setOpen(false)}>
+          <View
+            accessibilityRole="menu"
+            style={[styles.options, { position: 'absolute', left: anchor.x, top, width: anchor.width, maxHeight: listHeight }]}
+            // Taps inside the list must not reach the closing backdrop.
+            onStartShouldSetResponder={() => true}
+          >
+            {options.map((o) => {
+              const selected = o.value === value;
+              return (
+                <Pressable
+                  key={o.value}
+                  accessibilityRole="menuitem"
+                  accessibilityState={{ selected }}
+                  onPress={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                  style={({ pressed }) => [styles.option, selected && { backgroundColor: colors.roseWash }, pressed && { opacity: 0.8 }]}
+                >
+                  <Text variant="body" style={{ flex: 1, fontWeight: selected ? '600' : '400' }}>
+                    {o.label}
+                  </Text>
+                  {selected ? <RuneIcon name="check" size={16} color="rose" /> : null}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
       {error ? (
         <Text variant="caption" color="negative" accessibilityRole="alert">
           {error}
@@ -299,7 +324,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
   },
   select: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  options: { position: 'absolute', top: '100%', marginTop: 4, left: 0, right: 0, zIndex: 30, elevation: 6, shadowColor: '#2a2230', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' },
+  options: { elevation: 8, shadowColor: '#2a2230', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' },
   option: { flexDirection: 'row', alignItems: 'center', minHeight: TOUCH_TARGET, paddingHorizontal: spacing.base },
   multiline: { minHeight: 96, textAlignVertical: 'top' },
   segmented: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },

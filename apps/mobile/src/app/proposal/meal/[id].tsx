@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { View } from 'react-native';
 import { groupMealsByDay, mealPlanSchema, type MealPlanDraft } from '@mova/shared';
 import { Appear, Banner, Button, Card, ErrorState, LoadingState, Row, Screen, Section, Text, TextField } from '@/components';
-import { AIDisclaimer, ProposalBanner } from '@/components/domain';
+import { ProposalBanner } from '@/components/domain';
 import { useApproveMealPlan, useEditMealProposal, useMealProposal, useRejectProposal, useReviseMealProposal } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -164,7 +164,6 @@ export default function MealProposalReview() {
       ) : null}
       {edit.isError ? <Banner tone="error">{errorMessage(edit.error)}</Banner> : null}
       {approve.isError ? <Banner tone="error">{errorMessage(approve.error)}</Banner> : null}
-      <AIDisclaimer />
     </Screen>
   );
 }
