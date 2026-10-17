@@ -43,7 +43,7 @@ colors:
   scrim: "rgba(42, 34, 48, 0.45)"
 
 typography:
-  family: "Inter (400, 500, 600, 700), loaded with @expo-google-fonts/inter; the platform sans is the fallback if it fails to load"
+  family: "Inter (400, 500, 600, 700), three subset files in apps/mobile/assets/fonts (about 45 KB each); the page draws in the platform sans first on the web and swaps to Inter when it arrives"
   scale:
     display:  { size: 30, line: 38, weight: 600, tracking: -0.3, use: "Greeting on Overview and onboarding headlines" }
     title:    { size: 24, line: 30, weight: 600, use: "Tab titles and sheet titles (22 in sheets)" }
@@ -167,7 +167,7 @@ Body text on `page` and `surface` is at least 7:1 (`ink`) and secondary text at 
 
 ## 4. Typography
 
-**Typeface: Inter.** A modern, clean, highly legible sans designed for screens: even letter shapes, clear numerals and a wide weight range, so hierarchy comes from weight and size alone. It is neutral enough to let the blush palette and rounded shapes carry the feminine warmth, stays crisp at 12–14px, and feels at home next to the iOS and Android system fonts. It is loaded from `@expo-google-fonts/inter` (weights 400, 500, 600, 700) in the root layout; the app waits for the font before drawing, and falls back to the platform sans if loading fails. Researched in [`docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md`](docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md).
+**Typeface: Inter.** A modern, clean, highly legible sans designed for screens: even letter shapes, clear numerals and a wide weight range, so hierarchy comes from weight and size alone. It is neutral enough to let the blush palette and rounded shapes carry the feminine warmth, stays crisp at 12–14px, and feels at home next to the iOS and Android system fonts. It is loaded from three Latin-subset files (400, 500, 600; about 45 KB each, `apps/mobile/assets/fonts`) so the first load stays small. On the web the first screen draws straight away in the platform sans and swaps to Inter when the font arrives; on phones the fonts are bundled. Researched in [`docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md`](docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md).
 
 Custom fonts carry their weight in the family name, so `Text` turns a weight into a family (400 → Regular, 500 → Medium, 600 → SemiBold, 700 → Bold) and never fakes bold. Inputs and headers set their family explicitly.
 

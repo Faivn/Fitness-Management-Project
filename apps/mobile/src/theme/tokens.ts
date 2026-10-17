@@ -101,7 +101,7 @@ export const fonts = {
   regular: 'Inter_400Regular',
   medium: 'Inter_500Medium',
   semibold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
+  bold: 'Inter_600SemiBold', // 700 is not used in the interface and is not loaded
 } as const;
 
 export function fontFor(weight: string | number | undefined): string {

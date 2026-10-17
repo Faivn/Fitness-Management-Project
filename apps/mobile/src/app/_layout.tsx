@@ -2,13 +2,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Backdrop } from '@/components/Backdrop';
 import { HeaderBack } from '@/components/HeaderBack';
 import { ApiError } from '@/lib/api';
 import { OnboardingProvider } from '@/lib/onboarding';
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
+import { useFonts } from 'expo-font';
 import { colors, fonts } from '@/theme/tokens';
 
 /** Navigation's own scene background would hide the page gradient, so it is made transparent. */
@@ -18,7 +18,11 @@ const navTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background
 const SHEETS = ['companion', 'settings', 'history', 'schedule', 'routine/edit', 'routine/quick'] as const;
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular: require('../../assets/fonts/Inter-Regular.ttf'),
+    Inter_500Medium: require('../../assets/fonts/Inter-Medium.ttf'),
+    Inter_600SemiBold: require('../../assets/fonts/Inter-SemiBold.ttf'),
+  });
   const [client] = useState(
     () =>
       new QueryClient({
@@ -33,8 +37,9 @@ export default function RootLayout() {
       }),
   );
 
-  // Wait for the font so text never flashes in a fallback face (an error falls back to the system font).
-  if (!fontsLoaded && !fontError) return null;
+  // On the web the page draws straight away in the system font and swaps to Inter when it arrives, so the
+  // font download never blocks the first screen. On phones the font is bundled, so waiting is instant.
+  if (Platform.OS !== 'web' && !fontsLoaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>
