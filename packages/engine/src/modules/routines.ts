@@ -109,3 +109,16 @@ export async function saveRoutineVersion(ctx: AppContext, id: string, input: Upd
   const result = data as { sessionsCreated: number; sessionsRetired: number };
   return { routine: await getRoutine(ctx, id), sessionsCreated: result.sessionsCreated, sessionsRetired: result.sessionsRetired };
 }
+
+/**
+ * Replace-on-clash: stop a routine so another can take its place. Its upcoming
+ * scheduled sessions are cancelled (history stays) and it goes back to a draft.
+ */
+export async function deactivateRoutine(ctx: AppContext, id: string) {
+  await mustOne(ctx.db.from('workout_routines').select('id').eq('id', id).maybeSingle(), 'Routine');
+  const timezone = await userTimezone(ctx);
+  const { data, error } = await ctx.db.rpc('deactivate_routine', { p_routine_id: id, p_today: todayIn(timezone, ctx.now()) });
+  if (error) throw fromDbError(error);
+  const result = data as { sessionsRetired: number };
+  return { routine: await getRoutine(ctx, id), sessionsRetired: result.sessionsRetired };
+}

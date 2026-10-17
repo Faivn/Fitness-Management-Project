@@ -18,6 +18,15 @@ export function formatDayMonth(localDate: string): string {
   return `${d} ${MONTHS[m - 1]}`;
 }
 
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/** "Saturday, 17 October 2026" from a local date string — no timezone conversion. */
+export function formatLongDate(localDate: string): string {
+  const [y, m, d] = localDate.split('-').map(Number) as [number, number, number];
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return `${DAY_NAMES[dow]}, ${d} ${MONTHS_LONG[m - 1]} ${y}`;
+}
+
 export function formatMonth(localDate: string): string {
   const [y, m] = localDate.split('-').map(Number) as [number, number];
   return `${MONTHS[m - 1]} ${y}`;

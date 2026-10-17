@@ -173,18 +173,18 @@ Custom fonts carry their weight in the family name, so `Text` turns a weight int
 
 | Role | Size / line | Weight | Used for |
 |---|---|---|---|
-| Display | 30 / 38 | 600, -0.3 tracking | "Good morning, Faith"; onboarding headlines |
-| Title | 24 / 30 | 600 | Tab titles; sheet titles are 22 / 28 |
-| Heading | 20 / 26 | 600 | Card titles ("Needs an update", "On the Menu") |
-| Heading small | 18 / 24 | 600 | Weekday cards, "More options" |
-| Figure | 32 / 36 | 600, -0.5 tracking | Big numbers in rings and stats |
-| Body | 16 / 24 | 400 (names 500, buttons 600) | Reading text, inputs, meal and exercise names |
+| Display | 28 / 36 | 600, -0.3 tracking | Onboarding headlines |
+| Title | 22 / 28 | 600 | Tab titles, sheet titles; Overview status headline is 24 / 30 |
+| Heading | 18 / 24 | 600 | Card titles ("Needs an update", "On the Menu") |
+| Heading small | 16 / 22 | 600 | Weekday cards, "More options" |
+| Figure | 30 / 34 | 600, -0.5 tracking | Big numbers in rings and stats |
+| Body | 14 / 22 | 400 (names 500, buttons 600) | Reading text, inputs, meal and exercise names |
 | Small | 14 / 21 | 400 | Descriptions, secondary lines |
 | Label | 14 / 20 | 500 | Field labels, small buttons, chips |
 | Caption | 12 / 16 | 500 | Meta, units, helper text |
 | Eyebrow | 12 / 16 | 600, +0.8, uppercase | Section labels such as `YOUR ROUTINES` |
 
-**Greeting:** plain text, one weight and one colour: "Good morning, Faith". No italic, no coloured word.
+**Greeting:** the Overview has no greeting line; the header shows the name and long date beside the avatar. No italic, no coloured word anywhere.
 **Numerals:** large figures use the 600 weight with a small unit beside them (for example `32` with `ml`), the pattern seen in the reference health apps.
 
 ## 5. Layout, spacing and grid
@@ -425,3 +425,11 @@ Short and soft. Cards expand with a 200ms height ease; sheets fade in 200ms; the
 ## 13. Current build vs. this system
 
 The running app follows version 2.1: the rose palette, the blush page with lilac and peach glows, radii of 24 / 16 / 32, and the floating nav with a separate round companion button. Old token names (`canvas`, `cream`, `brand`, `sage`) remain in `apps/mobile/src/theme/tokens.ts` as aliases of the new values and can be removed gradually.
+
+### Overview layout (current)
+
+Header: avatar, name (16/600) and long date (12) with History and Settings on the right. Then the status section (large Mova mascot on a status glow, 24/30 headline, 14/400 supporting line, button only when work needs attention). Training and Nutrition sit side by side as equal cards: a filled 24 icon on a 40 tile at the top left (Training teal `#1f7a78` on `#dff2ef`, Nutrition apricot `#c2652a` on `#fdeadd`), the uppercase category label on the same line, right of the icon, then an 18/600 title and 14 detail; no chevron, the whole card is the tap target. Fasting is full width with a `FASTING` label top left, elapsed-of-target on the left and a progress ring on the right.
+
+**Icon sizes:** 20 for every icon in sticky headers and sheet controls (History, Settings, Back, Close, chevrons) and for icons in body rows; 24 only for the filled icons on the Overview cards and the floating nav; 16 for inline status marks.
+
+**Overview status illustrations and colours:** needs attention uses the `oops` pose (worried brows, soft frown, sweat drop) on a soft red-pink blob, a 24/600 headline in `#c93445` and a raspberry `#cf3a4a` button (white text, 4.8:1); up to date uses the `cheer` pose on a blush blob with default ink text; not set up uses the `welcome` pose on a rose-wash blob. All blobs are the same organic shape, never a plain circle; there is no green in this section.

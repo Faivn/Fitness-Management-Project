@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, TextInput, View, type TextInputProps } from 'react-native';
 import { colors, fonts, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
 import { useFieldFill } from './fieldTone';
+import { RuneIcon } from './RuneIcon';
 import { Text } from './Text';
 
 interface FieldProps extends TextInputProps {
@@ -54,6 +55,79 @@ export function TextField({ label, error, helper, lightLabel, hideLabel, style, 
       ) : helper ? (
         <Text variant="caption" color="inkTertiary">
           {helper}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Single-choice dropdown: a field-style button showing the current value; the options
+ * open beneath it as a short list and close on choosing one.
+ */
+export function Select<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+  error,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+  error?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const fill = useFieldFill();
+  const current = options.find((o) => o.value === value)?.label ?? '';
+  return (
+    <View style={[styles.field, open && { zIndex: 20 }]}>
+      <Text variant="label" style={{ fontWeight: '500' }}>
+        {label}
+      </Text>
+      <View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${label}: ${current}`}
+        accessibilityHint="Opens the list of choices"
+        accessibilityState={{ expanded: open }}
+        onPress={() => setOpen((o) => !o)}
+        style={[styles.input, styles.select, { backgroundColor: fill }, error ? { borderColor: colors.negative, borderWidth: 1 } : null]}
+      >
+        <Text variant="body" numberOfLines={1} style={{ flex: 1 }}>
+          {current}
+        </Text>
+        <RuneIcon name={open ? 'chevron-up' : 'chevron-down'} size={20} color="inkTertiary" />
+      </Pressable>
+      {open ? (
+        <View accessibilityRole="menu" style={styles.options}>
+          {options.map((o) => {
+            const selected = o.value === value;
+            return (
+              <Pressable
+                key={o.value}
+                accessibilityRole="menuitem"
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                style={({ pressed }) => [styles.option, selected && { backgroundColor: colors.roseWash }, pressed && { opacity: 0.8 }]}
+              >
+                <Text variant="body" style={{ flex: 1, fontWeight: selected ? '600' : '400' }}>
+                  {o.label}
+                </Text>
+                {selected ? <RuneIcon name="check" size={16} color="rose" /> : null}
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+      </View>
+      {error ? (
+        <Text variant="caption" color="negative" accessibilityRole="alert">
+          {error}
         </Text>
       ) : null}
     </View>
@@ -224,6 +298,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.regular,
   },
+  select: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  options: { position: 'absolute', top: '100%', marginTop: 4, left: 0, right: 0, zIndex: 30, elevation: 6, shadowColor: '#2a2230', shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' },
+  option: { flexDirection: 'row', alignItems: 'center', minHeight: TOUCH_TARGET, paddingHorizontal: spacing.base },
   multiline: { minHeight: 96, textAlignVertical: 'top' },
   segmented: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   segment: {

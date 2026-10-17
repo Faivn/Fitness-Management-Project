@@ -12,9 +12,9 @@ function files(dir: string): string[] {
 const sources = files(SRC).map((p) => ({ path: p.slice(SRC.length + 1), text: readFileSync(p, 'utf8') }));
 
 describe('demo shell', () => {
-  it('opens the companion only from the nav button and from places that ask for a plan', () => {
+  it('opens the companion only from the nav button and from first-run onboarding', () => {
     const entries = sources.filter((s) => /router\.push\(['"`]\/companion/.test(s.text)).map((s) => s.path).sort();
-    expect(entries).toEqual(['app/(tabs)/index.tsx', 'app/onboarding.tsx', 'components/FloatingNav.tsx']);
+    expect(entries).toEqual(['app/onboarding.tsx', 'components/FloatingNav.tsx']);
     expect(sources.some((s) => /FloatingChatButton/.test(s.text))).toBe(false);
   });
 

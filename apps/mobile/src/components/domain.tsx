@@ -4,6 +4,7 @@ import { addDays, describeConflict, type MealPlanEntryDto, type ScheduleChange, 
 import { copy } from '@/lib/copy';
 import { ACTIVITY_LABELS, DAY_SHORT, formatDate, formatSeconds, formatTimeRange } from '@/lib/format';
 import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
+import { Button } from './Button';
 import { Card, PressableCard, Row } from './Layout';
 import { Mascot } from './Mascot';
 import { Icon, StatusBadge } from './Status';
@@ -150,6 +151,40 @@ export function ConflictList({ conflicts }: { conflicts: ScheduleConflict[] }) {
           • {describeConflict(c)}
         </Text>
       ))}
+    </View>
+  );
+}
+
+/**
+ * Shown only when a routine's days clash with one already active: replace the old
+ * routine with this one, or keep both.
+ */
+export function ClashPrompt({ conflicts, busy, onReplace, onKeep }: { conflicts: ScheduleConflict[]; busy?: boolean; onReplace: () => void; onKeep: () => void }) {
+  if (!conflicts.length) return null;
+  return (
+    <View style={styles.conflicts} accessibilityRole="alert">
+      <Text variant="bodyStrong">This clashes with a routine you already have</Text>
+      {conflicts.slice(0, 4).map((c, i) => (
+        <Text key={i} variant="small" color="inkSecondary">
+          • {describeConflict(c)}
+        </Text>
+      ))}
+      {conflicts.length > 4 ? (
+        <Text variant="small" color="inkSecondary">
+          …and {conflicts.length - 4} more.
+        </Text>
+      ) : null}
+      <Text variant="small" color="inkSecondary">
+        Replace the old routine with this one? Its upcoming workouts are removed; your logged history stays.
+      </Text>
+      <Row style={{ alignItems: 'stretch', gap: spacing.md }}>
+        <View style={{ flex: 1 }}>
+          <Button fullWidth label="Replace" loading={busy} onPress={onReplace} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button fullWidth label="Keep both" variant="secondary" disabled={busy} onPress={onKeep} />
+        </View>
+      </Row>
     </View>
   );
 }

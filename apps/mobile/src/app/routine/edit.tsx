@@ -3,10 +3,10 @@ import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
-import { Banner, Button, LoadingState, SheetPage, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
-import { ConflictList } from '@/components/domain';
+import { Banner, Button, Divider, LoadingState, SheetPage, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
+import { ClashPrompt } from '@/components/domain';
 import { cleanPlan, emptyPlan, RoutineEditor } from '@/components/RoutineEditor';
-import { useCreateRoutine, useProfile, useRoutine, useSaveRoutineVersion } from '@/hooks/api';
+import { useCreateRoutine, useProfile, useReplaceClashingRoutines, useRoutine, useSaveRoutineVersion } from '@/hooks/api';
 import { ApiError, errorMessage, newIdempotencyKey } from '@/lib/api';
 import { useDraft } from '@/lib/drafts';
 import { serverFieldErrors, validate } from '@/lib/validation';
@@ -23,9 +23,11 @@ function EditRoutineBody() {
   const profile = useProfile();
   const create = useCreateRoutine();
   const save = useSaveRoutineVersion();
+  const replace = useReplaceClashingRoutines();
   const draft = useDraft<RoutinePlan>(`routine-editor-${id ?? 'new'}`, emptyPlan());
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [activate, setActivate] = useState(false);
+  // A new routine is active as soon as it is saved; an existing draft stays a draft until activated.
+  const [activate, setActivate] = useState(!id);
   const [rescheduleFuture, setRescheduleFuture] = useState(false);
   const [changeReason, setChangeReason] = useState('');
   const today = appToday(profile.data?.timezone ?? 'UTC');
@@ -70,16 +72,11 @@ function EditRoutineBody() {
   }
 
   const busy = create.isPending || save.isPending;
-  const error = create.error ?? save.error;
+  const error = create.error ?? save.error ?? replace.error;
 
   return (
     <Screen
-      footer={
-        <>
-          {conflicts?.length ? <Button label="Save anyway — keep both" fullWidth loading={busy} onPress={() => onSave(true)} /> : null}
-          <Button label={id ? (only !== undefined ? 'Save' : 'Save new version') : activate ? 'Save and schedule' : 'Save as draft'} fullWidth loading={busy} onPress={() => onSave(false)} />
-        </>
-      }
+      footer={<Button label={id ? (only !== undefined ? 'Save' : 'Save new version') : 'Save routine'} fullWidth loading={busy} onPress={() => onSave(false)} />}
     >
       <Stack.Screen options={{ title: only !== undefined ? 'Edit training day' : id ? 'Edit routine' : 'New routine' }} />
       {id && only === undefined ? (
@@ -90,6 +87,8 @@ function EditRoutineBody() {
       <RoutineEditor only={only} plan={draft.value} onChange={(p) => { draft.setValue(p); setConflicts(null); setKey(newIdempotencyKey()); }} errors={errors} weightUnit={profile.data?.weightUnit ?? 'kg'} />
 
       {only === undefined ? (
+      <>
+      <Divider />
       <Section title="Scheduling">
         {id ? (
           <>
@@ -105,14 +104,7 @@ function EditRoutineBody() {
               <ToggleRow label="Activate and schedule" description="Create planned sessions from this routine." value={activate} onChange={setActivate} />
             )}
           </>
-        ) : (
-          <ToggleRow
-            label="Schedule sessions now"
-            description="Off saves a template only."
-            value={activate}
-            onChange={setActivate}
-          />
-        )}
+        ) : null}
         {willSchedule ? (
           <Row style={{ alignItems: 'flex-start' }}>
             <View style={{ flex: 1 }}>
@@ -124,8 +116,16 @@ function EditRoutineBody() {
           </Row>
         ) : null}
       </Section>
+      </>
       ) : null}
-      {conflicts ? <ConflictList conflicts={conflicts} /> : null}
+      {conflicts ? (
+        <ClashPrompt
+          conflicts={conflicts}
+          busy={busy || replace.isPending}
+          onKeep={() => onSave(true)}
+          onReplace={() => replace.mutate(conflicts, { onSuccess: () => onSave(true) })}
+        />
+      ) : null}
       {error && !(error instanceof ApiError && error.code === 'schedule_conflict') ? <Banner tone="error">{errorMessage(error)}</Banner> : null}
       {Object.keys(errors).length ? (
         <Text variant="small" color="negative">

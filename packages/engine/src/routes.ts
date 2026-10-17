@@ -70,7 +70,7 @@ import {
   listRoutineProposals,
   reviseRoutineProposal,
 } from './modules/routineProposals.js';
-import { createManualRoutine, getRoutine, listRoutines, saveRoutineVersion } from './modules/routines.js';
+import { createManualRoutine, deactivateRoutine, getRoutine, listRoutines, saveRoutineVersion } from './modules/routines.js';
 import { deleteReminder, getSchedule, listReminders, saveReminder } from './modules/schedule.js';
 import {
   correctSetLog,
@@ -149,6 +149,7 @@ export function buildRoutes(): Router<AppContext> {
   r.on('GET', 'routines', ({ ctx }) => listRoutines(ctx));
   r.on('POST', 'routines', (q) => createManualRoutine(q.ctx, q.input(createManualRoutineSchema)), 201);
   r.on('GET', 'routines/:id', (q) => getRoutine(q.ctx, idParam(q.params.id)));
+  r.on('POST', 'routines/:id/deactivate', (q) => deactivateRoutine(q.ctx, idParam(q.params.id)));
   r.on('POST', 'routines/:id/versions', (q) => saveRoutineVersion(q.ctx, idParam(q.params.id), q.input(updateRoutineSchema)), 201);
 
   // Sessions, logging, rescheduling (WF-06, WF-07, WF-12)

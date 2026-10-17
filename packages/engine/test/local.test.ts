@@ -95,6 +95,32 @@ describe('core flows', () => {
     expect(detail.scheduleChanges).toHaveLength(1);
   });
 
+  it('replaces a clashing routine: stops it, cancels its upcoming sessions, keeps history', async () => {
+    const { api } = await fresh(false);
+    const today = todayIn(TZ);
+    const plan = (title: string) => ({ title, goalIds: [], assumptions: [], warnings: [], sessions: [{ title, activityType: 'strength', dayOfWeek: new Date(today + 'T12:00:00Z').getUTCDay(), exercises: [{ name: 'Squat', targetSets: 3 }] }] });
+    const make = (title: string, acceptConflicts = false) => api.call<any>('POST', 'routines', { plan: plan(title), activate: true, schedule: { startDate: today, weeks: 2 }, acceptConflicts, idempotencyKey: key() });
+    const first = await make('Old');
+    await expect(make('New')).rejects.toMatchObject({ status: 409, code: 'schedule_conflict' });
+    const res: any = await api.call('POST', `routines/${first.routine.id}/deactivate`, {});
+    expect(res.sessionsRetired).toBeGreaterThan(0);
+    expect(res.routine.status).toBe('draft');
+    const second = await make('New');
+    expect(second.sessionsCreated).toBeGreaterThan(0);
+    const list: any[] = await api.call('GET', `workout-sessions?from=${today}&to=${addDays(today, 14)}`);
+    expect(list.filter((x) => x.status === 'scheduled').every((x) => x.title === 'New')).toBe(true);
+  });
+
+  it('activating a draft routine schedules its sessions', async () => {
+    const { api } = await fresh(false);
+    const today = todayIn(TZ);
+    const plan = { title: 'R', goalIds: [], assumptions: [], warnings: [], sessions: [{ title: 'S', activityType: 'strength', dayOfWeek: new Date(today + 'T12:00:00Z').getUTCDay(), exercises: [{ name: 'Squat', targetSets: 3 }] }] };
+    const made: any = await api.call('POST', 'routines', { plan, activate: false, idempotencyKey: key() });
+    const res: any = await api.call('POST', `routines/${made.routine.id}/versions`, { plan, rescheduleFuture: false, activate: true, schedule: { startDate: today, weeks: 4 }, acceptConflicts: false, idempotencyKey: key() });
+    expect(res.routine.status).toBe('active');
+    expect(res.sessionsCreated).toBeGreaterThan(0);
+  });
+
   it('plans meals only after approval and updates the shopping list', async () => {
     const { api } = await fresh();
     const today = todayIn(TZ);

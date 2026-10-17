@@ -1,32 +1,22 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { fastingStatus, formatVolume, hydrationProgress } from '@mova/shared';
-import { Banner, Button, Card, Divider, EmptyState, ErrorState, ExpandableCard, IconTile, LoadingState, PressableCard, Row, RuneIcon, Screen, Section, StatusBadge, Text, TextAction, TileRow, tileKindFor } from '@/components';
-import { dayPart } from '@/lib/greeting';
-import { MascotNote } from '@/components/domain';
-import { useOverview, useProfile } from '@/hooks/api';
+import { fastingStatus, type WorkoutSession } from '@mova/shared';
+import { ErrorState, LoadingState, OverviewStatusSection, PressableCard, Row, RuneIcon, Screen, Text } from '@/components';
+import { useOverview, useSession } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
-import { ACTIVITY_LABELS, formatDate, formatTimeRange } from '@/lib/format';
-import { useOnboarding } from '@/lib/onboarding';
+import { ACTIVITY_LABELS, formatTimeRange } from '@/lib/format';
+import { overviewStatus } from '@/lib/overviewStatus';
 import { colors, radii, spacing } from '@/theme/tokens';
+import type { RuneIconName } from '@/components/RuneIcon';
 
 /**
- * WF-05 daily overview: today's plan from persisted records. Rest days are
- * valid plans; past-due sessions stay visible; disabled modules are hidden.
+ * WF-05 daily overview: today's plan from persisted records. The headline status,
+ * Training, Nutrition and Fasting all come from the person's real data; anything
+ * not set up shows an honest empty state instead of an invented plan.
  */
 export default function Overview() {
   const overview = useOverview();
-  const [part, setPart] = useState(dayPart());
-  // Keep the greeting in step with the clock while the screen stays open.
-  useEffect(() => {
-    const t = setInterval(() => setPart(dayPart()), 60_000);
-    return () => clearInterval(t);
-  }, []);
-  const profile = useProfile();
-  const onboarding = useOnboarding();
-
   if (overview.isPending) return <LoadingState label="Loading today…" />;
   if (overview.isError)
     return (
@@ -37,111 +27,46 @@ export default function Overview() {
 
   const o = overview.data;
   const active = o.sessions.filter((s) => s.status !== 'cancelled');
-  const volumeUnit = profile.data?.volumeUnit ?? 'ml';
+  const status = overviewStatus(o);
 
   return (
-    <Screen
-      refreshing={overview.isRefetching}
-      onRefresh={() => overview.refetch()}
-    >
-      <View style={{ gap: spacing.xs, paddingTop: spacing.sm, paddingBottom: spacing.md }}>
-        <Text variant="caption" color="inkTertiary" style={{ textTransform: 'uppercase', letterSpacing: 1 }}>
-          {formatDate(o.localDate, true)}
-        </Text>
-        <Text variant="display">
-          {`Good ${part}${onboarding.state.name ? `, ${onboarding.state.name}` : ''}`}
-        </Text>
+    <Screen refreshing={overview.isRefetching} onRefresh={() => overview.refetch()}>
+      <OverviewStatusSection status={status} onCatchUp={() => router.push('/catchup')} />
+
+      <View style={styles.pair}>
+      <View style={styles.half}>
+      {active.length > 0 ? (
+        <TrainingCard session={active[0]} />
+      ) : o.isRestDay ? (
+        <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="Rest day" detail="Recovery is part of the plan." />
+      ) : o.hasActiveRoutine ? (
+        <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="Nothing scheduled today" detail="Your routine has no workout for today." />
+      ) : (
+        <InfoCard icon="dumbbell-fill" tone="training" label="Training" title="No routine yet" detail="Create one" onPress={() => router.push('/routine/edit')} />
+      )}
       </View>
 
-      {o.needsAttention.length > 0 ? (
-        <ExpandableCard
-          title="Needs an update"
-          summary={`${o.needsAttention.length} ${o.needsAttention.length === 1 ? 'session needs' : 'sessions need'} attention`}
-        >
-          {o.needsAttention.map((s) => (
-            <TileRow
-              key={s.id}
-              kind={tileKindFor(s.activityType)}
-              title={s.title}
-              subtitle={formatDate(s.plannedDate)}
-              onPress={() => router.push(`/session/${s.id}`)}
-              accessibilityLabel={`${s.title}, ${formatDate(s.plannedDate)}, needs an update`}
-            />
-          ))}
-        </ExpandableCard>
-      ) : null}
-
-      <Section>
-        {active.length > 0 && active.every((s) => s.status === 'completed') ? (
-          <MascotNote mood="celebration">Today's workout is done. Well done.</MascotNote>
-        ) : null}
-        {active.length > 0 ? (
-          active.map((s) => (
-            <PressableCard key={s.id} accessibilityLabel={`${s.title}, ${s.status}`} onPress={() => router.push(`/session/${s.id}`)}>
-              <Row style={{ justifyContent: 'space-between' }}>
-                <Text variant="caption" color="inkTertiary">
-                  {ACTIVITY_LABELS[s.activityType]?.toUpperCase()}
-                </Text>
-                <StatusBadge status={s.plannedDate ? s.status : s.source === 'historical_entry' ? 'historical_entry' : 'spontaneous'} />
-              </Row>
-              <Text variant="bodyStrong">{s.title}</Text>
-              <Row style={{ justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                <Text variant="small" color="inkSecondary">
-                  {formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ?? 'Unplanned'}
-                </Text>
-                <RuneIcon name="arrow-up-right" size={20} />
-              </Row>
-            </PressableCard>
-          ))
-        ) : o.isRestDay ? (
-          <MascotNote mood="rest">Rest day. Recovery is part of the plan.</MascotNote>
-        ) : o.hasActiveRoutine ? (
-          <MascotNote mood="calm">Nothing is scheduled today.</MascotNote>
-        ) : (
-          <EmptyState
-            mood="planning"
-            title="No routine yet"
-            action={{ label: 'New routine', onPress: () => router.push('/routine/edit') }}
-          />
-        )}
-      </Section>
-
-      {o.meals.length > 0 ? (
-        <ExpandableCard title="On the Menu" summary={mealCountLabel(o.meals.length)}>
-          {o.meals.map((m, i) => (
-            <View key={m.id}>
-              {i > 0 ? <Divider /> : null}
-              <TileRow medium eyebrow={m.slot.toUpperCase() + (m.isSmoothie ? ' · SMOOTHIE' : '')} title={m.mealName} />
-            </View>
-          ))}
-          <View style={{ alignItems: 'flex-start', paddingTop: spacing.sm }}>
-          <Button label="Open meal plan" variant="secondary" size="sm" onPress={() => router.push(`/meal/${o.mealPlanId}`)} />
-          </View>
-        </ExpandableCard>
-      ) : !o.mealPlanId ? (
-        <Card>
-          <Text variant="heading">On the Menu</Text>
-          <Text variant="small" color="inkSecondary">
-            No meal plan yet. Mova can plan your meals with you.
-          </Text>
-          <View style={{ alignItems: 'flex-start' }}>
-            <Button label="Plan my meals" variant="secondary" size="sm" onPress={() => router.push('/companion?intent=meal')} />
-          </View>
-        </Card>
-      ) : null}
+      <View style={styles.half}>
+      <InfoCard
+        icon="utensils-fill" tone="nutrition"
+        label="Nutrition"
+        title="On the Menu"
+        detail={!o.mealPlanId ? 'No meal plan yet.' : o.meals.length === 0 ? 'No meals planned today.' : `${mealCountLabel(o.meals.length)} planned`}
+        onPress={() => router.navigate('/meals')}
+        accessibilityHint="Opens your meal plan"
+      />
+      </View>
+      </View>
 
       {o.fasting ? (
         <FastingCard fasting={o.fasting} timezone={o.timezone} />
       ) : (
-        <Card>
-          <Text variant="heading">Fasting</Text>
+        <PressableCard accessibilityLabel="Fasting, not set up. Opens fasting" onPress={() => router.push('/fasting')}>
+          <Text variant="eyebrow" color="inkTertiary">Fasting</Text>
           <Text variant="small" color="inkSecondary">
             Not set up. Turn it on whenever you want an eating window.
           </Text>
-          <View style={{ alignItems: 'flex-start' }}>
-            <Button label="Set up fasting" variant="secondary" size="sm" onPress={() => router.push('/fasting')} />
-          </View>
-        </Card>
+        </PressableCard>
       )}
     </Screen>
   );
@@ -149,9 +74,81 @@ export default function Overview() {
 
 const COUNT_WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
 
-/** "Four meals" — the number of meals planned for the day, in words up to ten. */
+/** "Four meals": the number of meals planned for the day, in words up to ten. */
 function mealCountLabel(n: number): string {
   return `${COUNT_WORDS[n] ?? n} ${n === 1 ? 'meal' : 'meals'}`;
+}
+
+const TONES = {
+  training: { bg: colors.tealWash, fg: 'teal' },
+  nutrition: { bg: colors.apricotWash, fg: 'apricot' },
+} as const;
+
+/** A filled icon on a soft tinted tile: teal for Training, apricot for Nutrition. */
+function CardIcon({ name, tone }: { name: RuneIconName; tone: keyof typeof TONES }) {
+  return (
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={{ width: 40, height: 40, borderRadius: radii.lg, backgroundColor: TONES[tone].bg, alignItems: 'center', justifyContent: 'center' }}>
+      <RuneIcon name={name} size={24} color={TONES[tone].fg} />
+    </View>
+  );
+}
+
+/** Icon, category label, title and one detail line; the whole card is the tap target when it has an action. */
+function InfoCard({
+  icon,
+  tone,
+  label,
+  title,
+  detail,
+  onPress,
+  accessibilityHint,
+}: {
+  icon: RuneIconName;
+  tone: keyof typeof TONES;
+  label: string;
+  title: string;
+  detail: string;
+  onPress?: () => void;
+  accessibilityHint?: string;
+}) {
+  const body = (
+    <View style={{ gap: spacing.md, flex: 1 }}>
+      <Row style={{ gap: spacing.sm }}>
+        <CardIcon name={icon} tone={tone} />
+        <Text variant="eyebrow" color="inkTertiary" style={{ flex: 1 }}>
+          {label}
+        </Text>
+      </Row>
+      <View style={{ gap: 2 }}>
+        <Text variant="heading">{title}</Text>
+        <Text variant="small" color="inkSecondary" style={{ marginTop: spacing.xs }}>
+          {detail}
+        </Text>
+      </View>
+    </View>
+  );
+  if (!onPress) return <View style={[cardBox, { flex: 1 }]}>{body}</View>;
+  return (
+    <PressableCard fill accessibilityLabel={`${label}. ${title}. ${detail}`} accessibilityHint={accessibilityHint} onPress={onPress}>
+      {body}
+    </PressableCard>
+  );
+}
+
+const styles = StyleSheet.create({
+  pair: { flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' },
+  half: { flex: 1, flexBasis: 0, minWidth: 0 },
+});
+
+const cardBox = { backgroundColor: colors.canvas, borderRadius: radii.xl, padding: spacing.card } as const;
+
+/** Today's workout: filled dumbbell, "Training", the workout's title and how many exercises are planned. Opens the workout panel. */
+function TrainingCard({ session: s }: { session: WorkoutSession }) {
+  const detail = useSession(s.id);
+  const n = detail.data?.exercises.length ?? 0;
+  const info =
+    n > 0 ? `${n} ${n === 1 ? 'exercise' : 'exercises'} planned` : formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ?? ACTIVITY_LABELS[s.activityType] ?? 'Planned';
+  return <InfoCard icon="dumbbell-fill" tone="training" label="Training" title={s.title} detail={info} onPress={() => router.push(`/session/${s.id}`)} accessibilityHint="Opens today's workout" />;
 }
 
 /** Circular progress: a track ring with a graphite arc, value in the centre. */
@@ -196,32 +193,23 @@ function FastingCard({ fasting, timezone }: { fasting: NonNullable<ReturnType<ty
   const on = status.state === 'fasting';
   const fraction = on ? status.fraction : 0;
   const total = on ? new Date(status.endsAt).getTime() - new Date(status.startedAt).getTime() : 0;
+  const elapsed = on ? `${hours(total * fraction)} of ${hours(total)}` : 'Not fasting';
+  const sub = on ? `Ends at ${time(status.endsAt)}` : status.nextFastStartsAt ? `Next window starts at ${time(status.nextFastStartsAt)}` : 'No window planned';
   return (
-    <PressableCard accessibilityLabel={on ? 'Fasting, in progress. Set fasting time' : 'Fasting, not fasting. Set fasting time'} onPress={() => router.push('/fasting')}>
-      <Row style={{ gap: spacing.lg }}>
+    <PressableCard accessibilityLabel={`Fasting. ${elapsed}. ${sub}. Opens fasting`} onPress={() => router.push('/fasting')}>
+      <Text variant="eyebrow" color="inkTertiary">
+        Fasting
+      </Text>
+      <Row style={{ justifyContent: 'space-between', gap: spacing.lg }}>
+        <View style={{ flex: 1, gap: spacing.xs }}>
+          <Text variant="heading">{elapsed}</Text>
+          <Text variant="small" color="inkSecondary">
+            {sub}
+          </Text>
+        </View>
         <ProgressRing fraction={fraction} label={on ? 'Fasting progress toward your target' : 'Not fasting'}>
           <Text variant="label">{on ? `${Math.round(fraction * 100)}%` : '—'}</Text>
         </ProgressRing>
-        <View style={{ flex: 1, gap: spacing.xs }}>
-          <Text variant="label">Fasting</Text>
-          {on ? (
-            <>
-              <Text variant="small">
-                {hours(total * fraction)} of {hours(total)}
-              </Text>
-              <Text variant="small" color="inkSecondary">
-                Ends at {time(status.endsAt)}
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text variant="small">Not fasting</Text>
-              <Text variant="small" color="inkSecondary">
-                {status.nextFastStartsAt ? `Next window starts at ${time(status.nextFastStartsAt)}` : 'No window planned'}
-              </Text>
-            </>
-          )}
-        </View>
       </Row>
     </PressableCard>
   );

@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const dir = join(here, '../../../assets/illustrations/mova');
-const moods = ['welcome', 'fitness', 'planning', 'focus', 'hydration', 'celebration', 'rest', 'checklist', 'thinking', 'nutrition', 'calm', 'phone'];
+const moods = ['welcome', 'fitness', 'planning', 'focus', 'hydration', 'celebration', 'rest', 'checklist', 'thinking', 'nutrition', 'calm', 'phone', 'oops', 'cheer'];
 
 const out = {};
 for (const mood of moods) {

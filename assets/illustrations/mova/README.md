@@ -19,6 +19,8 @@ The Mova bubble mascot adds a friendly visual identity to the application. Illus
 - `mova-bubble-thinking.png` — AI thinking and empty states
 - `mova-bubble-nutrition.png` — Meal planning
 - `mova-bubble-calm.png` — Calm and recovery
+- `mova-bubble-oops.svg` — gentle concern: something needs attention (Overview)
+- `mova-bubble-cheer.svg` — happy and proud: all up to date (Overview)
 - `mova-bubble-phone.png` — Check-ins and companion interactions
 
 ## Usage

@@ -153,6 +153,7 @@ export function registerProcedures(database: LocalDatabase): void {
       const r = mine('workout_routines', a.p_routine_id);
       if (!r) throw notFound('routine not found');
       const plan = a.p_plan as Row;
+      const wasActive = r.status === 'active'; // read before the update below, which may mutate the row
       const versionNumber = nextVersionNumber(r.id);
       const version = core.insert('workout_routine_versions', { routine_id: r.id, user_id: user, version_number: versionNumber, plan_data: plan, change_reason: a.p_change_reason ?? null });
       core.update('workout_routines', (x) => x.id === r.id, { current_version: versionNumber, title: plan.title, status: a.p_activate ? 'active' : r.status });
@@ -160,12 +161,20 @@ export function registerProcedures(database: LocalDatabase): void {
       let retired = 0;
       let created = 0;
       if (a.p_reschedule_future) retired = retireFutureSessions(r.id, String(a.p_today), `Replaced by routine version ${versionNumber}`);
-      if (a.p_reschedule_future || (a.p_activate && r.status !== 'active')) {
+      if (a.p_reschedule_future || (a.p_activate && !wasActive)) {
         created = createSessionsForVersion(r.id, version.id, plan, a.p_occurrences as Row[], String(a.p_timezone), r.source);
       }
       const result = { routineId: r.id, versionId: version.id, versionNumber, sessionsCreated: created, sessionsRetired: retired };
       idemPut(a.p_idempotency_key, 'save_routine_version', result);
       return result;
+    },
+
+    deactivate_routine(a) {
+      const r = mine('workout_routines', a.p_routine_id);
+      if (!r) throw notFound('routine not found');
+      const retired = retireFutureSessions(r.id, String(a.p_today), 'Replaced by another routine');
+      core.update('workout_routines', (x) => x.id === r.id, { status: 'draft' });
+      return { sessionsRetired: retired };
     },
 
     reschedule_session(a) {

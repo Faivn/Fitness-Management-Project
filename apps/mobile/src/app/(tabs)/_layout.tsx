@@ -3,7 +3,11 @@ import { Pressable, Text, View, type ColorValue } from 'react-native';
 import { FloatingNav, NAV_HEIGHT, NAV_LIFT } from '@/components/FloatingNav';
 import { AvatarCharacter } from '@/components/AvatarCharacter';
 import { HeaderBack } from '@/components/HeaderBack';
+import { useProfile } from '@/hooks/api';
 import { useAvatar } from '@/lib/avatar';
+import { formatLongDate } from '@/lib/format';
+import { useOnboarding } from '@/lib/onboarding';
+import { appToday } from '@/lib/today';
 import { NavInsetContext } from '@/components/Layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RuneIcon, type RuneIconName } from '@/components/RuneIcon';
@@ -19,7 +23,7 @@ function TabTitle({ children }: { children?: string }) {
 }
 
 /** Round, equal-size icon containers (History, Settings, New routine, Schedule), per DESIGN.md's full-round action grammar. */
-function HeaderIcon({ icon, label, href }: { icon: RuneIconName; label: string; href: '/history' | '/settings' | '/routine/edit' | '/schedule' }) {
+function HeaderIcon({ icon, label, href }: { icon: RuneIconName; label: string; href: '/history' | '/settings' | '/routine/edit' | '/schedule' | '/shopping' }) {
   const active = usePathname() === href;
   return (
     <Pressable
@@ -37,32 +41,43 @@ function HeaderIcon({ icon, label, href }: { icon: RuneIconName; label: string; 
         opacity: pressed ? 0.8 : 1,
       })}
     >
-      <RuneIcon name={icon} size={24} color={active ? 'onInk' : 'ink'} />
+      <RuneIcon name={icon} size={20} color={active ? 'onInk' : 'ink'} />
     </Pressable>
   );
 }
 
-/** Profile avatar on the Overview header: the visitor's random character. Display only. */
-function Avatar() {
+/** Overview header, left side: the random avatar with the person's name and today's date beside it. Display only. */
+function ProfileBlock() {
   const focused = useIsFocused();
   const avatar = useAvatar();
+  const { state } = useOnboarding();
+  const profile = useProfile();
+  const today = appToday(profile.data?.timezone ?? 'UTC');
   if (!focused) return null;
+  const name = state.name || 'Hello';
   return (
-    <View
-      accessible
-      accessibilityLabel="Your avatar"
-      style={{
-        width: TOUCH_TARGET,
-        height: TOUCH_TARGET,
-        borderRadius: TOUCH_TARGET / 2,
-        marginLeft: spacing.base,
-        backgroundColor: colors.roseWash,
-        alignItems: 'center',
-        justifyContent: 'center',
-        overflow: 'hidden',
-      }}
-    >
-      {avatar ? <AvatarCharacter avatar={avatar} size={TOUCH_TARGET} /> : null}
+    <View accessible accessibilityLabel={`${name}. ${formatLongDate(today)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginLeft: spacing.base }}>
+      <View
+        style={{
+          width: TOUCH_TARGET,
+          height: TOUCH_TARGET,
+          borderRadius: TOUCH_TARGET / 2,
+          backgroundColor: colors.roseWash,
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {avatar ? <AvatarCharacter avatar={avatar} size={TOUCH_TARGET} /> : null}
+      </View>
+      <View style={{ gap: 2 }}>
+        <Text style={{ fontSize: 16, lineHeight: 20, fontFamily: fonts.semibold, color: colors.ink }} numberOfLines={1}>
+          {name}
+        </Text>
+        <Text style={{ fontSize: 12, lineHeight: 16, fontFamily: fonts.regular, color: colors.inkTertiary }} numberOfLines={1}>
+          {formatLongDate(today)}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -74,6 +89,16 @@ function WorkoutButtons() {
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginRight: spacing.base }}>
       <HeaderIcon icon="plus" label="New routine" href="/routine/edit" />
       <HeaderIcon icon="schedule" label="Schedule" href="/schedule" />
+    </View>
+  );
+}
+
+function MealButtons() {
+  const focused = useIsFocused();
+  if (!focused) return null;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginRight: spacing.base }}>
+      <HeaderIcon icon="cart" label="Shopping list" href="/shopping" />
     </View>
   );
 }
@@ -118,9 +143,9 @@ export default function TabsLayout() {
           headerRight: () => null,
         }}
       >
-        <Tabs.Screen name="index" options={{ title: 'Overview', headerTitle: '', headerLeft: () => <Avatar />, headerRight: () => <HeaderButtons /> }} />
+        <Tabs.Screen name="index" options={{ title: 'Overview', headerTitle: '', headerLeft: () => <ProfileBlock />, headerRight: () => <HeaderButtons /> }} />
         <Tabs.Screen name="workouts" options={{ title: 'Workouts', headerRight: () => <WorkoutButtons /> }} />
-        <Tabs.Screen name="meals" options={{ title: 'Meal plan' }} />
+        <Tabs.Screen name="meals" options={{ title: 'Meal plan', headerRight: () => <MealButtons /> }} />
       </Tabs>
     </NavInsetContext.Provider>
   );

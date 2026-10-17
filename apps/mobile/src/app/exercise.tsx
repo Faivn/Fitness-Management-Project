@@ -1,12 +1,12 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Card, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, Section, Text } from '@/components';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Card, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, Section, SheetPage, Text } from '@/components';
 import { useExerciseHistory } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import { RecordRow } from '@/components/RecordRow';
 
 /** WF-09: one exercise's history and records. Past entries are read-only here. */
-export default function ExerciseHistoryScreen() {
+function ExerciseHistory() {
   const { name } = useLocalSearchParams<{ name: string }>();
   const history = useExerciseHistory(name);
   if (history.isPending) return <LoadingState />;
@@ -19,7 +19,7 @@ export default function ExerciseHistoryScreen() {
   const h = history.data;
   return (
     <Screen>
-      <Stack.Screen options={{ title: h.exerciseName }} />
+      <Text variant="heading">{h.exerciseName}</Text>
       {h.entries.length === 0 ? (
         <EmptyState mood="thinking" title="No history yet" body="Logged sets for this exercise will appear here." />
       ) : (
@@ -51,5 +51,13 @@ export default function ExerciseHistoryScreen() {
         </>
       )}
     </Screen>
+  );
+}
+
+export default function ExerciseHistorySheet() {
+  return (
+    <SheetPage title="Exercise history">
+      <ExerciseHistory />
+    </SheetPage>
   );
 }

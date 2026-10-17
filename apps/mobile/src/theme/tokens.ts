@@ -56,11 +56,20 @@ export const colors = {
   indigoDeep: '#4b3d94',
   indigoSoft: '#efebfa',
 
+  // Card accents: calm teal for training, warm apricot for nutrition (icon tiles only)
+  teal: '#1f7a78',
+  tealWash: '#dff2ef',
+  apricot: '#c2652a',
+  apricotWash: '#fdeadd',
+
   // Status (always paired with text or an icon)
   positive: '#2f6b58',
   positiveWash: '#e3efe9',
   negative: '#b3261e',
   negativeWash: '#fbe4e1',
+  negativeGlow: '#fbd9dc',
+  alert: '#cf3a4a', // raspberry red: the "needs attention" button; 4.8:1 with white text
+  alertInk: '#c93445', // the same red for headline text on the page background
   warning: '#9a5a2e',
   warningWash: '#fdebdd',
   info: '#6552b8',
@@ -114,17 +123,17 @@ export function fontFor(weight: string | number | undefined): string {
 
 export const typography = {
   /** Greeting and page-level statement. */
-  display: { fontSize: 30, lineHeight: 38, fontWeight: '600' as const, letterSpacing: -0.3 },
+  display: { fontSize: 28, lineHeight: 36, fontWeight: '600' as const, letterSpacing: -0.3 },
   /** Page and sheet titles. */
-  title: { fontSize: 24, lineHeight: 30, fontWeight: '600' as const },
+  title: { fontSize: 22, lineHeight: 28, fontWeight: '600' as const },
   /** Card titles. */
-  heading: { fontSize: 20, lineHeight: 26, fontWeight: '600' as const },
+  heading: { fontSize: 18, lineHeight: 24, fontWeight: '600' as const },
   /** Big numbers in rings and stats. */
-  figure: { fontSize: 32, lineHeight: 36, fontWeight: '600' as const, letterSpacing: -0.5 },
+  figure: { fontSize: 30, lineHeight: 34, fontWeight: '600' as const, letterSpacing: -0.5 },
   /** Section labels, set in capitals. */
   eyebrow: { fontSize: 12, lineHeight: 16, fontWeight: '600' as const, letterSpacing: 0.8, textTransform: 'uppercase' as const },
-  body: { fontSize: 16, lineHeight: 24, fontWeight: '400' as const },
-  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' as const },
+  body: { fontSize: 14, lineHeight: 22, fontWeight: '400' as const },
+  bodyStrong: { fontSize: 14, lineHeight: 22, fontWeight: '600' as const },
   small: { fontSize: 14, lineHeight: 21, fontWeight: '400' as const },
   label: { fontSize: 14, lineHeight: 20, fontWeight: '500' as const },
   caption: { fontSize: 12, lineHeight: 16, fontWeight: '500' as const },

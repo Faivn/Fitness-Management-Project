@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } f
 import { BUTTON_HEIGHT, colors, radii, spacing } from '@/theme/tokens';
 import { Text } from './Text';
 
-type Variant = 'primary' | 'brand' | 'secondary' | 'ghost' | 'danger';
+type Variant = 'primary' | 'brand' | 'secondary' | 'ghost' | 'danger' | 'alert';
 
 interface Props extends Omit<PressableProps, 'children' | 'style'> {
   label: string;
@@ -19,6 +19,7 @@ const palette: Record<Variant, { bg: string; fg: keyof typeof colors; border?: s
   brand: { bg: colors.rose, fg: 'onInk' },
   secondary: { bg: colors.well, fg: 'ink' },
   ghost: { bg: 'transparent', fg: 'roseDeep' },
+  alert: { bg: colors.alert, fg: 'onInk' },
   danger: { bg: colors.negativeWash, fg: 'negative' },
 };
 

@@ -2,7 +2,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { canReschedule, type WorkoutSessionDetail } from '@mova/shared';
-import { Banner, Button, Card, Divider, ErrorState, ExpandableCard, LoadingState, NumberField, Row, RuneIcon, Screen, Section, Segmented, statusLabel, Text, TextField } from '@/components';
+import { Banner, Button, Card, Divider, ErrorState, ExpandableCard, LoadingState, NumberField, Row, RuneIcon, Screen, Section, SheetPage, Segmented, statusLabel, Text, TextField } from '@/components';
 import { ChangeTimeline } from '@/components/domain';
 import { useCancelSession, useFinishSession, useMarkMissed, useProfile, useSession, useStartSession } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
@@ -13,7 +13,7 @@ import { spacing } from '@/theme/tokens';
  * Session detail: the plan, what actually happened, and the change history
  * (WF-06, WF-07, WF-12). Opening this screen never changes the session.
  */
-export default function SessionDetail() {
+function SessionBody() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const session = useSession(id);
   const start = useStartSession();
@@ -211,5 +211,13 @@ function ActivityCompletion({ session }: { session: WorkoutSessionDetail }) {
         }
       />
     </Card>
+  );
+}
+
+export default function SessionDetail() {
+  return (
+    <SheetPage title="Workout">
+      <SessionBody />
+    </SheetPage>
   );
 }

@@ -30,7 +30,7 @@ export default function Meals() {
         <Section title="This week">
           {current.isPending ? <LoadingState /> : null}
           {current.isError ? <ErrorState message={errorMessage(current.error)} onRetry={() => current.refetch()} /> : null}
-          {current.data ? <MealPlanView plan={current.data} /> : null}
+          {current.data ? <MealPlanView plan={current.data} hideShopping /> : null}
         </Section>
       )}
 

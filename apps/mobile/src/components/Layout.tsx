@@ -55,18 +55,23 @@ export function Card({ style, children, tone = 'canvas', ...rest }: ViewProps & 
 export function PressableCard({
   onPress,
   accessibilityLabel,
+  accessibilityHint,
   children,
   tone,
+  fill,
 }: {
   onPress: () => void;
   accessibilityLabel: string;
+  accessibilityHint?: string;
   children: React.ReactNode;
   tone?: 'canvas' | 'subtle' | 'brand';
+  /** Share a row equally with a sibling card. */
+  fill?: boolean;
 }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress}>
+    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityHint={accessibilityHint} onPress={onPress} style={fill ? { flex: 1, flexBasis: 0, minWidth: 0 } : undefined}>
       {({ pressed }) => (
-        <Card tone={tone} style={{ opacity: pressed ? 0.85 : 1 }}>
+        <Card tone={tone} style={[{ opacity: pressed ? 0.85 : 1 }, fill ? { flex: 1 } : null]}>
           {children}
         </Card>
       )}

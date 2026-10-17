@@ -3,7 +3,7 @@ import { appToday } from '@/lib/today';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { type SummaryItem } from '@mova/shared';
-import { Button, Card, DateRangeHeader, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, SheetPage, Section, StatusBadge, Text, TextAction } from '@/components';
+import { DateRangeHeader, Divider, EmptyState, ErrorState, LoadingState, PressableCard, Row, Screen, SheetPage, Section, StatusBadge, Text, TextAction } from '@/components';
 import { useHistory, useProfile, useReviews } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { ACTIVITY_LABELS, formatDate, formatMonth, monthBounds } from '@/lib/format';
@@ -52,6 +52,8 @@ function HistoryBody() {
         </View>
       ) : null}
 
+      <Divider />
+
       {history.data ? (
         <Section title={filter ? `${FILTERS.find((f) => f.key === filter)!.label} · ${shown.length}` : 'Activity'} action={filter ? <TextAction label="Show all" onPress={() => setFilter(null)} /> : undefined}>
           {history.data.summary.isEmpty || (filter && shown.length === 0) ? (
@@ -61,6 +63,8 @@ function HistoryBody() {
           )}
         </Section>
       ) : null}
+
+      <Divider />
 
       <Section title="Saved reviews" action={<TextAction label="New review" onPress={() => router.push(`/review/new?start=${start}&end=${end}`)} />}>
         {reviews.data?.length ? (
@@ -80,7 +84,6 @@ function HistoryBody() {
           </Text>
         )}
       </Section>
-      <Button label="Exercise history" variant="ghost" onPress={() => router.push('/records')} />
     </Screen>
   );
 }

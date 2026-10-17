@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { appToday } from '@/lib/today';
 import { addDays } from '@mova/shared';
 import { Button, Card, Divider, EmptyState, ErrorState, LoadingState, PressableCard, Row, RuneIcon, Screen, Section, Text, TextAction } from '@/components';
-import { useProfile, useRoutineProposals, useRoutines, useSessions } from '@/hooks/api';
+import { useExercises, useProfile, useRoutineProposals, useRoutines, useSessions } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { copy } from '@/lib/copy';
 import { ACTIVITY_LABELS, DAY_SHORT, formatDate, formatTimeRange } from '@/lib/format';
@@ -15,6 +15,7 @@ export default function Workouts() {
   const today = appToday(profile.data?.timezone ?? 'UTC');
   const routines = useRoutines();
   const proposals = useRoutineProposals();
+  const exercises = useExercises();
   const upcoming = useSessions(today, addDays(today, 13));
 
   if (routines.isPending) return <LoadingState />;
@@ -100,14 +101,14 @@ export default function Workouts() {
             </Text>
           </PressableCard>
         ))}
-        <Text variant="caption" color="inkTertiary">
-          Next 14 days.
-        </Text>
       </Section>
 
-      <Divider />
-
-      <TextAction label="Exercise history" onPress={() => router.push('/records')} />
+      {(exercises.data?.length ?? 0) > 0 ? (
+        <>
+          <Divider />
+          <TextAction label="Exercise history" onPress={() => router.push('/records')} />
+        </>
+      ) : null}
     </Screen>
   );
 }

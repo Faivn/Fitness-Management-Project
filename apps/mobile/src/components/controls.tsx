@@ -35,7 +35,7 @@ export function IconButton({
         variant === 'outline' && { borderWidth: 1, borderColor: colors.inkSoft },
       ]}
     >
-      <RuneIcon name={icon} size={size >= 40 ? 24 : 20} />
+      <RuneIcon name={icon} size={20} />
     </Pressable>
   );
 }
@@ -152,7 +152,7 @@ const TILE_ICON: Record<TileKind, RuneIconName> = {
 export function IconTile({ kind, size = 44 }: { kind: TileKind; size?: number }) {
   return (
     <View accessible={false} importantForAccessibility="no-hide-descendants" style={[styles.tile, { width: size, height: size }]}>
-      <RuneIcon name={TILE_ICON[kind]} size={size >= 40 ? 24 : 20} color="roseDeep" />
+      <RuneIcon name={TILE_ICON[kind]} size={20} color="roseDeep" />
     </View>
   );
 }

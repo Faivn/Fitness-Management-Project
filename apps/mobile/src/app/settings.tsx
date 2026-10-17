@@ -1,3 +1,5 @@
+import { View } from 'react-native';
+import { spacing } from '@/theme/tokens';
 import { router, Stack } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -113,13 +115,6 @@ function SettingsBody({ onOpenGoals }: { onOpenGoals: () => void }) {
 
       <Divider />
 
-      <ExpandableCard title="Intermittent fasting" summary={p.fastingEnabled ? 'On' : 'Off'}>
-        <ToggleRow label="Intermittent fasting" description="Fasting window and status." value={p.fastingEnabled} onChange={(fastingEnabled) => update.mutate({ fastingEnabled })} />
-        {p.fastingEnabled ? <Button label="Set time" size="sm" variant="secondary" onPress={() => router.push('/fasting')} /> : null}
-      </ExpandableCard>
-
-      <Divider />
-
       <Section title="Reminders">
         <ToggleRow
           label="Workout reminders"
@@ -137,7 +132,10 @@ function SettingsBody({ onOpenGoals }: { onOpenGoals: () => void }) {
         {confirmReset ? (
           <>
             <Text variant="bodyStrong">{copy.demo.resetConfirm}</Text>
+            <Row style={{ alignItems: 'stretch', gap: spacing.md }}>
+            <View style={{ flex: 1 }}>
             <Button
+              fullWidth
               label={copy.actions.confirm}
               variant="danger"
               loading={resetting}
@@ -156,7 +154,11 @@ function SettingsBody({ onOpenGoals }: { onOpenGoals: () => void }) {
                   .finally(() => setResetting(false));
               }}
             />
-            <Button label={copy.actions.cancel} variant="ghost" disabled={resetting} onPress={() => setConfirmReset(false)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button fullWidth label={copy.actions.cancel} variant="secondary" disabled={resetting} onPress={() => setConfirmReset(false)} />
+            </View>
+            </Row>
           </>
         ) : (
           <Button label={copy.demo.resetAction} variant="secondary" onPress={() => setConfirmReset(true)} />

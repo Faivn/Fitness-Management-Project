@@ -17,12 +17,13 @@ import { Text } from './Text';
  * recurring Monday–Sunday week (first day open, the rest collapsed).
  * Ticking a shopping item is shopping state — never a record of eating.
  */
-export function MealPlanView({ plan }: { plan: MealPlan }) {
+export function MealPlanView({ plan, hideShopping }: { plan: MealPlan; hideShopping?: boolean }) {
   const [tab, setTab] = useState<'timetable' | 'shopping'>('timetable');
   const byWeekday = new Map(groupMealsByWeekday(plan.entries));
   const firstDay = [...byWeekday.keys()][0];
   return (
     <View style={{ gap: spacing.base }}>
+      {hideShopping ? null : (
       <UnderlineTabs
         tabs={[
           { key: 'timetable', label: 'Timetable' },
@@ -31,7 +32,8 @@ export function MealPlanView({ plan }: { plan: MealPlan }) {
         value={tab}
         onChange={setTab}
       />
-      {tab === 'timetable' ? (
+      )}
+      {tab === 'timetable' || hideShopping ? (
         WEEKDAY_NAMES.map((name, wd) => {
           const entries = byWeekday.get(wd) ?? [];
           return (
@@ -67,7 +69,7 @@ export function MealPlanView({ plan }: { plan: MealPlan }) {
   );
 }
 
-function ShoppingList({ planId, items, editable }: { planId: string; items: ShoppingListItemDto[]; editable: boolean }) {
+export function ShoppingList({ planId, items, editable }: { planId: string; items: ShoppingListItemDto[]; editable: boolean }) {
   const update = useUpdateShoppingItem(planId);
   const add = useAddShoppingItem(planId);
   const remove = useDeleteShoppingItem(planId);

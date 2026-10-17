@@ -192,6 +192,32 @@ export function useCreateRoutine() {
   });
 }
 
+/** Replace-on-clash: stops the routines that own the clashing sessions, so a new routine can take their place. */
+export function useReplaceClashingRoutines() {
+  const inv = useInvalidate();
+  return useMutation({
+    mutationFn: async (conflicts: ScheduleConflict[]) => {
+      const ids = new Set<string>();
+      for (const c of conflicts) {
+        if (!c.existing.id) continue;
+        const s = await api<WorkoutSession>('GET', `workout-sessions/${c.existing.id}`);
+        if (s.routineId) ids.add(s.routineId);
+      }
+      for (const id of ids) await api('POST', `routines/${id}/deactivate`, {});
+      return ids.size;
+    },
+    onSuccess: () => inv(ACTIVITY_KEYS),
+  });
+}
+
+export function useDeactivateRoutine() {
+  const inv = useInvalidate();
+  return useMutation({
+    mutationFn: (id: string) => api<{ routine: Routine; sessionsRetired: number }>('POST', `routines/${id}/deactivate`, {}),
+    onSuccess: () => inv(ACTIVITY_KEYS),
+  });
+}
+
 export function useSaveRoutineVersion() {
   const inv = useInvalidate();
   return useMutation({

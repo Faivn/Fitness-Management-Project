@@ -1,11 +1,11 @@
-import { router, Stack } from 'expo-router';
-import { EmptyState, ErrorState, LoadingState, PressableCard, Screen, Section, Text } from '@/components';
+import { router } from 'expo-router';
+import { EmptyState, ErrorState, LoadingState, PressableCard, Screen, Section, SheetPage, Text } from '@/components';
 import { useExercises, usePersonalRecords } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 
 /** WF-09: exercise history and personal records across all routines. */
-export default function Records() {
+function Records() {
   const exercises = useExercises();
   const records = usePersonalRecords();
   if (exercises.isPending) return <LoadingState />;
@@ -17,7 +17,6 @@ export default function Records() {
     );
   return (
     <Screen>
-      <Stack.Screen options={{ title: 'Exercise history' }} />
       {exercises.data.length === 0 ? (
         <EmptyState mood="checklist" title="No exercises yet" body="Log a workout to build history." />
       ) : (
@@ -37,5 +36,13 @@ export default function Records() {
         </Section>
       )}
     </Screen>
+  );
+}
+
+export default function RecordsSheet() {
+  return (
+    <SheetPage title="Exercise history">
+      <Records />
+    </SheetPage>
   );
 }

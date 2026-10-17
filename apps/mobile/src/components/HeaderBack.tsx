@@ -13,7 +13,7 @@ export function HeaderBack() {
       hitSlop={8}
       style={{ marginLeft: spacing.base, padding: spacing.xs }}
     >
-      <RuneIcon name="chevron-left" size={24} />
+      <RuneIcon name="chevron-left" size={20} />
     </Pressable>
   );
 }
