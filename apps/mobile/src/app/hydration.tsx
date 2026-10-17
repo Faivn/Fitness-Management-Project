@@ -32,7 +32,7 @@ export default function Hydration() {
       <Screen>
         <Stack.Screen options={{ title: 'Hydration' }} />
         <Banner tone="info" title="Hydration is turned off">
-          Turn it on in Settings if you'd like to track water. Any past entries are kept.
+          Turn it on in Settings.
         </Banner>
         <Button label="Open settings" onPress={() => router.push('/settings')} />
       </Screen>
@@ -82,7 +82,7 @@ export default function Hydration() {
       ) : null}
       <Section title="Daily goal">
         <Text variant="small" color="inkSecondary">
-          Choose a goal that suits you. Needs vary from person to person; Mova doesn't give medical guidance on how much to drink.
+          Choose a goal that suits you. Not medical advice.
         </Text>
         <Row style={{ alignItems: 'flex-end' }}>
           <View style={{ flex: 1 }}>

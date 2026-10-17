@@ -36,7 +36,6 @@ export default function ReviewDetail() {
         </Card>
       ) : null}
       <Button label="Update this review" variant="secondary" onPress={() => router.push(`/review/new?start=${r.periodStart}&end=${r.periodEnd}`)} />
-      <Button label="Plan next period with AI" variant="brand" onPress={() => router.push(`/routine/ai?reviewId=${r.id}`)} />
     </Screen>
   );
 }

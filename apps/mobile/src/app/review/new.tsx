@@ -36,7 +36,7 @@ export default function NewReview() {
       <Row>
         <Mascot mood="checklist" size={72} />
         <Text variant="small" color="inkSecondary" style={{ flex: 1 }}>
-          I'll summarise what you planned, completed, moved, missed and did spontaneously — only from what's recorded.
+          Summarised from your records only.
         </Text>
       </Row>
       <Row style={{ alignItems: 'flex-start' }}>
@@ -71,7 +71,7 @@ export default function NewReview() {
         <>
           {!draft.aiAvailable && !draft.summary.isEmpty ? (
             <Banner tone="info" title="Plain summary">
-              The AI wasn't available, so this is a factual summary of your records. You can edit it before saving.
+              Factual summary of your records. Edit before saving.
             </Banner>
           ) : null}
           <Card>
@@ -113,7 +113,6 @@ export default function NewReview() {
           {save.isSuccess ? (
             <>
               <Banner tone="success">Review saved. Your workout logs are unchanged.</Banner>
-              <Button label="Plan next month with AI" variant="brand" fullWidth onPress={() => router.push(`/routine/ai?reviewId=${save.data.id}`)} />
               <Button label="Done" variant="ghost" fullWidth onPress={() => router.back()} />
             </>
           ) : (

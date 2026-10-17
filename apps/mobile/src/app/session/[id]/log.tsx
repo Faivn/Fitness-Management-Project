@@ -8,7 +8,7 @@ import { useFinishSession, useProfile, useSaveSets, useSession } from '@/hooks/a
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
 import { useDraft } from '@/lib/drafts';
 import { formatDate } from '@/lib/format';
-import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
+import { colors, fonts, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
 
 /**
  * WF-06 workout logging (research: Hevy table with a PREVIOUS column).
@@ -214,15 +214,15 @@ export default function LogWorkout() {
                     <View style={[styles.cAct, { flexDirection: 'row', gap: 4 }]}>
                       {done ? (
                         <Pressable accessibilityRole="button" accessibilityLabel={`Edit set ${r.setNumber}`} onPress={() => update(r.clientId, { status: 'pending', saved: true })} hitSlop={6}>
-                          <Icon name={r.status === 'skipped' ? 'play-skip-forward' : r.saved ? 'checkmark-circle' : 'cloud-upload-outline'} color={r.status === 'skipped' ? 'inkTertiary' : 'positive'} size={26} />
+                          <Icon name={r.status === 'skipped' ? 'skip-forward' : r.saved ? 'circle-check' : 'cloud-upload'} color={r.status === 'skipped' ? 'inkTertiary' : 'positive'} size={24} />
                         </Pressable>
                       ) : (
                         <>
                           <Pressable accessibilityRole="button" accessibilityLabel={`Complete set ${r.setNumber}`} onPress={() => confirmSet(r, 'completed')} hitSlop={6}>
-                            <Icon name="checkmark-circle-outline" size={26} />
+                            <Icon name="circle-check" size={24} />
                           </Pressable>
                           <Pressable accessibilityRole="button" accessibilityLabel={`Skip set ${r.setNumber}`} onPress={() => confirmSet(r, 'skipped')} hitSlop={6}>
-                            <Icon name="play-skip-forward-outline" size={22} color="inkTertiary" />
+                            <Icon name="skip-forward" size={24} color="inkTertiary" />
                           </Pressable>
                         </>
                       )}
@@ -274,5 +274,5 @@ const styles = StyleSheet.create({
   cPrev: { flex: 1.4, flexBasis: 0, minWidth: 0 },
   cNum: { flex: 1, flexBasis: 0, minWidth: 0, width: 0, textAlign: 'center' },
   cAct: { width: 60, alignItems: 'flex-end' },
-  input: { minHeight: 36, borderRadius: radii.sm, backgroundColor: colors.surfaceSubtle, color: colors.ink, fontSize: 16 },
+  input: { minHeight: 36, borderRadius: radii.md, backgroundColor: colors.cream, color: colors.ink, fontSize: 16, fontFamily: fonts.regular },
 });

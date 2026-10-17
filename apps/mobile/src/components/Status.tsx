@@ -1,11 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet, View } from 'react-native';
 import type { SessionStatus, SummaryOutcome } from '@mova/shared';
 import { colors, radii, spacing } from '@/theme/tokens';
 import { RuneIcon, type RuneIconName } from './RuneIcon';
 import { Text } from './Text';
-
-type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const STATUS: Record<SessionStatus | SummaryOutcome, { label: string; icon: RuneIconName; fg: keyof typeof colors; bg: string }> = {
   scheduled: { label: 'Planned', icon: 'schedule', fg: 'inkSecondary', bg: colors.surfaceSubtle },
@@ -25,8 +22,8 @@ export function StatusBadge({ status }: { status: SessionStatus | SummaryOutcome
   const s = STATUS[status];
   return (
     <View style={[styles.badge, { backgroundColor: s.bg }]} accessibilityLabel={`Status: ${s.label}`}>
-      <RuneIcon name={s.icon} size={14} color={s.fg} />
-      <Text variant="caption" color={s.fg}>
+      <RuneIcon name={s.icon} size={16} color={s.fg} />
+      <Text variant="label" color={s.fg}>
         {s.label}
       </Text>
     </View>
@@ -37,8 +34,9 @@ export function statusLabel(status: SessionStatus | SummaryOutcome): string {
   return STATUS[status].label;
 }
 
-export function Icon({ name, size = 20, color = 'ink' }: { name: IconName; size?: number; color?: keyof typeof colors }) {
-  return <Ionicons name={name} size={size} color={colors[color]} />;
+/** Inline icon (same Rune family as everywhere else). */
+export function Icon({ name, size = 20, color = 'ink' }: { name: RuneIconName; size?: number; color?: keyof typeof colors }) {
+  return <RuneIcon name={name} size={size} color={color} />;
 }
 
 const styles = StyleSheet.create({
@@ -46,7 +44,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: 2,
     borderRadius: radii.pill,
     alignSelf: 'flex-start',

@@ -75,7 +75,7 @@ export default function Reschedule() {
       <TextField label="Time (optional)" placeholder={s.plannedTime ?? 'HH:MM'} value={time} onChangeText={(t) => { setTime(t); setConflicts(null); setKey(newIdempotencyKey()); }} error={timeError} />
       <TextField label="Reason (optional)" placeholder="e.g. Work trip" value={reason} onChangeText={setReason} />
       <Text variant="caption" color="inkTertiary">
-        Exercises and targets stay the same. The original date is kept in this session's history.
+        Exercises stay the same. The original date is kept in history.
       </Text>
       {conflicts ? <ConflictList conflicts={conflicts} /> : null}
       {reschedule.isError && !(reschedule.error instanceof ApiError && reschedule.error.code === 'schedule_conflict') ? (

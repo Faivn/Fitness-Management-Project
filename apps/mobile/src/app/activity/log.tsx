@@ -124,7 +124,7 @@ export default function LogActivity() {
         ) : null}
       </Row>
       <Text variant="caption" color="inkTertiary">
-        Not sure of something? Leave it empty — unknown details stay unknown.
+        Leave unknown details empty.
       </Text>
 
       {d.type === 'strength' ? (
@@ -171,7 +171,7 @@ export default function LogActivity() {
         <Card tone="brand">
           <Text variant="bodyStrong">Was this one of your planned sessions?</Text>
           <Text variant="small" color="inkSecondary">
-            Linking records it against the plan instead of creating a duplicate.
+            Links it to the plan.
           </Text>
           <View style={{ gap: spacing.sm }}>
             {candidates.map((c) => (

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Button, Card, EmptyState, ErrorState, FAB_CLEARANCE, FloatingChatButton, LoadingState, MealPlanView, PressableCard, Screen, Section, Text } from '@/components';
+import { EmptyState, ErrorState, LoadingState, MealPlanView, PressableCard, Screen, Section, Text } from '@/components';
 import { useMealPlan, useMealPlans } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -23,25 +23,11 @@ export default function Meals() {
     <Screen
       refreshing={plans.isRefetching}
       onRefresh={() => Promise.all([plans.refetch(), current.refetch()])}
-      overlay={<FloatingChatButton />}
-      endInset={FAB_CLEARANCE}
     >
-      <Card tone="brand" style={{ padding: 20, gap: 12, backgroundColor: '#F5D9E8' }}>
-        <Text variant="title">Let's plan your week with Mova.</Text>
-        <Text variant="body" color="inkSecondary">
-          Plan your meals around your preferences and routine.
-        </Text>
-        <Button label="Plan my meals" variant="brand" fullWidth onPress={() => router.push('/meal/new')} />
-      </Card>
-
       {!active ? (
-        <EmptyState
-          mood="nutrition"
-          title="No meal plan yet"
-          body="Tell the AI your goal, location, foods you like and budget. You'll get a timetable and shopping list to review — no calorie counting."
-        />
+        <EmptyState mood="nutrition" title="No meal plan" body="Ask the companion to draft one." />
       ) : (
-        <Section title="Your weekly plan">
+        <Section title="This week">
           {current.isPending ? <LoadingState /> : null}
           {current.isError ? <ErrorState message={errorMessage(current.error)} onRetry={() => current.refetch()} /> : null}
           {current.data ? <MealPlanView plan={current.data} /> : null}

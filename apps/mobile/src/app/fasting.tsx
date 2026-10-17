@@ -2,11 +2,9 @@ import { router, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { fastingStatus, isLocalTime } from '@mova/shared';
-import { Banner, Button, Card, Chip, ErrorState, LoadingState, Mascot, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
+import { Banner, Button, Card, Divider, ErrorState, LoadingState, Mascot, NumberField, Row, Screen, Section, Text, TextField } from '@/components';
 import { useFasting, useFastingMutations, useProfile } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
-
-const PRESETS = [12, 14, 16, 18];
 
 /**
  * WF-14 intermittent fasting (optional). The schedule and recorded fasts are
@@ -45,7 +43,7 @@ export default function Fasting() {
       <Screen>
         <Stack.Screen options={{ title: 'Fasting' }} />
         <Banner tone="info" title="Fasting is turned off">
-          It's optional. Turn it on in Settings if you want it — past records are kept either way.
+          Turn it on in Settings.
         </Banner>
         <Button label="Open settings" onPress={() => router.push('/settings')} />
       </Screen>
@@ -85,22 +83,17 @@ export default function Fasting() {
       )}
       {status.state === 'fasting' && status.basis === 'schedule' ? (
         <Text variant="caption" color="inkTertiary">
-          This is your planned window. Only fasts you start and end here are recorded as fasts.
+          Planned window. Only fasts you start here are recorded.
         </Text>
       ) : null}
 
       <Section title="Schedule">
-        <Row style={{ flexWrap: 'wrap' }}>
-          {PRESETS.map((h) => (
-            <Chip key={h} label={`${h}:${24 - h}`} selected={hours === h} onPress={() => setHours(h)} />
-          ))}
-        </Row>
         <Row style={{ alignItems: 'flex-start' }}>
           <View style={{ flex: 1 }}>
-            <TextField label="Fast starts at" value={startTime} onChangeText={setStartTime} error={!isLocalTime(startTime) ? 'Use HH:MM.' : undefined} />
+            <TextField lightLabel label="Fast starts at" value={startTime} onChangeText={setStartTime} error={!isLocalTime(startTime) ? 'Use HH:MM.' : undefined} />
           </View>
           <View style={{ flex: 1 }}>
-            <NumberField label="Length" unit="hours" value={hours} onChange={setHours} />
+            <NumberField lightLabel label="Length" unit="hours" value={hours} onChange={setHours} />
           </View>
         </Row>
         <Button
@@ -110,12 +103,10 @@ export default function Fasting() {
           loading={m.setSchedule.isPending}
           onPress={() => hours && m.setSchedule.mutate({ fastStartTime: startTime, fastHours: hours })}
         />
-        <Text variant="caption" color="inkTertiary">
-          Fasting isn't suitable for everyone. If you have a health condition, are pregnant, or have a history of disordered eating, talk to a
-          professional first. Your meal plan is never changed automatically because of a fasting schedule.
-        </Text>
       </Section>
       {f.recentFasts.length ? (
+        <>
+        <Divider />
         <Section title="Recorded fasts">
           {f.recentFasts.map((r) => (
             <Card key={r.id}>
@@ -125,6 +116,7 @@ export default function Fasting() {
             </Card>
           ))}
         </Section>
+        </>
       ) : null}
       {err ? <Banner tone="error">{errorMessage(err)}</Banner> : null}
     </Screen>

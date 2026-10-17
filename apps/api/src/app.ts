@@ -1,13 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ZodError } from 'zod';
 import { allowedOrigins, ConfigError, getEnv, type Env } from './config/env.js';
-import type { AppContext } from './context.js';
-import { ApiError, unauthorized, validationError } from './http/errors.js';
-import { errorResponse, json, makeRequest, readJson } from './http/router.js';
-import { createGroqClient, type AiClient } from './lib/ai.js';
+import { ApiError, buildRoutes, errorResponse, json, makeRequest, readJson, unauthorized, validationError, type AiClient, type AppContext, type Db } from '@mova/engine';
+import { createGroqClient } from './lib/ai.js';
 import { withAiLimits } from './lib/guestLimits.js';
 import { createUserClient, verifyAccessToken, type VerifiedUser } from './lib/supabase.js';
-import { buildRoutes } from './routes.js';
 
 /** Dependencies are injectable so tests can run without network services. */
 export interface AppDeps {
@@ -76,9 +73,8 @@ export async function handleRequest(request: Request, deps: AppDeps = {}): Promi
     const user = await (deps.verifyToken ?? verifyAccessToken)(env, token);
     if (!user) throw unauthorized('Your session has expired. Sign in again.');
 
-    const db = deps.userClient ? deps.userClient(env, token, user) : createUserClient(env, token);
+    const db = (deps.userClient ? deps.userClient(env, token, user) : createUserClient(env, token)) as unknown as Db;
     const ctx: AppContext = {
-      env,
       user,
       db,
       ai: withAiLimits(deps.ai ? deps.ai(env) : createGroqClient(env), db),

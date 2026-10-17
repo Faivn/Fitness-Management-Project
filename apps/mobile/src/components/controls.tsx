@@ -1,9 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
-import { Mascot } from './Mascot';
+import { FieldToneContext } from './fieldTone';
 import { RuneIcon, type RuneIconName } from './RuneIcon';
 import { Text } from './Text';
 
@@ -33,11 +31,11 @@ export function IconButton({
       style={({ pressed }) => [
         styles.iconButton,
         { width: size, height: size, borderRadius: size / 2, opacity: disabled ? 0.4 : pressed ? 0.8 : 1 },
-        variant === 'solid' && { backgroundColor: colors.canvas },
-        variant === 'outline' && { borderWidth: 1.5, borderColor: colors.ink },
+        variant === 'solid' && { backgroundColor: 'rgba(255, 255, 255, 0.72)' },
+        variant === 'outline' && { borderWidth: 1, borderColor: colors.inkSoft },
       ]}
     >
-      <RuneIcon name={icon} size={Math.round(size * 0.5)} />
+      <RuneIcon name={icon} size={size >= 40 ? 24 : 20} />
     </Pressable>
   );
 }
@@ -51,12 +49,15 @@ export function ExpandableCard({
   summary,
   defaultExpanded = false,
   tone = 'canvas',
+  titleSize,
   children,
 }: {
   title: string;
   summary?: string;
   defaultExpanded?: boolean;
   tone?: 'canvas' | 'brand';
+  /** Smaller title (px), for denser lists. */
+  titleSize?: number;
   children: React.ReactNode;
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -70,7 +71,9 @@ export function ExpandableCard({
         style={({ pressed }) => [styles.expandableHeader, { opacity: pressed ? 0.85 : 1 }]}
       >
         <View style={{ flex: 1 }}>
-          <Text variant="heading">{title}</Text>
+          <Text variant="heading" style={titleSize ? { fontSize: titleSize, lineHeight: Math.round(titleSize * 1.25) } : undefined}>
+            {title}
+          </Text>
           {summary ? (
             <Text variant="small" color={tone === 'brand' ? 'brandDeep' : 'inkTertiary'}>
               {summary}
@@ -79,7 +82,11 @@ export function ExpandableCard({
         </View>
         <RuneIcon name={expanded ? 'chevron-up' : 'chevron-down'} size={20} />
       </Pressable>
-      {expanded ? <View style={styles.expandableBody}>{children}</View> : null}
+      {expanded ? (
+        <View style={styles.expandableBody}>
+          <FieldToneContext.Provider value="well">{children}</FieldToneContext.Provider>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -105,7 +112,7 @@ export function UnderlineTabs<T extends string>({
             accessibilityState={{ selected }}
             accessibilityLabel={t.label}
             onPress={() => onChange(t.key)}
-            style={[styles.tab, { borderBottomColor: selected ? colors.ink : colors.hairline }]}
+            style={[styles.tab, { borderBottomColor: selected ? colors.rose : colors.hairline }]}
           >
             <Text variant="bodyStrong" color={selected ? 'ink' : 'inkTertiary'} align="center" numberOfLines={1}>
               {t.label}
@@ -132,37 +139,20 @@ export function DateRangeHeader({ label, onPrevious, onNext, unit = 'week' }: { 
   );
 }
 
-/**
- * Floating Mova chat button. It opens the same /companion screen as the header
- * chat icon, and sits above the bottom tab bar (the tab bar is outside the screen).
- */
-export function FloatingChatButton() {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Open the Mova companion"
-      onPress={() => router.push('/companion')}
-      style={({ pressed }) => [styles.fab, { opacity: pressed ? 0.85 : 1 }]}
-    >
-      <Mascot mood="thinking" size={44} animated={false} />
-    </Pressable>
-  );
-}
-
 type TileKind = 'strength' | 'activity' | 'meal' | 'water' | 'fasting';
-const TILE_ICON: Record<TileKind, React.ComponentProps<typeof Ionicons>['name']> = {
-  strength: 'barbell-outline',
-  activity: 'footsteps-outline',
-  meal: 'restaurant-outline',
-  water: 'water-outline',
-  fasting: 'time-outline',
+const TILE_ICON: Record<TileKind, RuneIconName> = {
+  strength: 'dumbbell',
+  activity: 'footprints',
+  meal: 'utensils',
+  water: 'droplet',
+  fasting: 'clock',
 };
 
-/** Soft pink rounded square with a domain icon (Rune has no dumbbell, footsteps, utensils or water icons). */
+/** Soft rounded square with a domain icon, same Rune family and 2px stroke as every other icon. */
 export function IconTile({ kind, size = 44 }: { kind: TileKind; size?: number }) {
   return (
     <View accessible={false} importantForAccessibility="no-hide-descendants" style={[styles.tile, { width: size, height: size }]}>
-      <Ionicons name={TILE_ICON[kind]} size={Math.round(size * 0.5)} color={colors.brandDeep} />
+      <RuneIcon name={TILE_ICON[kind]} size={size >= 40 ? 24 : 20} color="roseDeep" />
     </View>
   );
 }
@@ -172,6 +162,7 @@ export const tileKindFor = (activityType: string): TileKind => (activityType ===
 /** Tappable row: tile, two text lines and a chevron. Used for sessions and meals. */
 export function TileRow({
   kind,
+  medium,
   title,
   subtitle,
   eyebrow,
@@ -179,7 +170,9 @@ export function TileRow({
   onPress,
   accessibilityLabel,
 }: {
-  kind: TileKind;
+  kind?: TileKind;
+  /** Medium instead of bold title. */
+  medium?: boolean;
   title: string;
   subtitle?: string | null;
   eyebrow?: string;
@@ -189,14 +182,16 @@ export function TileRow({
 }) {
   const body = (
     <View style={styles.tileRow}>
-      <IconTile kind={kind} />
+      {kind ? <IconTile kind={kind} /> : null}
       <View style={{ flex: 1 }}>
         {eyebrow ? (
           <Text variant="caption" color="brandDeep">
             {eyebrow}
           </Text>
         ) : null}
-        <Text variant="bodyStrong">{title}</Text>
+        <Text variant={medium ? 'body' : 'bodyStrong'} style={medium ? { fontWeight: '500' } : undefined}>
+          {title}
+        </Text>
         {subtitle ? (
           <Text variant="small" color="inkTertiary">
             {subtitle}
@@ -229,31 +224,16 @@ export function TextAction({ label, icon, onPress }: { label: string; icon?: Run
   );
 }
 
-/** Height reserved at the end of scrolling content so the floating button never hides it. */
-export const FAB_CLEARANCE = 56 + spacing.base;
-
 const styles = StyleSheet.create({
-  tile: { borderRadius: radii.sm, backgroundColor: colors.brandWash, alignItems: 'center', justifyContent: 'center' },
+  tile: { borderRadius: radii.lg, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center' },
   tileRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: TOUCH_TARGET + spacing.sm },
   textAction: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, minHeight: TOUCH_TARGET, alignSelf: 'flex-start' },
   iconButton: { alignItems: 'center', justifyContent: 'center' },
-  expandable: { borderRadius: radii.sm, overflow: 'hidden' },
-  expandableHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.base, minHeight: TOUCH_TARGET + spacing.base },
-  expandableBody: { paddingHorizontal: spacing.base, paddingBottom: spacing.base, gap: spacing.sm },
+  expandable: { borderRadius: radii.xl, overflow: 'hidden' },
+  expandableHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.card, minHeight: TOUCH_TARGET + spacing.base },
+  expandableBody: { paddingHorizontal: spacing.card, paddingBottom: spacing.card, gap: spacing.md },
   tabs: { flexDirection: 'row' },
   tab: { flex: 1, flexBasis: 0, minHeight: TOUCH_TARGET, alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2 },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  datePill: { flex: 1, minHeight: TOUCH_TARGET, borderRadius: radii.pill, backgroundColor: colors.canvas, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.base },
-  fab: {
-    position: 'absolute',
-    right: spacing.base,
-    bottom: spacing.base,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.brandSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 4px 14px rgba(11, 5, 29, 0.18)',
-  },
+  datePill: { flex: 1, minHeight: TOUCH_TARGET, borderRadius: radii.pill, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.base },
 });

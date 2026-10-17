@@ -1,6 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { AiClient } from './ai.js';
-import { ApiError, fromDbError } from '../http/errors.js';
+import { ApiError, fromDbError, type AiClient, type Db } from '@mova/engine';
 
 const MESSAGES: Record<string, string> = {
   hour: "You've used the demo's AI limit for this hour. Your work is kept — try again in a little while.",
@@ -14,7 +12,7 @@ const MESSAGES: Record<string, string> = {
  * The limit lives in the database, next to the data, so it works the same on every
  * serverless instance and cannot be skipped by calling a different endpoint.
  */
-export function withAiLimits(ai: AiClient, db: SupabaseClient): AiClient {
+export function withAiLimits(ai: AiClient, db: Db): AiClient {
   return {
     get configured() {
       return ai.configured;

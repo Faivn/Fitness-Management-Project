@@ -94,7 +94,7 @@ describe('proposals and conflicts are explicit', () => {
   it('labels a draft as not saved', async () => {
     await render(<ProposalBanner version={3} status="draft" />);
     expect(screen.getByText('Proposal — not saved yet')).toBeTruthy();
-    expect(screen.getByText('v3')).toBeTruthy();
+    expect(screen.queryByText('v3')).toBeNull();
   });
 
   it('describes each conflict in words', async () => {

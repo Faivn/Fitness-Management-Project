@@ -19,7 +19,7 @@ export default function Records() {
     <Screen>
       <Stack.Screen options={{ title: 'Exercise history' }} />
       {exercises.data.length === 0 ? (
-        <EmptyState mood="checklist" title="No logged exercises yet" body="Log a workout and your history and records will build up here." />
+        <EmptyState mood="checklist" title="No exercises yet" body="Log a workout to build history." />
       ) : (
         <Section title="Exercises">
           {exercises.data.map((e) => {

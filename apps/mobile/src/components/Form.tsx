@@ -1,20 +1,30 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Switch, TextInput, View, type TextInputProps } from 'react-native';
-import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
+import { colors, fonts, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
+import { useFieldFill } from './fieldTone';
 import { Text } from './Text';
 
 interface FieldProps extends TextInputProps {
   label: string;
   error?: string;
   helper?: string;
+  /** Regular-weight label instead of bold. */
+  lightLabel?: boolean;
+  /** Keep the label for assistive technology only (the section already names the field). */
+  hideLabel?: boolean;
 }
 
 /** Labelled text input (DESIGN.md text-input; 2px ink border on focus). */
-export function TextField({ label, error, helper, style, ...rest }: FieldProps) {
+export function TextField({ label, error, helper, lightLabel, hideLabel, style, ...rest }: FieldProps) {
   const [focused, setFocused] = useState(false);
+  const fill = useFieldFill();
   return (
     <View style={styles.field}>
-      <Text variant="label">{label}</Text>
+      {hideLabel ? null : (
+        <Text variant="label" style={{ fontWeight: lightLabel ? '400' : '500' }}>
+          {label}
+        </Text>
+      )}
       <TextInput
         accessibilityLabel={label}
         accessibilityHint={helper}
@@ -29,8 +39,10 @@ export function TextField({ label, error, helper, style, ...rest }: FieldProps) 
         }}
         style={[
           styles.input,
+          { backgroundColor: fill },
           rest.multiline && styles.multiline,
-          { borderColor: error ? colors.negative : focused ? colors.ink : colors.surfaceTertiary, borderWidth: focused ? 2 : 1 },
+          error ? { borderColor: colors.negative, borderWidth: 1 } : null,
+          { outlineStyle: 'none' } as object,
           style,
         ]}
         {...rest}
@@ -58,6 +70,7 @@ export function NumberField({
   error,
   helper,
   placeholder = 'Not recorded',
+  lightLabel,
 }: {
   label: string;
   value: number | undefined;
@@ -67,10 +80,12 @@ export function NumberField({
   error?: string;
   helper?: string;
   placeholder?: string;
+  lightLabel?: boolean;
 }) {
   const [text, setText] = useState(value === undefined ? '' : String(value));
   return (
     <TextField
+      lightLabel={lightLabel}
       label={unit ? `${label} (${unit})` : label}
       value={text}
       placeholder={placeholder}
@@ -93,16 +108,27 @@ export function Segmented<T extends string>({
   options,
   value,
   onChange,
+  inline,
+  equal,
 }: {
   label?: string;
   options: Array<{ value: T; label: string }>;
   value: T;
   onChange: (v: T) => void;
+  /** Label on the left and a fixed-width, equal-segment control on the right, so stacked rows align. */
+  inline?: boolean;
+  /** Segments share the full width equally. */
+  equal?: boolean;
 }) {
+  const fill = useFieldFill();
   return (
-    <View style={styles.field}>
-      {label ? <Text variant="label">{label}</Text> : null}
-      <View style={styles.segmented} accessibilityRole="radiogroup" accessibilityLabel={label}>
+    <View style={inline ? styles.inlineField : styles.field}>
+      {label ? (
+        <Text variant="label" style={[{ fontWeight: '500' }, inline ? { flex: 1 } : null]}>
+          {label}
+        </Text>
+      ) : null}
+      <View style={[styles.segmented, inline && styles.segmentedInline, equal && styles.segmentedEqual]} accessibilityRole="radiogroup" accessibilityLabel={label}>
         {options.map((o) => {
           const selected = o.value === value;
           return (
@@ -112,7 +138,7 @@ export function Segmented<T extends string>({
               accessibilityState={{ selected }}
               accessibilityLabel={o.label}
               onPress={() => onChange(o.value)}
-              style={[styles.segment, selected && styles.segmentSelected]}
+              style={[styles.segment, { backgroundColor: fill }, (inline || equal) && styles.segmentInline, selected && styles.segmentSelected]}
             >
               <Text variant="label" color={selected ? 'onInk' : 'ink'}>
                 {o.label}
@@ -153,7 +179,10 @@ export function ToggleRow({
         value={value}
         onValueChange={onChange}
         disabled={disabled}
-        trackColor={{ true: colors.ink, false: colors.surfaceTertiary }}
+        trackColor={{ true: colors.rose, false: colors.blush }}
+        thumbColor={colors.onInkPure}
+        // @ts-expect-error react-native-web prop
+        activeThumbColor={colors.onInkPure}
       />
     </View>
   );
@@ -168,14 +197,15 @@ export function Chip({
   selected?: boolean;
   onPress?: () => void;
 }) {
+  const fill = useFieldFill();
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityState={onPress ? { selected: !!selected } : undefined}
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipSelected]}
+      style={[styles.chip, { backgroundColor: fill }, selected && styles.chipSelected]}
     >
-      <Text variant="caption" color={selected ? 'onInk' : 'ink'}>
+      <Text variant="label" color={selected ? 'onInk' : 'inkSecondary'}>
         {label}
       </Text>
     </Pressable>
@@ -186,32 +216,37 @@ const styles = StyleSheet.create({
   field: { gap: spacing.xs },
   input: {
     minHeight: TOUCH_TARGET,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
+    borderRadius: radii.lg,
+    paddingHorizontal: spacing.base,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.canvas,
+    backgroundColor: colors.well,
     color: colors.ink,
     fontSize: 16,
+    fontFamily: fonts.regular,
   },
   multiline: { minHeight: 96, textAlignVertical: 'top' },
   segmented: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   segment: {
-    minHeight: 36,
+    minHeight: 40,
     paddingHorizontal: spacing.base,
     borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.canvas,
+    backgroundColor: colors.well,
     justifyContent: 'center',
   },
-  segmentSelected: { backgroundColor: colors.ink, borderColor: colors.ink },
+  inlineField: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  segmentedInline: { width: 216, flexWrap: 'nowrap' },
+  segmentedEqual: { flexWrap: 'nowrap' },
+  segmentInline: { flex: 1, paddingHorizontal: 0, alignItems: 'center' },
+  segmentSelected: { backgroundColor: colors.rose },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: TOUCH_TARGET },
   chip: {
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.base,
     paddingVertical: spacing.xs,
+    minHeight: 32,
+    justifyContent: 'center',
     borderRadius: radii.pill,
-    backgroundColor: colors.surfaceSubtle,
+    backgroundColor: colors.cream,
     alignSelf: 'flex-start',
   },
-  chipSelected: { backgroundColor: colors.ink },
+  chipSelected: { backgroundColor: colors.rose },
 });

@@ -90,6 +90,6 @@ export function Banner({ tone = 'info', title, children }: { tone?: BannerTone; 
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingVertical: spacing.xl },
-  banner: { borderRadius: radii.md, padding: spacing.base, gap: spacing.xs },
+  banner: { borderRadius: radii.lg, padding: spacing.base, gap: spacing.xs },
   error: { backgroundColor: colors.negativeWash },
 });

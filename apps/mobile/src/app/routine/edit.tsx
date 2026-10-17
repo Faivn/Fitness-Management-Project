@@ -3,7 +3,7 @@ import { appToday } from '@/lib/today';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
-import { Banner, Button, LoadingState, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
+import { Banner, Button, LoadingState, SheetPage, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
 import { ConflictList } from '@/components/domain';
 import { cleanPlan, emptyPlan, RoutineEditor } from '@/components/RoutineEditor';
 import { useCreateRoutine, useProfile, useRoutine, useSaveRoutineVersion } from '@/hooks/api';
@@ -16,8 +16,9 @@ import { serverFieldErrors, validate } from '@/lib/validation';
  * history keeps the targets it had. Saving a template and scheduling
  * sessions are separate choices.
  */
-export default function EditRoutine() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+function EditRoutineBody() {
+  const { id, day } = useLocalSearchParams<{ id?: string; day?: string }>();
+  const only = day !== undefined && day !== '' && Number.isInteger(Number(day)) ? Number(day) : undefined;
   const existing = useRoutine(id);
   const profile = useProfile();
   const create = useCreateRoutine();
@@ -44,7 +45,9 @@ export default function EditRoutine() {
 
   if (id && (existing.isPending || !loaded)) return <LoadingState />;
   const isActive = existing.data?.status === 'active';
-  const willSchedule = id ? rescheduleFuture || (activate && !isActive) : activate;
+  // Editing a single day of an active routine updates its upcoming sessions too.
+  const futureToo = rescheduleFuture || (only !== undefined && isActive);
+  const willSchedule = id ? futureToo || (activate && !isActive) : activate;
 
   function onSave(acceptConflicts = false) {
     const v = validate(routinePlanSchema, cleanPlan(draft.value));
@@ -60,7 +63,7 @@ export default function EditRoutine() {
       router.replace(`/routine/${r.routine.id}`);
     };
     if (id) {
-      save.mutate({ id, plan: v.data, changeReason: changeReason || undefined, rescheduleFuture, activate, schedule, acceptConflicts, idempotencyKey: key }, { onSuccess, onError });
+      save.mutate({ id, plan: v.data, changeReason: changeReason || undefined, rescheduleFuture: futureToo, activate, schedule, acceptConflicts, idempotencyKey: key }, { onSuccess, onError });
     } else {
       create.mutate({ plan: v.data, activate, schedule, acceptConflicts, idempotencyKey: key }, { onSuccess, onError });
     }
@@ -74,18 +77,19 @@ export default function EditRoutine() {
       footer={
         <>
           {conflicts?.length ? <Button label="Save anyway — keep both" fullWidth loading={busy} onPress={() => onSave(true)} /> : null}
-          <Button label={id ? 'Save new version' : activate ? 'Save and schedule' : 'Save as draft'} fullWidth loading={busy} onPress={() => onSave(false)} />
+          <Button label={id ? (only !== undefined ? 'Save' : 'Save new version') : activate ? 'Save and schedule' : 'Save as draft'} fullWidth loading={busy} onPress={() => onSave(false)} />
         </>
       }
     >
-      <Stack.Screen options={{ title: id ? 'Edit routine' : 'New routine' }} />
-      {id ? (
+      <Stack.Screen options={{ title: only !== undefined ? 'Edit training day' : id ? 'Edit routine' : 'New routine' }} />
+      {id && only === undefined ? (
         <Banner tone="info" title="Your history is safe">
           Saving creates version {(existing.data?.currentVersion ?? 0) + 1}. Completed workouts keep the targets they were done with.
         </Banner>
       ) : null}
-      <RoutineEditor plan={draft.value} onChange={(p) => { draft.setValue(p); setConflicts(null); setKey(newIdempotencyKey()); }} errors={errors} weightUnit={profile.data?.weightUnit ?? 'kg'} />
+      <RoutineEditor only={only} plan={draft.value} onChange={(p) => { draft.setValue(p); setConflicts(null); setKey(newIdempotencyKey()); }} errors={errors} weightUnit={profile.data?.weightUnit ?? 'kg'} />
 
+      {only === undefined ? (
       <Section title="Scheduling">
         {id ? (
           <>
@@ -93,7 +97,7 @@ export default function EditRoutine() {
             {isActive ? (
               <ToggleRow
                 label="Update future sessions"
-                description="Replace upcoming planned sessions with this version. Past and completed sessions are not changed."
+                description="Replace upcoming sessions. Past sessions stay."
                 value={rescheduleFuture}
                 onChange={setRescheduleFuture}
               />
@@ -104,7 +108,7 @@ export default function EditRoutine() {
         ) : (
           <ToggleRow
             label="Schedule sessions now"
-            description="Off saves the routine as a template only. You can schedule it later."
+            description="Off saves a template only."
             value={activate}
             onChange={setActivate}
           />
@@ -120,13 +124,24 @@ export default function EditRoutine() {
           </Row>
         ) : null}
       </Section>
+      ) : null}
       {conflicts ? <ConflictList conflicts={conflicts} /> : null}
       {error && !(error instanceof ApiError && error.code === 'schedule_conflict') ? <Banner tone="error">{errorMessage(error)}</Banner> : null}
       {Object.keys(errors).length ? (
         <Text variant="small" color="negative">
-          Some fields need attention — see the highlighted messages above.
+          Fix the highlighted fields.
         </Text>
       ) : null}
     </Screen>
+  );
+}
+
+export default function EditRoutine() {
+  const { id, day } = useLocalSearchParams<{ id?: string; day?: string }>();
+  const only = day !== undefined && day !== '' && Number.isInteger(Number(day));
+  return (
+    <SheetPage title={only ? 'Edit training day' : id ? 'Edit routine' : 'New routine'}>
+      <EditRoutineBody />
+    </SheetPage>
   );
 }

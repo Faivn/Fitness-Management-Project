@@ -14,7 +14,7 @@
     "android": {
       "package": "app.mova.fitness",
       "adaptiveIcon": {
-        "backgroundColor": "#FFF5F9",
+        "backgroundColor": "#F7F1E8",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
@@ -28,12 +28,11 @@
     "plugins": [
       "expo-router",
       "expo-status-bar",
-      "expo-secure-store",
       "expo-image",
       [
         "expo-notifications",
         {
-          "color": "#F477AD"
+          "color": "#AF751B"
         }
       ]
     ],

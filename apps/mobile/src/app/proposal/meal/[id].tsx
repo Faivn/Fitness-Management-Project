@@ -124,7 +124,7 @@ export default function MealProposalReview() {
           {!editing ? (
             <Section title="Shopping list preview">
               <Text variant="caption" color="inkTertiary">
-                The final list is rebuilt from the approved meals so it always matches them.
+                The list is rebuilt from approved meals.
               </Text>
               <View style={{ gap: spacing.xs }}>
                 {plan.shoppingList.map((i, k) => (

@@ -140,7 +140,7 @@ export default function RoutineProposalReview() {
               onPress={() => revise.mutate({ id, version: p.version, instruction }, { onSuccess: () => setInstruction('') })}
             />
             <Text variant="caption" color="inkTertiary">
-              Fields you edited by hand are kept unless your instruction changes them.
+              Your edits are kept.
             </Text>
           </Section>
 

@@ -1,11 +1,15 @@
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { fastingStatus, formatVolume, hydrationProgress } from '@mova/shared';
-import { Banner, Button, Card, EmptyState, ErrorState, ExpandableCard, FAB_CLEARANCE, FloatingChatButton, IconTile, LoadingState, PressableCard, Row, RuneIcon, Screen, Section, StatusBadge, Text, TextAction, TileRow, tileKindFor } from '@/components';
+import { Banner, Button, Card, Divider, EmptyState, ErrorState, ExpandableCard, IconTile, LoadingState, PressableCard, Row, RuneIcon, Screen, Section, StatusBadge, Text, TextAction, TileRow, tileKindFor } from '@/components';
+import { dayPart } from '@/lib/greeting';
 import { MascotNote } from '@/components/domain';
 import { useOverview, useProfile } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { ACTIVITY_LABELS, formatDate, formatTimeRange } from '@/lib/format';
+import { useOnboarding } from '@/lib/onboarding';
 import { colors, radii, spacing } from '@/theme/tokens';
 
 /**
@@ -14,7 +18,14 @@ import { colors, radii, spacing } from '@/theme/tokens';
  */
 export default function Overview() {
   const overview = useOverview();
+  const [part, setPart] = useState(dayPart());
+  // Keep the greeting in step with the clock while the screen stays open.
+  useEffect(() => {
+    const t = setInterval(() => setPart(dayPart()), 60_000);
+    return () => clearInterval(t);
+  }, []);
   const profile = useProfile();
+  const onboarding = useOnboarding();
 
   if (overview.isPending) return <LoadingState label="Loading today…" />;
   if (overview.isError)
@@ -32,14 +43,14 @@ export default function Overview() {
     <Screen
       refreshing={overview.isRefetching}
       onRefresh={() => overview.refetch()}
-      overlay={<FloatingChatButton />}
-      endInset={FAB_CLEARANCE}
     >
-      <View style={{ gap: spacing.xs }}>
-        <Text variant="caption" color="inkTertiary">
-          {formatDate(o.localDate).toUpperCase()}
+      <View style={{ gap: spacing.xs, paddingTop: spacing.sm, paddingBottom: spacing.md }}>
+        <Text variant="caption" color="inkTertiary" style={{ textTransform: 'uppercase', letterSpacing: 1 }}>
+          {formatDate(o.localDate, true)}
         </Text>
-        <Text variant="title">Your day</Text>
+        <Text variant="display">
+          {`Good ${part}${onboarding.state.name ? `, ${onboarding.state.name}` : ''}`}
+        </Text>
       </View>
 
       {o.needsAttention.length > 0 ? (
@@ -60,7 +71,10 @@ export default function Overview() {
         </ExpandableCard>
       ) : null}
 
-      <Section title="Today's workout" action={<TextAction label="See all" onPress={() => router.push('/workouts')} />}>
+      <Section>
+        {active.length > 0 && active.every((s) => s.status === 'completed') ? (
+          <MascotNote mood="celebration">Today's workout is done. Well done.</MascotNote>
+        ) : null}
         {active.length > 0 ? (
           active.map((s) => (
             <PressableCard key={s.id} accessibilityLabel={`${s.title}, ${s.status}`} onPress={() => router.push(`/session/${s.id}`)}>
@@ -75,7 +89,7 @@ export default function Overview() {
                 <Text variant="small" color="inkSecondary">
                   {formatTimeRange(s.plannedTime, s.plannedDurationMinutes) ?? 'Unplanned'}
                 </Text>
-                <RuneIcon name="arrow-up-right" size={18} />
+                <RuneIcon name="arrow-up-right" size={20} />
               </Row>
             </PressableCard>
           ))
@@ -86,36 +100,49 @@ export default function Overview() {
         ) : (
           <EmptyState
             mood="planning"
-            title="No plan yet"
-            body="Create a routine with the AI companion or build one yourself."
-            action={{ label: 'Plan my training', onPress: () => router.push('/routine/ai') }}
+            title="No routine yet"
+            action={{ label: 'New routine', onPress: () => router.push('/routine/edit') }}
           />
         )}
       </Section>
 
       {o.meals.length > 0 ? (
-        <ExpandableCard title="Today's meals" summary={mealCountLabel(o.meals.length)}>
-          {o.meals.map((m) => (
-            <TileRow key={m.id} kind="meal" eyebrow={m.slot.toUpperCase() + (m.isSmoothie ? ' · SMOOTHIE' : '')} title={m.mealName} />
+        <ExpandableCard title="On the Menu" summary={mealCountLabel(o.meals.length)}>
+          {o.meals.map((m, i) => (
+            <View key={m.id}>
+              {i > 0 ? <Divider /> : null}
+              <TileRow medium eyebrow={m.slot.toUpperCase() + (m.isSmoothie ? ' · SMOOTHIE' : '')} title={m.mealName} />
+            </View>
           ))}
-          <TextAction label="Open meal plan" onPress={() => router.push(`/meal/${o.mealPlanId}`)} />
+          <View style={{ alignItems: 'flex-start', paddingTop: spacing.sm }}>
+          <Button label="Open meal plan" variant="secondary" size="sm" onPress={() => router.push(`/meal/${o.mealPlanId}`)} />
+          </View>
         </ExpandableCard>
+      ) : !o.mealPlanId ? (
+        <Card>
+          <Text variant="heading">On the Menu</Text>
+          <Text variant="small" color="inkSecondary">
+            No meal plan yet. Mova can plan your meals with you.
+          </Text>
+          <View style={{ alignItems: 'flex-start' }}>
+            <Button label="Plan my meals" variant="secondary" size="sm" onPress={() => router.push('/companion?intent=meal')} />
+          </View>
+        </Card>
       ) : null}
 
-      {o.hydration || o.fasting ? (
-        <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'stretch' }}>
-          {o.hydration ? (
-            <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
-              <HydrationCard totalMl={o.hydration.totalMl} target={o.hydration.target} unit={volumeUnit} />
-            </View>
-          ) : null}
-          {o.fasting ? (
-            <View style={{ flex: 1, flexBasis: 0, minWidth: 0 }}>
-              <FastingCard fasting={o.fasting} timezone={o.timezone} />
-            </View>
-          ) : null}
-        </View>
-      ) : null}
+      {o.fasting ? (
+        <FastingCard fasting={o.fasting} timezone={o.timezone} />
+      ) : (
+        <Card>
+          <Text variant="heading">Fasting</Text>
+          <Text variant="small" color="inkSecondary">
+            Not set up. Turn it on whenever you want an eating window.
+          </Text>
+          <View style={{ alignItems: 'flex-start' }}>
+            <Button label="Set up fasting" variant="secondary" size="sm" onPress={() => router.push('/fasting')} />
+          </View>
+        </Card>
+      )}
     </Screen>
   );
 }
@@ -127,78 +154,75 @@ function mealCountLabel(n: number): string {
   return `${COUNT_WORDS[n] ?? n} ${n === 1 ? 'meal' : 'meals'}`;
 }
 
-function ProgressBar({ fraction, label }: { fraction: number; label: string }) {
+/** Circular progress: a track ring with a graphite arc, value in the centre. */
+function ProgressRing({ fraction, size = 96, label, children }: { fraction: number; size?: number; label: string; children: React.ReactNode }) {
+  const stroke = 8;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const f = Math.min(1, Math.max(0, fraction));
   return (
     <View
       accessibilityRole="progressbar"
       accessibilityLabel={label}
-      accessibilityValue={{ min: 0, max: 100, now: Math.round(fraction * 100) }}
-      style={{ height: spacing.sm, borderRadius: radii.pill, backgroundColor: colors.surfaceSubtle, overflow: 'hidden' }}
+      accessibilityValue={{ min: 0, max: 100, now: Math.round(f * 100) }}
+      style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
     >
-      <View style={{ width: `${Math.round(fraction * 100)}%`, height: '100%', backgroundColor: colors.brand }} />
+      <Svg width={size} height={size} style={{ position: 'absolute' }}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={colors.blush} strokeWidth={stroke} fill="none" />
+        {f > 0 ? (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={colors.rose}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${c * f} ${c}`}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        ) : null}
+      </Svg>
+      {children}
     </View>
-  );
-}
-
-function HydrationCard({ totalMl, target, unit }: { totalMl: number; target: { dailyTarget: number; unit: 'ml' | 'l' | 'fl_oz' } | null; unit: 'ml' | 'l' | 'fl_oz' }) {
-  const p = target ? hydrationProgress(totalMl, target.dailyTarget, target.unit) : null;
-  return (
-    <Card style={{ flex: 1 }}>
-      <Row>
-        <IconTile kind="water" size={32} />
-        <Text variant="bodyStrong">Water</Text>
-      </Row>
-      <StatLine left={formatVolume(totalMl, unit)} right={p ? formatVolume(p.targetMl, unit) : 'No goal set'} />
-      {p ? <ProgressBar fraction={p.fraction} label="Water intake toward today's goal" /> : null}
-      <TextAction label="Add water" icon="plus" onPress={() => router.push('/hydration')} />
-    </Card>
-  );
-}
-
-/** Current value on the left, target/next on the right — one line, one size, so progress reads left to right. */
-function StatLine({ left, right, hint }: { left: string; right: string; hint?: string }) {
-  return (
-    <Row style={{ justifyContent: 'space-between' }} accessible accessibilityLabel={hint ?? `${left}, ${right}`}>
-      <Text variant="label" numberOfLines={1}>
-        {left}
-      </Text>
-      <Text variant="small" color="inkTertiary" numberOfLines={1}>
-        {right}
-      </Text>
-    </Row>
   );
 }
 
 function FastingCard({ fasting, timezone }: { fasting: NonNullable<ReturnType<typeof useOverview>['data']>['fasting']; timezone: string }) {
   if (!fasting) return null;
-  if (!fasting.schedule && !fasting.activeFast) {
-    return (
-      <Banner tone="info" title="No fasting schedule yet">
-        Set a window if you want one — it's optional.
-      </Banner>
-    );
-  }
   const status = fastingStatus(fasting.schedule, fasting.activeFast, new Date(), timezone);
   const time = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const hours = (ms: number) => `${Math.floor(ms / 3_600_000)}h ${Math.floor((ms % 3_600_000) / 60_000)}m`;
+  const on = status.state === 'fasting';
+  const fraction = on ? status.fraction : 0;
+  const total = on ? new Date(status.endsAt).getTime() - new Date(status.startedAt).getTime() : 0;
   return (
-    <Card style={{ flex: 1 }}>
-      <Row>
-        <IconTile kind="fasting" size={32} />
-        <Text variant="bodyStrong">Fasting</Text>
+    <PressableCard accessibilityLabel={on ? 'Fasting, in progress. Set fasting time' : 'Fasting, not fasting. Set fasting time'} onPress={() => router.push('/fasting')}>
+      <Row style={{ gap: spacing.lg }}>
+        <ProgressRing fraction={fraction} label={on ? 'Fasting progress toward your target' : 'Not fasting'}>
+          <Text variant="label">{on ? `${Math.round(fraction * 100)}%` : '—'}</Text>
+        </ProgressRing>
+        <View style={{ flex: 1, gap: spacing.xs }}>
+          <Text variant="label">Fasting</Text>
+          {on ? (
+            <>
+              <Text variant="small">
+                {hours(total * fraction)} of {hours(total)}
+              </Text>
+              <Text variant="small" color="inkSecondary">
+                Ends at {time(status.endsAt)}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text variant="small">Not fasting</Text>
+              <Text variant="small" color="inkSecondary">
+                {status.nextFastStartsAt ? `Next window starts at ${time(status.nextFastStartsAt)}` : 'No window planned'}
+              </Text>
+            </>
+          )}
+        </View>
       </Row>
-      {status.state === 'fasting' ? (
-        <>
-          <StatLine left="In progress" right={`to ${time(status.endsAt)}`} />
-          <ProgressBar fraction={status.fraction} label="Fasting window progress" />
-        </>
-      ) : (
-        <StatLine
-          left="Not fasting"
-          right={status.nextFastStartsAt ? time(status.nextFastStartsAt) : 'No window'}
-          hint={status.nextFastStartsAt ? `Not fasting, next window starts ${time(status.nextFastStartsAt)}` : 'Not fasting, no window planned'}
-        />
-      )}
-      <TextAction label="View fasting" onPress={() => router.push('/fasting')} />
-    </Card>
+    </PressableCard>
   );
 }

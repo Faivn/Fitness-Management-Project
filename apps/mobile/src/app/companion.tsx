@@ -1,38 +1,38 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ConversationMessage, GoalDraft } from '@mova/shared';
-import { Appear, Banner, Button, Card, Chip, Row, Text, TextField, ThinkingIndicator } from '@/components';
+import { Appear, Banner, Button, Card, Chip, Composer, IconButton, Row, RuneIcon, SheetPage, Text, TextAction, TextField, ThinkingIndicator } from '@/components';
 import { AIDisclaimer, ProposalBanner } from '@/components/domain';
 import { Mascot } from '@/components/Mascot';
-import { useAiTurn, useApproveGoals, useConversation, useConversations, useGoalProposal, useRejectProposal } from '@/hooks/api';
+import { useAiTurn, useApproveGoals, useClearConversations, useConversation, useConversations, useGenerateMealPlan, useGenerateRoutineProposal, useGoalProposal, useProfile, useRejectProposal } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
+import { copy } from '@/lib/copy';
 import { useDraft } from '@/lib/drafts';
+import { appToday } from '@/lib/today';
 import { colors, radii, spacing } from '@/theme/tokens';
-
-const STARTERS = [
-  'I want to train four times a week and improve my running',
-  'Help me plan meals for a cutting phase',
-  "I'm done with this month — help me review it",
-];
 
 /**
  * WF-02 AI companion. The composer text is kept as a draft until the server
  * confirms the message, so an AI or network failure never loses it.
  */
 export default function Companion() {
-  const params = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string; intent?: string }>();
   const conversations = useConversations();
   const [conversationId, setConversationId] = useState<string | undefined>(params.id);
   const conversation = useConversation(conversationId);
   const turn = useAiTurn();
+  const clearChats = useClearConversations();
   const draft = useDraft('companion-message', { text: '', clientMessageId: newIdempotencyKey() });
   const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
   // Messages already on screen when a conversation loads appear in place; later ones animate in.
   const known = useRef<{ id?: string; ids: Set<string> | null }>({ ids: null });
-  const streamedLast = useRef(false);
   const following = useRef(true);
+  const [picker, setPicker] = useState(false);
+  const draftRoutine = useGenerateRoutineProposal();
+  const draftMeals = useGenerateMealPlan();
+  const profile = useProfile();
 
   // Resume the most recent conversation by default.
   useEffect(() => {
@@ -51,21 +51,48 @@ export default function Companion() {
   if (known.current.id !== conversationId) known.current = { id: conversationId, ids: null };
   if (known.current.ids === null && (conversation.data || !conversationId)) known.current.ids = new Set(messages.map((m) => m.id));
   const isNew = (id: string) => known.current.ids !== null && !known.current.ids.has(id);
-  const streaming = turn.isPending ? turn.streamingText : '';
-  if (streaming) streamedLast.current = true;
   const pendingText = turn.isPending ? turn.variables?.message : undefined;
 
-  function send(text = draft.value.text) {
+  // Opened from onboarding or an empty state with an intent: start clean and ask the first question.
+  const started = useRef(false);
+  useEffect(() => {
+    if (!params.intent || started.current) return;
+    started.current = true;
+    const opener = params.intent === 'meal' ? 'Help me create a meal plan' : 'Help me create a workout routine';
+    clearChats.mutate(undefined, {
+      onSettled: () => {
+        setConversationId(undefined);
+        send(opener, true);
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.intent]);
+
+  /** New chat erases the past conversation(s), then shows a clean thread. */
+  function startNewChat() {
+    clearChats.mutate(undefined, {
+      onSettled: () => {
+        setConversationId(undefined);
+        known.current = { ids: null };
+        draft.setValue({ text: '', clientMessageId: newIdempotencyKey() });
+        void draft.clear();
+      },
+    });
+  }
+
+  function send(text = draft.value.text, fresh = false) {
     const message = text.trim();
     if (!message) return;
     const clientMessageId = text === draft.value.text ? draft.value.clientMessageId : newIdempotencyKey();
-    streamedLast.current = false;
     following.current = true; // sending re-engages follow-along
     turn.mutate(
-      { conversationId, message, clientMessageId },
+      { conversationId: fresh ? undefined : conversationId, message, clientMessageId },
       {
         onSuccess: (data) => {
           setConversationId(data.conversation.id);
+          const last = [...data.conversation.messages].reverse().find((m) => m.role === 'assistant');
+          const step = (last?.metadata as { suggestedNextStep?: string } | null)?.suggestedNextStep;
+          if (step === 'create_routine' || step === 'create_meal_plan' || step === 'monthly_review') setPicker(true);
           draft.setValue({ text: '', clientMessageId: newIdempotencyKey() });
           void draft.clear();
         },
@@ -75,8 +102,43 @@ export default function Companion() {
     );
   }
 
+  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+  const nextStep = (lastAssistant?.metadata as { suggestedNextStep?: string } | null)?.suggestedNextStep;
+  const request = messages.filter((m) => m.role === 'user').map((m) => m.content).join('. ');
+  const options: Array<{ label: string; hint?: string; onPress: () => void; loading?: boolean }> = [];
+  if (nextStep === 'create_routine')
+    options.push({
+      label: copy.ai.draftRoutine,
+      hint: 'Uses what you told me',
+      loading: draftRoutine.isPending,
+      onPress: () => draftRoutine.mutate({ request: request || 'Three sessions a week', mode: 'new' }, { onSuccess: (p) => { setPicker(false); router.push(`/proposal/routine/${p.id}`); } }),
+    });
+  if (nextStep === 'create_meal_plan')
+    options.push({
+      label: copy.ai.draftMeals,
+      hint: 'Uses what you told me',
+      loading: draftMeals.isPending,
+      onPress: () =>
+        draftMeals.mutate(
+          { request: request || 'Weekly meal plan', startDate: appToday(profile.data?.timezone ?? 'UTC'), days: 7 },
+          { onSuccess: (p) => { setPicker(false); router.push(`/proposal/meal/${p.id}`); } },
+        ),
+    });
+  if (nextStep === 'monthly_review') options.push({ label: 'Open monthly review', onPress: () => { setPicker(false); router.push('/review/new'); } });
+  options.push(
+    { label: 'Create a workout routine', onPress: () => { setPicker(false); send('Help me create a workout routine'); } },
+    { label: 'Create a meal plan', onPress: () => { setPicker(false); send('Help me create a meal plan'); } },
+    { label: 'Suggest a goal', onPress: () => { setPicker(false); send('Suggest a goal for me'); } },
+    { label: 'Ask a fitness question', hint: 'Type it in the box', onPress: () => setPicker(false) },
+  );
+
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: colors.page }}>
+    <SheetPage
+      title="Mova Companion"
+      hideTitle
+      action={<IconButton icon="chat-plus" label="New chat" variant="solid" size={36} onPress={startNewChat} />}
+    >
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1 }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }} keyboardVerticalOffset={90}>
         <ScrollView
           ref={scroll}
@@ -87,41 +149,32 @@ export default function Companion() {
             const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
             following.current = contentSize.height - (contentOffset.y + layoutMeasurement.height) < 80;
           }}
-          onContentSizeChange={() => following.current && scroll.current?.scrollToEnd({ animated: !streaming })}
+          onContentSizeChange={() => following.current && scroll.current?.scrollToEnd({ animated: true })}
         >
-          <Row style={{ flexWrap: 'wrap' }}>
-            <Button label="New conversation" size="sm" variant="ghost" onPress={() => setConversationId(undefined)} />
-            <Button label="Create a routine" size="sm" variant="ghost" onPress={() => router.push('/routine/ai')} />
-            <Button label="Plan meals" size="sm" variant="ghost" onPress={() => router.push('/meal/new')} />
-          </Row>
           {messages.length === 0 && !pendingText ? (
             <View style={{ alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xl }}>
-              <Mascot mood="focus" size={110} />
+              <Mascot mood="welcome" size={110} />
               <Text variant="heading" align="center">
-                What would you like to work on?
+                {copy.ai.emptyTitle}
               </Text>
               <Text variant="small" color="inkSecondary" align="center">
-                Tell me about your goals, schedule or meals in your own words. I'll ask only what I need.
+                {copy.ai.emptyBody}
               </Text>
-              <View style={{ gap: spacing.sm, alignSelf: 'stretch' }}>
-                {STARTERS.map((s) => (
-                  <Chip key={s} label={s} onPress={() => send(s)} />
-                ))}
-              </View>
             </View>
           ) : null}
-          {messages.map((m) => {
-            // The reply that was just streamed is already on screen; swap it in place without re-animating.
-            const justStreamed = m.role === 'assistant' && isNew(m.id) && streamedLast.current;
-            return <MessageBubble key={m.id} message={m} animate={m.role === 'assistant' && isNew(m.id) && !justStreamed} cardDelay={justStreamed ? 0 : 120} />;
-          })}
+          {messages.map((m) => (
+            <MessageBubble
+              key={m.id}
+              message={m}
+              animate={m.role === 'assistant' && isNew(m.id)}
+            />
+          ))}
           {pendingText ? <MessageBubble message={{ id: 'pending', role: 'user', content: pendingText, createdAt: '', metadata: null }} animate /> : null}
-          {turn.isPending && !streaming ? (
+          {turn.isPending ? (
             <Appear>
               <ThinkingIndicator />
             </Appear>
           ) : null}
-          {streaming ? <MessageBubble message={{ id: 'streaming', role: 'assistant', content: streaming, createdAt: '', metadata: null }} animate={false} streaming /> : null}
           {turn.isError ? (
             <Appear>
               <Banner tone="error">{errorMessage(turn.error)}</Banner>
@@ -129,27 +182,56 @@ export default function Companion() {
           ) : null}
         </ScrollView>
         <View style={styles.composer}>
-          <TextField
-            label="Message"
-            placeholder="Message Mova…"
+          <Composer
             value={draft.value.text}
             onChangeText={(text) => draft.setValue((d) => ({ ...d, text }))}
-            multiline
-            style={{ minHeight: 48, maxHeight: 140 }}
+            onSend={() => send()}
+            onOptions={() => setPicker(true)}
+            sending={turn.isPending}
+            placeholder={copy.ai.placeholder}
           />
-          <Row style={{ justifyContent: 'space-between' }}>
-            <View style={{ flex: 1 }}>
-              <AIDisclaimer />
-            </View>
-            <Button label={turn.isError ? 'Retry' : 'Send'} loading={turn.isPending} disabled={!draft.value.text.trim()} onPress={() => send()} />
-          </Row>
+          <AIDisclaimer />
         </View>
       </KeyboardAvoidingView>
+      <Modal visible={picker} transparent animationType="fade" onRequestClose={() => setPicker(false)}>
+        <Pressable accessibilityLabel="Close" style={styles.backdrop} onPress={() => setPicker(false)}>
+          <Pressable accessible={false} style={styles.sheet} onPress={() => undefined}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text variant="title" style={{ flex: 1 }}>
+                What would you like to do?
+              </Text>
+              <IconButton icon="close" label="Close" variant="plain" onPress={() => setPicker(false)} />
+            </View>
+            {options.map((o) => (
+              <Pressable
+                key={o.label}
+                accessibilityRole="button"
+                accessibilityLabel={o.label}
+                disabled={o.loading}
+                onPress={o.onPress}
+                style={({ pressed }) => [styles.option, { opacity: pressed || o.loading ? 0.7 : 1 }]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text variant="bodyStrong">{o.loading ? 'Working…' : o.label}</Text>
+                  {o.hint ? (
+                    <Text variant="small" color="inkTertiary">
+                      {o.hint}
+                    </Text>
+                  ) : null}
+                </View>
+                <RuneIcon name="chevron-right" size={20} color="inkTertiary" />
+              </Pressable>
+            ))}
+            {draftRoutine.isError || draftMeals.isError ? <Banner tone="error">{errorMessage(draftRoutine.error ?? draftMeals.error)}</Banner> : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
+    </SheetPage>
   );
 }
 
-function MessageBubble({ message, animate = false, streaming = false, cardDelay = 120 }: { message: ConversationMessage; animate?: boolean; streaming?: boolean; cardDelay?: number }) {
+function MessageBubble({ message, animate = false, cardDelay = 120 }: { message: ConversationMessage; animate?: boolean; cardDelay?: number }) {
   const mine = message.role === 'user';
   const meta = message.metadata as (ConversationMessage['metadata'] & { routineProposalId?: string; mealPlanProposalId?: string }) | null;
   return (
@@ -157,7 +239,7 @@ function MessageBubble({ message, animate = false, streaming = false, cardDelay 
       <View
         style={[styles.bubble, mine ? styles.mine : styles.theirs]}
         // The finished reply is announced once; partial text is not read out token by token.
-        accessibilityLiveRegion={!mine && !streaming && animate ? 'polite' : 'none'}
+        accessibilityLiveRegion={!mine && animate ? 'polite' : 'none'}
       >
         <Text variant="body" color={mine ? 'onInk' : 'ink'}>
           {message.content}
@@ -179,22 +261,13 @@ function MessageBubble({ message, animate = false, streaming = false, cardDelay 
       ) : null}
       {meta?.routineProposalId ? (
         <Appear variant="card" enabled={animate} delay={cardDelay}>
-          <Button label="Review routine proposal" size="sm" variant="secondary" onPress={() => router.push(`/proposal/routine/${meta.routineProposalId}`)} />
+          <Button label={copy.ai.reviewRoutine} size="sm" variant="secondary" onPress={() => router.push(`/proposal/routine/${meta.routineProposalId}`)} />
         </Appear>
       ) : null}
       {meta?.mealPlanProposalId ? (
         <Appear variant="card" enabled={animate} delay={cardDelay}>
-          <Button label="Review meal plan" size="sm" variant="secondary" onPress={() => router.push(`/proposal/meal/${meta.mealPlanProposalId}`)} />
+          <Button label={copy.ai.reviewMeals} size="sm" variant="secondary" onPress={() => router.push(`/proposal/meal/${meta.mealPlanProposalId}`)} />
         </Appear>
-      ) : null}
-      {meta?.suggestedNextStep === 'create_routine' ? (
-        <Button label="Draft a routine from this" size="sm" variant="brand" onPress={() => router.push('/routine/ai')} />
-      ) : null}
-      {meta?.suggestedNextStep === 'create_meal_plan' ? (
-        <Button label="Draft a meal plan" size="sm" variant="brand" onPress={() => router.push('/meal/new')} />
-      ) : null}
-      {meta?.suggestedNextStep === 'monthly_review' ? (
-        <Button label="Open monthly review" size="sm" variant="brand" onPress={() => router.push('/review/new')} />
       ) : null}
     </Appear>
   );
@@ -214,7 +287,7 @@ function GoalProposalCard({ id }: { id: string }) {
   const editable = p.status === 'draft';
 
   return (
-    <Card tone="brand" style={{ alignSelf: 'stretch' }}>
+    <Card tone="assist" style={{ alignSelf: 'stretch' }}>
       <ProposalBanner version={p.version} status={p.status} />
       <Text variant="label">Suggested goals</Text>
       {list.map((g, i) =>
@@ -252,8 +325,11 @@ function GoalProposalCard({ id }: { id: string }) {
 
 const styles = StyleSheet.create({
   thread: { padding: spacing.base, gap: spacing.md },
-  bubble: { maxWidth: '88%', borderRadius: radii.md, padding: spacing.md },
-  mine: { backgroundColor: colors.ink },
-  theirs: { backgroundColor: colors.canvas, borderWidth: 1, borderColor: colors.hairline },
-  composer: { padding: spacing.base, gap: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.hairline, backgroundColor: colors.canvas },
+  bubble: { maxWidth: '88%', borderRadius: radii.xl, padding: spacing.base },
+  mine: { backgroundColor: colors.rose },
+  theirs: { backgroundColor: colors.lilacWash },
+  composer: { paddingHorizontal: spacing.base, paddingTop: spacing.sm, paddingBottom: spacing.sm, gap: spacing.xs },
+  backdrop: { flex: 1, backgroundColor: 'rgba(42, 34, 48, 0.45)', justifyContent: 'flex-end', padding: spacing.base },
+  sheet: { width: '100%', maxWidth: 520, alignSelf: 'center', backgroundColor: colors.surface, borderRadius: radii.sheet, padding: spacing.lg, gap: spacing.sm },
+  option: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56, paddingHorizontal: spacing.base, borderRadius: radii.lg, backgroundColor: colors.well },
 });

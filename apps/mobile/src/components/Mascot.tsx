@@ -1,32 +1,36 @@
-import { Image } from 'expo-image';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { AccessibilityInfo, Animated, Platform, View } from 'react-native';
+import { SvgXml } from 'react-native-svg';
+import { MASCOT_SVG } from './mascotData.generated';
 
 /**
- * The Mova bubble mascot (assets/illustrations/mova). Images are referenced
- * from the repository asset folder rather than copied, so there is one
- * source of truth for the illustrations.
+ * The Mova bubble mascot. The editable source of truth is the SVG set in
+ * assets/illustrations/mova (recoloured to the warm sandstone/amber palette);
+ * `npm run mascot:generate` embeds it so it renders as a crisp vector everywhere.
  */
-const sources = {
-  welcome: require('../../../../assets/illustrations/mova/mova-bubble-welcome.png'),
-  fitness: require('../../../../assets/illustrations/mova/mova-bubble-fitness.png'),
-  planning: require('../../../../assets/illustrations/mova/mova-bubble-planning.png'),
-  focus: require('../../../../assets/illustrations/mova/mova-bubble-focus.png'),
-  hydration: require('../../../../assets/illustrations/mova/mova-bubble-hydration.png'),
-  celebration: require('../../../../assets/illustrations/mova/mova-bubble-celebration.png'),
-  rest: require('../../../../assets/illustrations/mova/mova-bubble-rest.png'),
-  checklist: require('../../../../assets/illustrations/mova/mova-bubble-checklist.png'),
-  thinking: require('../../../../assets/illustrations/mova/mova-bubble-thinking.png'),
-  nutrition: require('../../../../assets/illustrations/mova/mova-bubble-nutrition.png'),
-  calm: require('../../../../assets/illustrations/mova/mova-bubble-calm.png'),
-  phone: require('../../../../assets/illustrations/mova/mova-bubble-phone.png'),
-} as const;
+export type MascotMood = keyof typeof MASCOT_SVG;
 
-export type MascotMood = keyof typeof sources;
+/** The thought mark ("?") that only the thinking mood carries. */
+const THOUGHT_MARK = /<circle cx="380" cy="145"[^>]*\/><text[^>]*>\?<\/text>/;
 
 /** Subtle float animation; disabled when the user prefers reduced motion. */
-export function Mascot({ mood, size = 120, animated = true }: { mood: MascotMood; size?: number; animated?: boolean }) {
+export function Mascot({
+  mood = 'welcome',
+  size = 120,
+  animated = true,
+  plain = false,
+}: {
+  mood?: MascotMood;
+  size?: number;
+  animated?: boolean;
+  /** Drop the thought mark, for places that need the same face every time (the nav button). */
+  plain?: boolean;
+}) {
   const y = useRef(new Animated.Value(0)).current;
+  // Gradient ids must be unique per instance: with several mascots on a page (or one inside a
+  // hidden tab), duplicate ids make the visible mascot's gradients resolve to a hidden element and drop out.
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const xml = useMemo(() => (plain ? MASCOT_SVG[mood].replace(THOUGHT_MARK, '') : MASCOT_SVG[mood]).replace(/id="(\w+)"/g, `id="$1${uid}"`).replace(/url\(#(\w+)\)/g, `url(#$1${uid})`), [uid, mood, plain]);
 
   useEffect(() => {
     let loop: Animated.CompositeAnimation | undefined;
@@ -50,7 +54,7 @@ export function Mascot({ mood, size = 120, animated = true }: { mood: MascotMood
   return (
     <View accessible={false} importantForAccessibility="no-hide-descendants">
       <Animated.View style={{ transform: [{ translateY: y }] }}>
-        <Image source={sources[mood]} style={{ width: size, height: size }} contentFit="contain" />
+        <SvgXml xml={xml} width={size} height={size} />
       </Animated.View>
     </View>
   );

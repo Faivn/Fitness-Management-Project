@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
 import type {
   ApplyResult,
@@ -31,7 +30,6 @@ import type {
   WorkoutSessionDetail,
 } from '@mova/shared';
 import { api } from '@/lib/api';
-import { streamAiTurn } from '@/lib/aiStream';
 
 /**
  * Server state hooks. Screens always render the API's confirmed response —
@@ -130,27 +128,28 @@ export const useConversations = () =>
 export const useConversation = (id: string | undefined) =>
   useQuery({ queryKey: qk.conversation(id ?? ''), queryFn: () => api<Conversation>('GET', `ai/conversations/${id}`), enabled: !!id });
 
+/** "New chat": deletes every past conversation so the next message starts clean. */
+export function useClearConversations() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<{ cleared: number }>('DELETE', 'ai/conversations'),
+    onSuccess: () => {
+      qc.removeQueries({ queryKey: ['conversation'] });
+      qc.setQueryData(qk.conversations, []);
+    },
+  });
+}
+
 export function useAiTurn() {
   const qc = useQueryClient();
-  const [streamingText, setStreamingText] = useState('');
-  const mutation = useMutation({
-    mutationFn: (input: { conversationId?: string; message: string; clientMessageId: string; context?: string }) => {
-      setStreamingText('');
-      return streamAiTurn(input, setStreamingText);
-    },
+  return useMutation({
+    mutationFn: (input: { conversationId?: string; message: string; clientMessageId: string; context?: string }) =>
+      api<{ conversation: Conversation; goalProposal: GoalProposal | null }>('POST', 'ai/turn', input),
     onSuccess: (data) => {
       qc.setQueryData(qk.conversation(data.conversation.id), data.conversation);
       void qc.invalidateQueries({ queryKey: qk.conversations });
-      // streamingText is deliberately NOT cleared here: callers only show it while the mutation is
-      // pending, so the streamed bubble hands over to the saved message in a single render.
-    },
-    onError: () => setStreamingText(''),
-    // Not returned: the turn is finished once saved, the refresh happens in the background.
-    onSettled: () => {
-      void qc.invalidateQueries({ queryKey: ['conversation'] });
     },
   });
-  return Object.assign(mutation, { streamingText });
 }
 
 export const useGoalProposal = (id: string | undefined) =>

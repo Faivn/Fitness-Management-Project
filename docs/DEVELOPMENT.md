@@ -1,193 +1,94 @@
 # Development Guide
 
-How to run, test and configure the Mova codebase. Product requirements live in [`PRODUCT_SPECIFICATION.md`](PRODUCT_SPECIFICATION.md), and implementation decisions in [`ARCHITECTURE_DECISIONS.md`](ARCHITECTURE_DECISIONS.md).
+How to run, test and deploy Mova. Product requirements live in [`PRODUCT_SPECIFICATION.md`](PRODUCT_SPECIFICATION.md); decisions in [`ARCHITECTURE_DECISIONS.md`](ARCHITECTURE_DECISIONS.md) (see ADR-016).
+
+## What this is today
+
+Mova is a **recruiter-facing, no-login demo**. It needs no backend, database, accounts, API keys or environment variables. The whole product runs in the browser:
+
+- All data lives in browser **local storage** (key `mova.demo`, about 90 KB). It is seeded on first visit with two weeks of realistic history, an active routine, this week's meal plan, water, fasting and a saved review, all relative to today.
+- The "AI companion" is a **deterministic demo assistant** (rule-based, offline). It is labelled as simulated in the app. Its goal, routine and meal suggestions are drafts that only change anything after explicit approval, exactly like a live AI would.
+- Settings → **Reset demo data** clears local storage and re-seeds.
+- Nothing sensitive is stored: no credentials, tokens or keys.
 
 ## Repository layout
 
 ```text
 apps/
-  mobile/        React Native (Expo SDK 58, Expo Router) app
+  mobile/        React Native (Expo SDK 58, Expo Router) app, the demo
     src/app/         screens (file-based routes)
     src/components/  design-system and domain components
-    src/hooks/       React Query hooks for every API resource
-    src/lib/         API client, auth, secure storage, drafts, reminders
+    src/hooks/       React Query hooks (one per resource)
+    src/lib/         data layer (api.ts), storage, copy (UX text), drafts, reminders
     src/theme/       design tokens
-  api/           TypeScript API for Vercel Functions
-    api/router.ts    single function entry (see vercel.json)
-    src/modules/     domain use cases (thin handlers in src/routes.ts)
-    src/lib/         Supabase (user-scoped) and Groq clients
-    test/            end-to-end API tests on an embedded Postgres
+  api/           OPTIONAL reference backend (Vercel Functions + Supabase). Not used by the demo.
 packages/
-  shared/        Zod schemas, DTO types and pure business rules (+ tests)
-supabase/
-  migrations/    schema, RLS policies, transactional functions
-  tests/         database tests (PGlite) and test-only Supabase stubs
-docs/            product brief, specification, research, ADRs, this guide
-assets/          Mova mascot illustrations (used directly by the app)
+  shared/        Zod schemas, DTO types and pure business rules
+  engine/        The product's use cases, written against a small database interface
+    src/modules/     routines, sessions, schedule, meals, hydration, fasting, history, AI proposals
+    src/local/       browser database (local storage), stored procedures, seed data, demo assistant
+supabase/        Schema, RLS and SQL functions for the reference backend (PGlite tests)
+docs/            Product brief, specification, research, ADRs, this guide
+assets/          Mova mascot illustrations
 ```
+
+### Design system
+
+`DESIGN.md` (Oura-based) is the source of truth; `apps/mobile/src/theme/tokens.ts` implements it: sandstone page, cards one tone deeper (no borders or shadows), graphite pill actions, 24px cards, light-weight display type with one serif-italic phrase per heading (the greeting), eyebrow section labels, and mustard/amber/indigo used sparingly. AkkuratLL and Editorial New are not bundled, so the platform sans and serif are used. Where a spec value fails contrast (`ink-soft` text, hairline outlines), a darker value is used and noted in `tokens.ts`. The mascot is the SVG set in `assets/illustrations/mova`, recoloured to the palette and embedded with `npm run mascot:generate`.
+
+### How the data layer works
+
+`apps/mobile/src/lib/api.ts` exposes one function, `api(method, path, body)`, with the same routes and JSON contracts a server would. It calls the **engine** (`@mova/engine`) running on a **local database** (`createLocalApi`). The engine is the same code the reference backend runs; only the database differs (browser storage here, Postgres there). To reintroduce a backend, replace the body of `api()` with a `fetch` to it. No screen changes are needed.
+
+The local database (`packages/engine/src/local`) emulates the small query surface the engine uses, plus ports of the SQL functions (routine/meal approval, rescheduling, idempotent retries) with the same rules: history is insert-only, a proposal is applied only from `draft` at the reviewed version, retries are idempotent. Stored data that is missing, corrupt or from an older version is replaced with fresh demo data.
 
 ## Prerequisites
 
-- Node.js 20 or later (developed on Node 22) and npm.
-- To run the app on a device or simulator: the **Expo Go** app or a development build. Building native binaries locally needs Xcode (iOS) or Android Studio with a JDK (Android). Alternatively, build in the cloud with EAS: `npx eas-cli build`.
-- To run Supabase locally: the Supabase CLI and Docker. Neither is needed for the automated tests.
+Node.js 20 or later and npm. To run on a device or simulator: Expo Go or a development build.
 
-## Install, test, typecheck
+## Install, test, typecheck, build
 
 ```bash
 npm install
+npm run typecheck      # builds shared + engine, then typechecks every workspace
+npm test               # shared, engine, api (reference backend) and mobile tests
+npm run test:db        # reference-backend schema tests (PGlite)
+npm run build:web      # production web export → apps/mobile/dist
+npm run mobile         # start Expo (press w for web)
 ```
 
-```bash
-npm test
-```
+## Deploying the demo (Vercel)
 
-```bash
-npm run test:db
-```
+One static Vercel project from the repository root (`vercel.json`: `npm run build:web` → `apps/mobile/dist`, SPA rewrite). **No environment variables are needed.** Deploy with `vercel deploy --prod`.
 
-```bash
-npm run typecheck
-```
+## Optional reference backend
 
-`npm test` builds `@mova/shared` and runs the shared-rule tests, the API end-to-end tests and the mobile component tests (jest-expo). `npm run test:db` applies every migration to an embedded Postgres and checks RLS, history integrity and idempotency.
+`apps/api` and `supabase/` are kept, unchanged in behaviour, so a real backend can come back later. They share the engine (`@mova/engine`) and schemas (`@mova/shared`). The demo does not call them. Summary:
 
-## Public web preview (Vercel)
+- API: Vercel Functions, Supabase Auth token verification, Row Level Security, Groq for AI (streaming at `POST /api/v1/ai/turn/stream`), guest limits (`supabase/migrations/*_guest_demo.sql`). Variables: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `GROQ_API_KEY`, `GROQ_BASE_URL`, `GROQ_MODEL`, `APP_ORIGIN`, `API_ENV` (see `apps/api/.env.example`).
+- Run it: `npm run api:dev`; tests: `npm test -w @mova/api`, `npm run test:db`.
+- The existing Vercel project `mova-api` and the Supabase project belong to this reference backend and were not modified by the demo change.
 
-The website is the Expo web build, deployed as one static Vercel project from the **repository root** (`vercel.json`).
+## Manual QA script
 
-```bash
-npm run build:web
-```
+1. First visit → Welcome → Open demo → optional Set up (try Save and Skip) → Overview is already populated.
+2. Companion (floating button): "Plan my training week" → Draft a routine → review → Approve and schedule → it appears in Workouts and the schedule.
+3. Companion: "Suggest a goal" → approve the suggested goal → Settings → Goals.
+4. Workouts → New routine (manual) → save as draft, then schedule it.
+5. Open today's session → Start workout → log sets → Finish. Move a session with a reason; its history shows both dates.
+6. Schedule → add a run or activity. History → tap a stat card to filter.
+7. Companion: "Plan my meals" → Draft a meal plan → approve → Meal plan tab: timetable and shopping list.
+8. Overview: add water; Fasting: start and end a fast.
+9. Refresh the page: everything is still there. Settings → Reset demo data restores the original data.
 
-This produces `apps/mobile/dist`. Vercel runs the same command.
+## Known gaps
 
-- **Without backend variables**, the site is a **read-only sample preview**. Every screen shows a banner: sample data, nothing saved, AI not connected.
-- **To go live**, set `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and `EXPO_PUBLIC_API_URL` in the Vercel project, then redeploy. Visitors then follow: Welcome → Get started → create account or sign in → optional "Set up your workspace" (first sign-in only) → workspace.
-- To refresh the sample snapshot:
+- The demo assistant is rule-based and returns fixed templates; it does not read your free text beyond a few keywords.
+- Data is per browser: another browser or device starts from the seed. Clearing site data resets it.
+- Native builds have not been produced here (no Xcode/Android SDK); the web export and iOS JS bundle build.
+- Reminders are local notifications only.
 
-```bash
-npm run sample:generate
-```
 
-## Verifying the live Supabase connection
+## First-run onboarding
 
-With `apps/api/.env` filled in, the API running (`npm run api:dev`) and two **confirmed** test accounts in the gitignored `.env.test-accounts` (`TEST_ACCOUNT_A_EMAIL/PASSWORD` plus `TEST_ACCOUNT_C_EMAIL/PASSWORD`, or `…_B_…`):
-
-```bash
-npm run verify:live -w @mova/api
-```
-
-It signs in as both accounts and checks persistence, per-user isolation (through the API **and** through Supabase's own REST interface), privilege limits, idempotency and a real Groq-backed AI turn. It prints PASS/FAIL lines and never prints credentials. It creates a few labelled test rows.
-
-## Configuration
-
-### 1. Supabase
-
-1. Create a **development** Supabase project, and a separate production project later (§8.0.3).
-2. Apply the migrations: `npx supabase link --project-ref <ref>`, then `npx supabase db push`.
-3. Under Authentication → Providers, keep **Email** enabled. Email confirmation is your choice: if it's on, new users confirm by email before their first sign-in. Under URL configuration, set the Site URL to the web URL and add `http://localhost:8081` and `mova://` as redirect URLs.
-4. Generate typed database bindings once the project exists: `npx supabase gen types typescript --linked > apps/api/src/db/database.types.ts`. These are not generated yet; see "Known gaps".
-
-### 2. API (`apps/api/.env`, and Vercel project environment variables)
-
-Copy `apps/api/.env.example` to `apps/api/.env` and fill in:
-
-| Variable | Secret? | Notes |
-|---|---|---|
-| `SUPABASE_URL` | No | Project URL |
-| `SUPABASE_PUBLISHABLE_KEY` | No | Publishable/anon key, used together with each user's JWT so RLS applies |
-| `GROQ_API_KEY` | **Yes** | Server only. Never put it in the app or in Git |
-| `GROQ_BASE_URL` | No | Default `https://api.groq.com/openai/v1` (https required, or localhost for tests) |
-| `GROQ_MODEL` | No | Default `openai/gpt-oss-120b` |
-| `APP_ORIGIN` | No | Comma-separated browser origins for CORS (Expo web/dev). Native apps don't send an Origin header |
-| `API_ENV` | No | `development` / `preview` / `production` |
-
-Run locally:
-
-```bash
-npm run api:dev
-```
-
-This serves the same handler as Vercel at `http://localhost:3000/api/v1/*`. `GET /api/v1/health` is public; every other endpoint needs `Authorization: Bearer <supabase access token>`.
-
-On Vercel, create a project with **Root Directory = `apps/api`** and set the variables above per environment.
-
-### 3. Mobile app (`apps/mobile/.env`)
-
-Copy `apps/mobile/.env.example` to `apps/mobile/.env`:
-
-- `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: public values only.
-- `EXPO_PUBLIC_API_URL`: the API base URL (for example `http://<your-LAN-IP>:3000` when using a phone with a local API).
-
-Then start the app:
-
-```bash
-npm run mobile
-```
-
-Without configuration the app shows a "not configured" screen listing the missing variables.
-
-## Vercel environment variables
-
-Two Vercel projects are involved (ADR-004 / ADR-015), both deployed to production: the website `mova-fitness` (https://mova-fitness.vercel.app) and the API `mova-api` (https://mova-api.vercel.app).
-
-**API project `mova-api`** (Root Directory `apps/api`, framework preset "Other"). Set for Production (and Preview if wanted):
-
-| Variable | Value | Secret? |
-|---|---|---|
-| `SUPABASE_URL` | `https://vuwaaopqzzxjuykverkm.supabase.co` | No |
-| `SUPABASE_PUBLISHABLE_KEY` | the project's publishable key (`sb_publishable_…`) | No (public by design) |
-| `GROQ_API_KEY` | your Groq key | **Yes — mark Sensitive** |
-| `GROQ_BASE_URL` | `https://api.groq.com/openai/v1` | No |
-| `GROQ_MODEL` | `openai/gpt-oss-120b` | No |
-| `APP_ORIGIN` | the website URL, e.g. `https://mova-fitness.vercel.app` (comma-separate several) | No |
-| `API_ENV` | `production` | No |
-
-**Website project `mova-fitness`** (repo root). Set, then redeploy, to switch from the sample preview to the live app:
-
-| Variable | Value |
-|---|---|
-| `EXPO_PUBLIC_SUPABASE_URL` | `https://vuwaaopqzzxjuykverkm.supabase.co` |
-| `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | the publishable key (public; it is compiled into the bundle) |
-| `EXPO_PUBLIC_API_URL` | the `mova-api` production URL, with no trailing slash |
-
-Never set a service-role key anywhere, and never give `GROQ_API_KEY` an `EXPO_PUBLIC_` prefix.
-
-## Manual QA script (§11.4 essential scenarios)
-
-1. Fresh visit → Welcome → Get started → create an account → "Set up your workspace" (optional, or Skip) → Overview. Sign out and sign in again: you go straight to your workspace with your data, and onboarding isn't shown again.
-2. Companion: "I want to train four times a week and improve my running" → approve the suggested goals.
-3. Workouts → Create with AI → review → edit a field → Check my schedule → Approve and schedule.
-4. Workouts → Build manually → save as a draft (no sessions created).
-5. Open today's session → Start workout → log sets (kill the app mid-way and reopen: sets are still there) → Finish.
-6. Move a session with a reason → its history shows the original and new dates → complete it on the new day.
-7. Log activity → a past run with an unknown distance → it shows as "Added later" with no planned date.
-8. Meal plan with AI: a Nigerian-food cutting week → approve → timetable and consolidated shopping list, with no calories.
-9. Settings → enable hydration and fasting → log water → disable hydration → the overview hides it and the history remains.
-10. History → Monthly review → summarise → save → "Plan next month with AI".
-11. Turn on airplane mode during a save → the error banner keeps your input → retry → no duplicate records.
-
-## Known gaps and blockers
-
-- **Production is connected to the live backend.** `mova-fitness` is built with the three `EXPO_PUBLIC_*` variables below and talks to `mova-api`, which holds the server-side variables (including `GROQ_API_KEY`, stored as Sensitive). For `mova-api` the project settings are: Root Directory `apps/api`, install `cd ../.. && npm ci`, build `cd ../.. && npm run build:shared && mkdir -p apps/api/public && printf "User-agent: *\nDisallow: /\n" > apps/api/public/robots.txt`, output directory `public`. Deploy each project with `vercel deploy --prod` from the repository root (the root `.vercel/repo.json` links `mova-fitness`; for `mova-api` set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID`). In Supabase → Authentication → URL Configuration, the Site URL is the website URL and `http://localhost:8081/**` stays in Redirect URLs for local development.
-- **Generated Supabase types** are not committed (spec §8.0.3). They need a linked project; until then, DB rows are mapped to typed DTOs by hand in `apps/api/src/db/mappers.ts`.
-- **Mobile UI tests** (§11.2) cover the key components so far (status labels, the planned-vs-actual card, unknown values, proposal and conflict labels, and the routine editor against the shared schema). Full screen-flow tests with mocked API responses are still to be added.
-- **Native builds** have not been produced: this machine has no Xcode or Android SDK. The iOS JavaScript bundle builds successfully (`npx expo export --platform ios`).
-- **Push notifications** are local-only (`expo-notifications`). Remote push channels are an open decision (§13 item 6).
-- **Data export and deletion** expectations (§13 item 10) are not implemented.
-- Decisions marked **Proposed** in `ARCHITECTURE_DECISIONS.md` need product-owner confirmation.
-
-## AI companion streaming
-
-`POST /api/v1/ai/turn/stream` is the streaming twin of `POST /api/v1/ai/turn` (newline-delimited JSON: `delta` events with the reply so far, then `done` with the saved conversation, or `error`). Groq only streams tokens when no `response_format` is set, so the stream route puts the JSON schema in the prompt and still validates the final output with Zod (one schema-enforced repair attempt). Approval flows are unchanged: goal, routine and meal-plan suggestions stay drafts until the user approves them. The app falls back to the plain endpoint if the stream route is unavailable. Motion respects the OS reduced-motion setting.
-
-## Guest demo (no account)
-
-"Get started" on the Welcome screen starts a **guest session** with Supabase anonymous sign-ins (`signInAnonymously`). A guest is a real `auth.users` row with `is_anonymous = true` and no email or password, so the API and row level security work exactly as for an account: a guest can only read and write their own rows, and the service-role key is never used.
-
-- **What persists:** the guest's session token lives in the browser's local storage, so a refresh or a later visit in the same browser returns to the same workspace. Another browser/device, or cleared site data, starts a new empty demo.
-- **Retention:** guests are deleted after 7 days (`purge_stale_guests()`, scheduled daily by pg_cron when that extension is enabled: run `select cron.schedule('purge-stale-guests', '17 3 * * *', 'select public.purge_stale_guests()');` once). Deleting the auth user cascades to every table. A guest can erase their workspace at once from Settings (`DELETE /api/v1/guest` → `delete_guest_account()`).
-- **Cost and abuse limits:** every AI call is recorded by `reserve_ai_call()` (migration `20261016120000_guest_demo.sql`). Guests are limited to 20 AI calls per hour, 60 per day, and the demo as a whole to 3000 per day; registered users are never limited. Supabase limits anonymous sign-ins to 30 per hour per IP (`auth.rate_limit.anonymous_users`); add a CAPTCHA in Auth settings if the demo is shared widely.
-- **Required Supabase settings:** Authentication → Sign In / Providers → **Allow anonymous sign-ins** on; run the guest_demo migration (SQL editor or `supabase db push`).
-- Existing email sign-in still works through "I already have an account" on the Welcome screen and in Settings.
+New people see `/onboarding` once (name, "used a fitness app before?", "do you have a routine?"). Progress and answers are kept in AsyncStorage under `mova.onboarding` (`apps/mobile/src/lib/onboarding.ts`); the entry gate in `app/index.tsx` redirects until `completed` is true. The workspace itself starts empty (`createLocalApi({ sample: false })`); the engine's sample data is only used by its own tests. "Reset demo data" in Settings wipes the workspace and the onboarding answers, so onboarding runs again. The demo storage version was bumped to 2, which discards any sample-seeded data saved by earlier builds.

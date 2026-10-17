@@ -1,10 +1,12 @@
 import { router, Stack } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Banner, Button, ErrorState, LoadingState, Screen, Section, Segmented, Text, TextField, ToggleRow } from '@/components';
-import { useProfile, useUpdatePreferences } from '@/hooks/api';
-import { errorMessage } from '@/lib/api';
-import { useAuth } from '@/lib/auth';
-import { GUEST_RETENTION_DAYS } from '@/lib/config';
+import { Banner, Button, Divider, ErrorState, ExpandableCard, LoadingState, IconButton, PressableCard, Row, RuneIcon, Screen, SheetPage, Section, Segmented, Text, TextField, ToggleRow } from '@/components';
+import { GoalsPanel } from '@/app/goals';
+import { useOnboarding } from '@/lib/onboarding';
+import { useGoals, useProfile, useUpdatePreferences } from '@/hooks/api';
+import { errorMessage, resetDemo } from '@/lib/api';
+import { copy } from '@/lib/copy';
 import { deviceTimeZone } from '@/lib/format';
 import { ensureNotificationPermission } from '@/lib/reminders';
 
@@ -12,14 +14,16 @@ import { ensureNotificationPermission } from '@/lib/reminders';
  * WF-16 basic preferences. Changes affect future behaviour only; turning a
  * module off never deletes its history.
  */
-export default function Settings() {
+function SettingsBody({ onOpenGoals }: { onOpenGoals: () => void }) {
   const profile = useProfile();
+  const goals = useGoals();
   const update = useUpdatePreferences();
-  const { signOut, session, isGuest, endGuest } = useAuth();
-  const [erasing, setErasing] = useState(false);
-  const [eraseError, setEraseError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const onboarding = useOnboarding();
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
   const [equipment, setEquipment] = useState<string | null>(null);
-  const [notes, setNotes] = useState<string | null>(null);
   const [permissionNote, setPermissionNote] = useState<string | null>(null);
 
   if (profile.isPending) return <LoadingState />;
@@ -30,6 +34,11 @@ export default function Settings() {
       </Screen>
     );
   const p = profile.data;
+  const active = (goals.data ?? []).filter((g) => g.status === 'active');
+  const goalSummary =
+    active.length === 0
+      ? { empty: true, text: 'No goals set yet. Tap to add one.', label: 'Goals. None set yet. Open goals' }
+      : { empty: false, text: active.map((g) => g.title).join(' · '), label: `Goals: ${active.map((g) => g.title).join(', ')}. Open goals` };
   const device = deviceTimeZone();
 
   async function toggleReminders(on: boolean) {
@@ -37,7 +46,7 @@ export default function Settings() {
     if (on) {
       const granted = await ensureNotificationPermission();
       if (!granted) {
-        setPermissionNote('Notifications are blocked for Mova. You can allow them in your device settings; everything else keeps working.');
+        setPermissionNote('Notifications are blocked. Allow them in device settings.');
         return;
       }
     }
@@ -51,9 +60,10 @@ export default function Settings() {
       {update.isSuccess ? <Banner tone="success">Saved.</Banner> : null}
 
       <Section title="Units">
-        <Segmented label="Weight" options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]} value={p.weightUnit} onChange={(weightUnit) => update.mutate({ weightUnit })} />
-        <Segmented label="Distance" options={[{ value: 'km', label: 'km' }, { value: 'mi', label: 'mi' }]} value={p.distanceUnit} onChange={(distanceUnit) => update.mutate({ distanceUnit })} />
+        <Segmented inline label="Weight" options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]} value={p.weightUnit} onChange={(weightUnit) => update.mutate({ weightUnit })} />
+        <Segmented inline label="Distance" options={[{ value: 'km', label: 'km' }, { value: 'mi', label: 'mi' }]} value={p.distanceUnit} onChange={(distanceUnit) => update.mutate({ distanceUnit })} />
         <Segmented
+          inline
           label="Water"
           options={[{ value: 'ml', label: 'ml' }, { value: 'l', label: 'L' }, { value: 'fl_oz', label: 'fl oz' }]}
           value={p.volumeUnit}
@@ -61,98 +71,111 @@ export default function Settings() {
         />
       </Section>
 
+      <Divider />
+
       <Section title="Time zone">
         <Text variant="body">{p.timezone}</Text>
         {device !== p.timezone ? (
           <Button label={`Use this device's time zone (${device})`} size="sm" variant="secondary" onPress={() => update.mutate({ timezone: device })} />
         ) : null}
-        <Text variant="caption" color="inkTertiary">
-          Planned sessions keep the local date and time you chose.
-        </Text>
+        
       </Section>
 
-      <Section title="Training">
+      <Divider />
+
+      <Section title="Goals">
+        <PressableCard accessibilityLabel={goalSummary.label} onPress={onOpenGoals}>
+          <Row style={{ justifyContent: 'space-between' }}>
+            <Text variant="small" color={goalSummary.empty ? 'inkTertiary' : 'ink'} style={{ flex: 1 }}>
+              {goalSummary.text}
+            </Text>
+            <RuneIcon name="chevron-right" size={20} color="inkTertiary" />
+          </Row>
+        </PressableCard>
+      </Section>
+
+      <Divider />
+
+      <Section title="Training equipment">
         <TextField
-          label="Equipment you have access to"
-          placeholder="e.g. Dumbbells, barbell, resistance bands"
+          label="Training equipment"
+          hideLabel
+          placeholder="Enter the equipment you use"
           value={equipment ?? p.equipment.join(', ')}
           onChangeText={setEquipment}
+          // Saved when the field loses focus; there is no separate Save step.
+          onBlur={() => {
+            if (equipment === null) return;
+            update.mutate({ equipment: equipment.split(',').map((x) => x.trim()).filter(Boolean) });
+          }}
         />
-        <TextField
-          label="Anything the AI should know"
-          placeholder="e.g. Old knee injury — avoid deep lunges"
-          value={notes ?? p.trainingNotes ?? ''}
-          onChangeText={setNotes}
-          multiline
-        />
-        <Button
-          label="Save training preferences"
-          size="sm"
-          variant="secondary"
-          loading={update.isPending}
-          onPress={() =>
-            update.mutate({
-              equipment: (equipment ?? p.equipment.join(',')).split(',').map((s) => s.trim()).filter(Boolean),
-              trainingNotes: (notes ?? p.trainingNotes ?? '').trim() || null,
-            })
-          }
-        />
-        <Button label="Goals" size="sm" variant="ghost" onPress={() => router.push('/goals')} />
       </Section>
 
-      <Section title="Optional modules">
-        <ToggleRow label="Hydration" description="Water goal and intake on your overview." value={p.hydrationEnabled} onChange={(hydrationEnabled) => update.mutate({ hydrationEnabled })} />
-        <ToggleRow label="Intermittent fasting" description="Fasting window and status on your overview." value={p.fastingEnabled} onChange={(fastingEnabled) => update.mutate({ fastingEnabled })} />
-        <Text variant="caption" color="inkTertiary">
-          Turning a module off hides it. Your past entries are kept.
-        </Text>
-        {p.hydrationEnabled ? <Button label="Open hydration" size="sm" variant="ghost" onPress={() => router.push('/hydration')} /> : null}
-        {p.fastingEnabled ? <Button label="Open fasting" size="sm" variant="ghost" onPress={() => router.push('/fasting')} /> : null}
-      </Section>
+      <Divider />
+
+      <ExpandableCard title="Intermittent fasting" summary={p.fastingEnabled ? 'On' : 'Off'}>
+        <ToggleRow label="Intermittent fasting" description="Fasting window and status." value={p.fastingEnabled} onChange={(fastingEnabled) => update.mutate({ fastingEnabled })} />
+        {p.fastingEnabled ? <Button label="Set time" size="sm" variant="secondary" onPress={() => router.push('/fasting')} /> : null}
+      </ExpandableCard>
+
+      <Divider />
 
       <Section title="Reminders">
         <ToggleRow
           label="Workout reminders"
-          description={`A notification ${p.workoutReminderLeadMinutes} minutes before planned sessions that have a time.`}
+          description={`${p.workoutReminderLeadMinutes} minutes before a session.`}
           value={p.workoutRemindersEnabled}
           onChange={toggleReminders}
         />
         {permissionNote ? <Banner tone="warning">{permissionNote}</Banner> : null}
       </Section>
 
-      <Section title="Account">
-        {isGuest ? (
+      <Divider />
+
+      <Section>
+        {resetError ? <Banner tone="error">{resetError}</Banner> : null}
+        {confirmReset ? (
           <>
-            <Banner tone="info" title="You're using a demo workspace">
-              {`It has no email or password. Your plans and chats are stored privately in this browser and deleted automatically after ${GUEST_RETENTION_DAYS} days. Clearing this site's data or using another device starts a new, empty demo.`}
-            </Banner>
-            {eraseError ? <Banner tone="error">{eraseError}</Banner> : null}
+            <Text variant="bodyStrong">{copy.demo.resetConfirm}</Text>
             <Button
-              label="Erase my demo data and start over"
+              label={copy.actions.confirm}
               variant="danger"
-              loading={erasing}
+              loading={resetting}
               onPress={() => {
-                setEraseError(null);
-                setErasing(true);
-                endGuest()
-                  .then(() => router.replace('/welcome'))
-                  .catch((e) => setEraseError(errorMessage(e)))
-                  .finally(() => setErasing(false));
+                setResetError(null);
+                setResetting(true);
+                resetDemo()
+                  .then(() => {
+                    onboarding.reset();
+                    queryClient.clear();
+                    setConfirmReset(false);
+                    if (router.canDismiss()) router.dismissAll();
+                    router.replace('/');
+                  })
+                  .catch((e) => setResetError(errorMessage(e)))
+                  .finally(() => setResetting(false));
               }}
             />
-            <Button label="I have an account — sign in" variant="ghost" onPress={() => router.push('/sign-in')} />
+            <Button label={copy.actions.cancel} variant="ghost" disabled={resetting} onPress={() => setConfirmReset(false)} />
           </>
         ) : (
-          <>
-            {session?.user.email ? (
-              <Text variant="small" color="inkSecondary">
-                Signed in as {session.user.email}
-              </Text>
-            ) : null}
-            <Button label="Sign out" variant="danger" onPress={() => signOut().then(() => router.replace('/'))} />
-          </>
+          <Button label={copy.demo.resetAction} variant="secondary" onPress={() => setConfirmReset(true)} />
         )}
       </Section>
     </Screen>
+  );
+}
+
+export default function Settings() {
+  const [view, setView] = useState<'main' | 'goals'>('main');
+  const [addOpen, setAddOpen] = useState(false);
+  return (
+    <SheetPage
+      title={view === 'goals' ? 'Goals' : 'Settings'}
+      onBack={view === 'goals' ? () => setView('main') : undefined}
+      action={view === 'goals' ? <IconButton icon="plus" label="Add a goal" variant="solid" onPress={() => setAddOpen(true)} /> : undefined}
+    >
+      {view === 'goals' ? <GoalsPanel addOpen={addOpen} setAddOpen={setAddOpen} /> : <SettingsBody onOpenGoals={() => setView('goals')} />}
+    </SheetPage>
   );
 }

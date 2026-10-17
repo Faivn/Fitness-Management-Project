@@ -1,8 +1,7 @@
-import type { ApiErrorBody } from '@mova/shared';
+import { ApiError as EngineApiError, createLocalApi, type LocalApi } from '@mova/engine';
 import { randomUUID } from 'expo-crypto';
-import { SampleWriteError, sampleApi } from '@/sample/sampleApi';
-import { config, sampleMode } from './config';
-import { supabase } from './supabase';
+import { deviceTimeZone } from './format';
+import { openDemoStorage } from './storage';
 
 export class ApiError extends Error {
   constructor(
@@ -22,64 +21,37 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Data layer. The app talks to ONE function, `api(method, path, body)`, with the
+ * same routes and JSON contracts a server would expose. Today it is served by
+ * the local demo engine (browser storage, no network or accounts). To bring a
+ * backend back, replace `local()` below with a `fetch` to it — no screen changes.
+ */
+let instance: Promise<LocalApi> | null = null;
+function local(): Promise<LocalApi> {
+  instance ??= openDemoStorage().then((storage) => createLocalApi({ storage, timezone: deviceTimeZone(), aiDelayMs: 700, sample: false }));
+  return instance;
+}
+
 /** One key per user intent; reuse it when retrying the same action. */
 export function newIdempotencyKey(): string {
   return randomUUID();
 }
 
-async function token(): Promise<string | null> {
-  const { data } = await supabase.auth.getSession();
-  return data.session?.access_token ?? null;
-}
-
-/** AI-backed endpoints can legitimately take longer than ordinary reads and writes. */
-function timeoutFor(path: string): number {
-  return /^(ai\/|routine-proposals|meal-plan-proposals|monthly-reviews\/generate)/.test(path) ? 70_000 : 25_000;
-}
-
 export async function api<T>(method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', path: string, body?: unknown): Promise<T> {
-  if (sampleMode) {
-    try {
-      return await sampleApi<T>(method, path);
-    } catch (e) {
-      if (e instanceof SampleWriteError) {
-        throw new ApiError(
-          403,
-          'sample_preview',
-          "This is a read-only preview with sample data, so changes aren't saved and the AI isn't connected. Everything you can see works the same way once Mova is connected to its backend.",
-        );
-      }
-      throw new ApiError(404, 'not_found', "This part of the sample preview doesn't have sample data.");
-    }
-  }
-  const t = await token();
-  if (!t) throw new ApiError(401, 'unauthorized', 'Sign in to continue.');
-  let res: Response;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutFor(path));
+  const demo = await local();
   try {
-    res = await fetch(`${config.apiUrl}/api/v1/${path}`, {
-      method,
-      signal: controller.signal,
-      headers: { authorization: `Bearer ${t}`, 'content-type': 'application/json', accept: 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    return await demo.call<T>(method, path, body);
   } catch (e) {
-    if (e instanceof Error && e.name === 'AbortError') {
-      throw new ApiError(0, 'timeout', 'Mova took too long to respond. Nothing you entered has been lost — try again.');
-    }
-    throw new ApiError(0, 'network', "Couldn't reach Mova. Check your connection — nothing you entered has been lost.");
-  } finally {
-    clearTimeout(timer);
+    if (e instanceof EngineApiError) throw new ApiError(e.status, e.code, e.message, e.details);
+    throw e;
   }
-  const text = await res.text();
-  const json = text ? (JSON.parse(text) as unknown) : null;
-  if (!res.ok) {
-    const err = (json as ApiErrorBody | null)?.error;
-    if (res.status === 401) await supabase.auth.refreshSession().catch(() => undefined);
-    throw new ApiError(res.status, err?.code ?? 'server_error', err?.message ?? 'Something went wrong.', err?.details);
-  }
-  return json as T;
+}
+
+/** Deletes everything stored on this device and starts again with an empty workspace. */
+export async function resetDemo(): Promise<void> {
+  const demo = await local();
+  await demo.reset();
 }
 
 export function errorMessage(e: unknown): string {

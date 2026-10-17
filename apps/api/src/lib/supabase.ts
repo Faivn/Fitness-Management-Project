@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { EngineUser } from '@mova/engine';
 import type { Env } from '../config/env.js';
 
 /**
@@ -13,10 +14,7 @@ export function createUserClient(env: Env, accessToken: string): SupabaseClient 
   });
 }
 
-export interface VerifiedUser {
-  id: string;
-  email: string | null;
-}
+export type VerifiedUser = EngineUser;
 
 /** Verify an access token with Supabase Auth and derive the user id from it. */
 export async function verifyAccessToken(env: Env, accessToken: string): Promise<VerifiedUser | null> {

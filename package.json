@@ -2,19 +2,18 @@
   "name": "mova",
   "private": true,
   "version": "0.1.0",
-  "description": "Mova — AI-powered personal fitness workspace (monorepo).",
+  "description": "Mova \u2014 AI-powered personal fitness workspace (monorepo).",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build:shared": "npm run build -w @mova/shared",
+    "build:shared": "npm run build -w @mova/shared && npm run build -w @mova/engine",
     "typecheck": "npm run build:shared && npm run typecheck --workspaces --if-present",
     "test": "npm run build:shared && npm run test --workspaces --if-present",
     "mobile": "npm run start -w mobile",
     "api:dev": "npm run dev -w @mova/api",
     "test:db": "vitest run --root supabase",
-    "sample:generate": "npm run build:shared && node --import tsx apps/api/src/dev/generateSampleSnapshot.ts",
     "build:web": "npm run build:shared && npm run build:web -w mobile"
   },
   "engines": {

@@ -106,3 +106,11 @@ Guarantees enforced in the database:
 - When the app has no backend configuration (no `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or `EXPO_PUBLIC_API_URL`), it runs a **read-only sample preview**. It serves `apps/mobile/src/sample/snapshot.json`, which is generated from the real API by `npm run sample:generate`: real handler, migrations, RLS and functions on an embedded Postgres, with a canned sample AI. A banner on every screen labels it as sample data. Saving shows a clear "read-only preview" message, and no AI is called.
 - Setting the three variables in the Vercel project and redeploying switches the same site to the live app, with sign-in (ADR-014).
 **Replaces:** the earlier local "demo login" approach, which was removed.
+
+## ADR-016 — Recruiter demo: local-storage engine, no backend or accounts
+
+- **Status:** Accepted.
+- **Context:** Mova is shown to recruiters. Sign-up, a hosted database and a paid AI key are friction and cost, and a public AI endpoint is an abuse risk.
+- **Decision:** Extract the use cases into `@mova/engine`, written against a small `Db` interface. The app runs the engine in the browser on a local-storage database (`createLocalApi`), seeded with realistic data, with a deterministic, clearly-labelled demo assistant instead of a live AI. Accounts, Supabase Auth, anonymous sessions, the API client, the read-only sample snapshot and secure-storage code were removed from the app. The app has one AI entry point: the floating companion; routine and meal drafts are created from inside it.
+- **Why not a fresh local implementation:** reusing the engine keeps one set of business rules (approval gates, immutable history, idempotency). `apps/api` and `supabase/` remain as an optional reference backend that shares the engine, so a server can return by swapping `api()` in `apps/mobile/src/lib/api.ts`.
+- **Consequences:** Data is per browser and disposable; AI is simulated; nothing sensitive is stored. Approval flows are unchanged: AI output is a draft until the user approves it.

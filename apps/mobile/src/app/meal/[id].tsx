@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { ErrorState, FAB_CLEARANCE, FloatingChatButton, LoadingState, MealPlanView, Screen, Text } from '@/components';
+import { ErrorState, LoadingState, MealPlanView, Screen, Text } from '@/components';
 import { useMealPlan } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -17,7 +17,7 @@ export default function MealPlanScreen() {
     );
   const p = plan.data;
   return (
-    <Screen refreshing={plan.isRefetching} onRefresh={() => plan.refetch()} overlay={<FloatingChatButton />} endInset={FAB_CLEARANCE}>
+    <Screen refreshing={plan.isRefetching} onRefresh={() => plan.refetch()}>
       <Stack.Screen options={{ title: p.title }} />
       <Text variant="small" color="inkSecondary">
         {formatDate(p.startDate)} – {formatDate(p.endDate)} · {p.status === 'active' ? 'Current plan' : 'Archived — kept for your records'}

@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { addDays, describeConflict, type MealPlanEntryDto, type ScheduleChange, type ScheduleConflict, type WorkoutSession } from '@mova/shared';
+import { copy } from '@/lib/copy';
 import { ACTIVITY_LABELS, DAY_SHORT, formatDate, formatSeconds, formatTimeRange } from '@/lib/format';
 import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
 import { Card, PressableCard, Row } from './Layout';
@@ -102,11 +103,11 @@ export function ChangeTimeline({ changes, originalDate }: { changes: ScheduleCha
   if (!originalDate) return null;
   return (
     <View style={{ gap: spacing.sm }}>
-      <TimelineItem icon="flag-outline" title={`Originally planned for ${formatDate(originalDate)}`} />
+      <TimelineItem icon="flag" title={`Originally planned for ${formatDate(originalDate)}`} />
       {changes.map((c) => (
         <TimelineItem
           key={c.id}
-          icon={c.changeType === 'rescheduled' ? 'swap-horizontal' : c.changeType === 'marked_missed' ? 'remove-circle-outline' : 'close-circle-outline'}
+          icon={c.changeType === 'rescheduled' ? 'swap' : c.changeType === 'marked_missed' ? 'circle-alert' : 'circle-x'}
           title={
             c.changeType === 'rescheduled'
               ? `Moved from ${formatDate(c.oldDate)}${c.oldTime ? ` ${c.oldTime}` : ''} to ${formatDate(c.newDate)}${c.newTime ? ` ${c.newTime}` : ''}`
@@ -124,7 +125,7 @@ export function ChangeTimeline({ changes, originalDate }: { changes: ScheduleCha
 function TimelineItem({ icon, title, detail }: { icon: React.ComponentProps<typeof Icon>['name']; title: string; detail?: string }) {
   return (
     <Row style={{ alignItems: 'flex-start' }}>
-      <Icon name={icon} size={18} color="inkSecondary" />
+      <Icon name={icon} size={20} color="inkSecondary" />
       <View style={{ flex: 1 }}>
         <Text variant="small">{title}</Text>
         {detail ? (
@@ -154,18 +155,13 @@ export function ConflictList({ conflicts }: { conflicts: ScheduleConflict[] }) {
 }
 
 /** Labels a proposal so it is never mistaken for a saved plan. */
-export function ProposalBanner({ version, status }: { version: number; status: string }) {
+export function ProposalBanner({ status }: { version?: number; status: string }) {
   return (
     <View style={styles.proposal}>
-      <Icon name="sparkles-outline" size={16} color="info" />
+      <Icon name="sparkles" size={16} color="info" />
       <Text variant="label" color="info" style={{ flex: 1 }}>
         {status === 'draft' ? 'Proposal — not saved yet' : `Proposal ${status}`}
       </Text>
-      <View style={styles.versionChip}>
-        <Text variant="caption" color="info">
-          v{version}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -173,21 +169,8 @@ export function ProposalBanner({ version, status }: { version: number; status: s
 export function AIDisclaimer() {
   return (
     <Text variant="caption" color="inkTertiary">
-      Mova's AI can make mistakes and isn't medical advice. Nothing is saved until you approve it.
+      {copy.ai.disclaimer}
     </Text>
-  );
-}
-
-/** Persistent AI entry point on the overview (research: WHOOP). */
-export function AIEntryBar({ prompt = 'Ask Mova anything…' }: { prompt?: string }) {
-  return (
-    <Pressable accessibilityRole="button" accessibilityLabel="Open the Mova companion" onPress={() => router.push('/companion')} style={styles.aiBar}>
-      <Mascot mood="thinking" size={32} animated={false} />
-      <Text variant="body" color="inkTertiary" style={{ flex: 1 }}>
-        {prompt}
-      </Text>
-      <Icon name="arrow-forward" size={18} color="inkSecondary" />
-    </Pressable>
   );
 }
 
@@ -220,30 +203,18 @@ export function MascotNote({ mood, children }: { mood: React.ComponentProps<type
 const styles = StyleSheet.create({
   actual: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.hairline, paddingTop: spacing.sm, gap: 2 },
   week: { flexDirection: 'row', gap: spacing.xs },
-  day: { flex: 1, flexBasis: 0, alignItems: 'center', gap: 2, paddingVertical: spacing.sm, minHeight: TOUCH_TARGET + spacing.lg, borderRadius: radii.sm, backgroundColor: colors.canvas },
-  daySelected: { backgroundColor: colors.ink },
+  day: { flex: 1, flexBasis: 0, alignItems: 'center', gap: 2, paddingVertical: spacing.sm, minHeight: TOUCH_TARGET + spacing.lg, borderRadius: radii.lg, backgroundColor: 'rgba(255, 255, 255, 0.68)' },
+  daySelected: { backgroundColor: colors.rose },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  conflicts: { backgroundColor: colors.warningWash, borderRadius: radii.md, padding: spacing.base, gap: spacing.xs },
+  conflicts: { backgroundColor: colors.warningWash, borderRadius: radii.lg, padding: spacing.base, gap: spacing.xs },
   proposal: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     backgroundColor: colors.infoWash,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  versionChip: { paddingHorizontal: spacing.sm, borderRadius: radii.pill, borderWidth: 1, borderColor: colors.info },
-  aiBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: 52,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.pill,
-    backgroundColor: colors.canvas,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-  },
-  bubble: { flex: 1, backgroundColor: colors.brandWash, borderRadius: radii.md, padding: spacing.md },
+  bubble: { flex: 1, backgroundColor: colors.canvas, borderRadius: radii.xl, padding: spacing.md },
 });

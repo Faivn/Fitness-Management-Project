@@ -40,16 +40,32 @@ const WANTED = {
   'circle-dot': 'circle-dot',
   'circle-question': 'circle-question-mark',
   bolt: 'zap',
+  archive: 'archive',
+  avatar: 'circle-user',
+  'arrow-up': 'arrow-up',
+  'arrow-down': 'arrow-down',
+  trash: 'trash',
+  swap: 'arrow-left-right',
+  flag: 'flag',
+  'skip-forward': 'skip-forward',
+  'cloud-upload': 'cloud-upload',
+  edit: 'pencil',
+  // Filled variants for the navigation bar.
+  'overview-fill': { suffix: 'house', variant: 'fill' },
+  'workouts-fill': { suffix: 'zap', variant: 'fill' },
+  'meals-fill': { suffix: 'shopping-basket', variant: 'fill' },
 };
 
 const out = {};
-for (const [name, suffix] of Object.entries(WANTED)) {
-  const matches = ICONS.filter((i) => i.variants.normal && (i.id === suffix || i.id.endsWith(`-${suffix}`)));
+for (const [name, want] of Object.entries(WANTED)) {
+  const suffix = typeof want === 'string' ? want : want.suffix;
+  const variant = typeof want === 'string' ? 'normal' : want.variant;
+  const matches = ICONS.filter((i) => i.variants[variant] && (i.id === suffix || i.id.endsWith(`-${suffix}`)));
   // Prefer an exact `<category>-<suffix>` id; otherwise require a single match.
   const exact = matches.filter((i) => i.id.split('-').slice(1).join('-') === suffix);
   const pick = exact.length === 1 ? exact[0] : matches.length === 1 ? matches[0] : null;
   if (!pick) throw new Error(`Rune icon "${suffix}" for "${name}" is ambiguous or missing: ${matches.map((m) => m.id).join(', ') || 'none'}`);
-  const v = getIconById(pick.id).variants.normal;
+  const v = getIconById(pick.id).variants[variant];
   out[name] = { id: pick.id, viewBox: v.viewBox, markup: v.markup.replace(/\r?\n/g, '') };
 }
 

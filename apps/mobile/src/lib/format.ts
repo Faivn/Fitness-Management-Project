@@ -12,6 +12,12 @@ export function formatDate(localDate: string | null | undefined, withYear = fals
   return `${DAY_SHORT[dow]} ${d} ${MONTHS[m - 1]}${withYear ? ` ${y}` : ''}`;
 }
 
+/** "12 Oct": day and month only, for ranges whose days are shown elsewhere. */
+export function formatDayMonth(localDate: string): string {
+  const [, m, d] = localDate.split('-').map(Number) as [number, number, number];
+  return `${d} ${MONTHS[m - 1]}`;
+}
+
 export function formatMonth(localDate: string): string {
   const [y, m] = localDate.split('-').map(Number) as [number, number];
   return `${MONTHS[m - 1]} ${y}`;

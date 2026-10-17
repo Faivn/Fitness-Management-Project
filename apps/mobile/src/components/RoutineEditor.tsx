@@ -1,3 +1,4 @@
+import { FieldToneContext } from './fieldTone';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { ActivityType, PlannedExercise, PlannedSession, RoutinePlan, WeightUnit } from '@mova/shared';
 import { ACTIVITY_LABELS, DAY_SHORT } from '@/lib/format';
@@ -40,39 +41,48 @@ export function RoutineEditor({
   onChange,
   errors,
   weightUnit,
+  only,
 }: {
   plan: RoutinePlan;
   onChange: (p: RoutinePlan) => void;
   errors: Record<string, string>;
   weightUnit: WeightUnit;
+  /** Edit just this training day: hides routine-level fields and day add/remove. */
+  only?: number;
 }) {
   const setSession = (i: number, s: PlannedSession) => onChange({ ...plan, sessions: plan.sessions.map((x, j) => (j === i ? s : x)) });
 
   return (
-    <View style={{ gap: spacing.lg }}>
-      <TextField label="Routine name" value={plan.title} onChangeText={(title) => onChange({ ...plan, title })} error={errors.title} />
-      <TextField
-        label="Purpose (optional)"
-        value={plan.purpose ?? ''}
-        onChangeText={(purpose) => onChange({ ...plan, purpose })}
-        multiline
-      />
+    <View style={{ gap: spacing.xl }}>
+      {only === undefined ? (
+        <>
+          <TextField label="Routine name" value={plan.title} onChangeText={(title) => onChange({ ...plan, title })} error={errors.title} />
+          <TextField
+            label="Purpose (optional)"
+            value={plan.purpose ?? ''}
+            onChangeText={(purpose) => onChange({ ...plan, purpose })}
+            multiline
+          />
+        </>
+      ) : null}
 
-      {plan.sessions.map((s, i) => (
+      {plan.sessions.map((s, i) => only !== undefined && i !== only ? null : (
         <Card key={i}>
-          <Row style={{ justifyContent: 'space-between' }}>
-            <Text variant="label">Training day {i + 1}</Text>
-            <Button
-              label="Remove day"
-              size="sm"
-              variant="ghost"
-              disabled={plan.sessions.length === 1}
-              onPress={() => onChange({ ...plan, sessions: plan.sessions.filter((_, j) => j !== i) })}
-            />
-          </Row>
+          {only === undefined ? (
+            <Row style={{ justifyContent: 'space-between' }}>
+              <Text variant="label">Training day {i + 1}</Text>
+              <Button
+                label="Remove day"
+                size="sm"
+                variant="ghost"
+                disabled={plan.sessions.length === 1}
+                onPress={() => onChange({ ...plan, sessions: plan.sessions.filter((_, j) => j !== i) })}
+              />
+            </Row>
+          ) : null}
           <TextField label="Session name" value={s.title} onChangeText={(title) => setSession(i, { ...s, title })} error={errors[`sessions.${i}.title`]} />
           <View style={{ gap: spacing.xs }}>
-            <Text variant="label">Day</Text>
+            <Text variant="label" style={{ fontWeight: '500' }}>Day</Text>
             <Row style={{ flexWrap: 'wrap' }}>
               {DAY_SHORT.map((d, dow) => (
                 <Chip key={d} label={d} selected={s.dayOfWeek === dow} onPress={() => setSession(i, { ...s, dayOfWeek: dow })} />
@@ -110,7 +120,7 @@ export function RoutineEditor({
 
           {s.activityType === 'strength' || s.exercises.length > 0 ? (
             <View style={{ gap: spacing.sm }}>
-              <Text variant="label">Exercises</Text>
+              <Text variant="label" style={{ fontWeight: '500' }}>Exercises</Text>
               {errors[`sessions.${i}.exercises`] ? (
                 <Text variant="caption" color="negative">
                   {errors[`sessions.${i}.exercises`]}
@@ -135,11 +145,13 @@ export function RoutineEditor({
         </Card>
       ))}
 
+      {only === undefined ? (
       <Button
         label="Add training day"
         variant="secondary"
         onPress={() => onChange({ ...plan, sessions: [...plan.sessions, emptySession((plan.sessions.at(-1)?.dayOfWeek ?? 0) + 2 > 6 ? 0 : (plan.sessions.at(-1)?.dayOfWeek ?? 0) + 2)] })}
       />
+      ) : null}
     </View>
   );
 }
@@ -164,6 +176,7 @@ function ExerciseRow({
   onMove: (dir: -1 | 1) => void;
 }) {
   return (
+    <FieldToneContext.Provider value="white">
     <View style={styles.exercise}>
       <Row style={{ justifyContent: 'space-between' }}>
         <Text variant="caption" color="inkTertiary">
@@ -172,7 +185,7 @@ function ExerciseRow({
         <Row>
           <IconButton label="Move up" icon="arrow-up" disabled={index === 0} onPress={() => onMove(-1)} />
           <IconButton label="Move down" icon="arrow-down" disabled={index === count - 1} onPress={() => onMove(1)} />
-          <IconButton label="Remove exercise" icon="trash-outline" onPress={onRemove} />
+          <IconButton label="Remove exercise" icon="trash" onPress={onRemove} />
         </Row>
       </Row>
       <TextField label="Name" value={e.name} onChangeText={(name) => onChange({ ...e, name })} error={errors[`${path}.name`]} />
@@ -208,13 +221,14 @@ function ExerciseRow({
       </Row>
       <NumberField label="Rest" unit="seconds" allowDecimal={false} placeholder="Optional" value={e.restSeconds} onChange={(restSeconds) => onChange({ ...e, restSeconds })} />
     </View>
+    </FieldToneContext.Provider>
   );
 }
 
 function IconButton({ label, icon, onPress, disabled }: { label: string; icon: React.ComponentProps<typeof Icon>['name']; onPress: () => void; disabled?: boolean }) {
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress} hitSlop={8} style={{ opacity: disabled ? 0.3 : 1, padding: 4 }}>
-      <Icon name={icon} size={18} />
+      <Icon name={icon} size={20} />
     </Pressable>
   );
 }
@@ -232,5 +246,5 @@ export function cleanPlan(plan: RoutinePlan): RoutinePlan {
 }
 
 const styles = StyleSheet.create({
-  exercise: { gap: spacing.sm, padding: spacing.md, borderRadius: radii.md, backgroundColor: colors.surfaceSubtle },
+  exercise: { gap: spacing.md, padding: spacing.base, borderRadius: radii.lg, backgroundColor: colors.cream },
 });

@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, View, type PressableProps } from 'react-native';
-import { colors, radii, spacing, TOUCH_TARGET } from '@/theme/tokens';
+import { BUTTON_HEIGHT, colors, radii, spacing } from '@/theme/tokens';
 import { Text } from './Text';
 
 type Variant = 'primary' | 'brand' | 'secondary' | 'ghost' | 'danger';
@@ -13,15 +13,16 @@ interface Props extends Omit<PressableProps, 'children' | 'style'> {
   icon?: React.ReactNode;
 }
 
+// DESIGN.md: ink pill for the main action; well-filled pill (no outline) for the rest.
 const palette: Record<Variant, { bg: string; fg: keyof typeof colors; border?: string }> = {
-  primary: { bg: colors.ink, fg: 'onInk' },
-  brand: { bg: colors.brand, fg: 'ink' },
-  secondary: { bg: colors.canvas, fg: 'ink', border: colors.ink },
-  ghost: { bg: 'transparent', fg: 'ink' },
-  danger: { bg: colors.canvas, fg: 'negative', border: colors.negative },
+  primary: { bg: colors.rose, fg: 'onInk' },
+  brand: { bg: colors.rose, fg: 'onInk' },
+  secondary: { bg: colors.well, fg: 'ink' },
+  ghost: { bg: 'transparent', fg: 'roseDeep' },
+  danger: { bg: colors.negativeWash, fg: 'negative' },
 };
 
-/** Pill button (DESIGN.md button-primary / button-brand / button-secondary). */
+/** Pill button (DESIGN.md button-primary / button-secondary / button-text-link). */
 export function Button({
   label,
   variant = 'primary',
@@ -58,7 +59,7 @@ export function Button({
       ) : (
         <View style={styles.row}>
           {icon}
-          <Text variant="label" color={p.fg}>
+          <Text variant={size === 'sm' ? 'label' : 'bodyStrong'} color={p.fg}>
             {label}
           </Text>
         </View>
@@ -69,13 +70,13 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: TOUCH_TARGET,
+    minHeight: BUTTON_HEIGHT,
     paddingHorizontal: spacing.lg,
     borderRadius: radii.pill,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  small: { minHeight: 36, paddingHorizontal: spacing.base },
+  small: { minHeight: 40, paddingHorizontal: spacing.base },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
 });

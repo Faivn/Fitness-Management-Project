@@ -11,6 +11,7 @@
     "verify:live": "node --env-file=.env --import tsx src/dev/verifyLiveIsolation.ts"
   },
   "dependencies": {
+    "@mova/engine": "*",
     "@mova/shared": "*",
     "@supabase/supabase-js": "^2.118.0",
     "zod": "^4.6.7"

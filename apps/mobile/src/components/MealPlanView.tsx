@@ -35,7 +35,7 @@ export function MealPlanView({ plan }: { plan: MealPlan }) {
         WEEKDAY_NAMES.map((name, wd) => {
           const entries = byWeekday.get(wd) ?? [];
           return (
-            <ExpandableCard key={name} title={name} defaultExpanded={wd === firstDay}>
+            <ExpandableCard key={name} title={name} titleSize={18} defaultExpanded={wd === firstDay}>
               {entries.length === 0 ? (
                 <Text variant="small" color="inkTertiary">
                   Nothing planned.
@@ -104,7 +104,7 @@ function ShoppingList({ planId, items, editable }: { planId: string; items: Shop
               ) : null}
               {editable ? (
                 <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${i.name}`} onPress={() => remove.mutate(i.id)} hitSlop={8}>
-                  <RuneIcon name="close" size={18} color="inkTertiary" />
+                  <RuneIcon name="close" size={20} color="inkTertiary" />
                 </Pressable>
               ) : null}
             </Row>
@@ -135,7 +135,7 @@ function ShoppingList({ planId, items, editable }: { planId: string; items: Shop
       ) : null}
       {update.isError || add.isError || remove.isError ? <Banner tone="error">{errorMessage(update.error ?? add.error ?? remove.error)}</Banner> : null}
       <Text variant="caption" color="inkTertiary">
-        Ticking items is just for shopping — Mova never treats planned meals as eaten.
+        Ticks are for shopping, not meals eaten.
       </Text>
     </View>
   );

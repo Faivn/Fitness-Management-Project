@@ -107,7 +107,7 @@ export default function SessionDetail() {
             <ActivityCompletion session={s} />
           )}
           {canReschedule(s.status) ? (
-            <ExpandableCard title="More options">
+            <ExpandableCard title="More options" titleSize={18}>
               <OptionRow icon="schedule" label="Move to another day" onPress={() => router.push(`/session/${s.id}/reschedule`)} />
               {s.status === 'scheduled' ? <OptionRow icon="circle-alert" label="Mark as missed" onPress={() => setConfirm('missed')} /> : null}
               <OptionRow icon="circle-x" label="Cancel session" onPress={() => setConfirm('cancel')} />
@@ -118,7 +118,7 @@ export default function SessionDetail() {
               <Text variant="bodyStrong">{confirm === 'missed' ? 'Mark this session as missed?' : 'Cancel this session?'}</Text>
               <Text variant="small" color="inkSecondary">
                 {confirm === 'missed'
-                  ? "It stays in your history as missed. You can still move it later — nothing is shifted automatically."
+                  ? "Stays in history as missed. You can move it later."
                   : 'It stays in your history as cancelled.'}
               </Text>
               <TextField label="Reason (optional)" value={reason} onChangeText={setReason} />
