@@ -69,9 +69,9 @@ export function PressableCard({
   fill?: boolean;
 }) {
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityHint={accessibilityHint} onPress={onPress} style={fill ? { flex: 1, flexBasis: 0, minWidth: 0 } : undefined}>
+    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityHint={accessibilityHint} onPress={onPress} style={fill ? { flexGrow: 1, alignSelf: 'stretch' } : undefined}>
       {({ pressed }) => (
-        <Card tone={tone} style={[{ opacity: pressed ? 0.85 : 1 }, fill ? { flex: 1 } : null]}>
+        <Card tone={tone} style={[{ opacity: pressed ? 0.85 : 1 }, fill ? { flexGrow: 1 } : null]}>
           {children}
         </Card>
       )}

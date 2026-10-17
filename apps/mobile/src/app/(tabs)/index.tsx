@@ -127,7 +127,7 @@ function InfoCard({
       </View>
     </View>
   );
-  if (!onPress) return <View style={[cardBox, { flex: 1 }]}>{body}</View>;
+  if (!onPress) return <View style={[cardBox, { flexGrow: 1 }]}>{body}</View>;
   return (
     <PressableCard fill accessibilityLabel={`${label}. ${title}. ${detail}`} accessibilityHint={accessibilityHint} onPress={onPress}>
       {body}
