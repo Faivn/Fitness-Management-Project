@@ -64,13 +64,6 @@ function SettingsBody({ onOpenGoals }: { onOpenGoals: () => void }) {
       <Section title="Units">
         <Segmented inline label="Weight" options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]} value={p.weightUnit} onChange={(weightUnit) => update.mutate({ weightUnit })} />
         <Segmented inline label="Distance" options={[{ value: 'km', label: 'km' }, { value: 'mi', label: 'mi' }]} value={p.distanceUnit} onChange={(distanceUnit) => update.mutate({ distanceUnit })} />
-        <Segmented
-          inline
-          label="Water"
-          options={[{ value: 'ml', label: 'ml' }, { value: 'l', label: 'L' }, { value: 'fl_oz', label: 'fl oz' }]}
-          value={p.volumeUnit}
-          onChange={(volumeUnit) => update.mutate({ volumeUnit })}
-        />
       </Section>
 
       <Divider />

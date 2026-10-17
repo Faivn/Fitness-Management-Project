@@ -27,7 +27,7 @@ function ScheduleBody() {
     const d = s.plannedDate ?? s.actualDate;
     if (d && s.status !== 'cancelled') marks[d] = (marks[d] ?? 0) + 1;
   }
-  const daySessions = (schedule.data?.sessions ?? []).filter((s) => (s.plannedDate ?? s.actualDate) === selected);
+  const daySessions = (schedule.data?.sessions ?? []).filter((s) => s.status !== 'cancelled' && (s.plannedDate ?? s.actualDate) === selected);
 
   return (
     <Screen refreshing={schedule.isRefetching} onRefresh={() => schedule.refetch()}>
