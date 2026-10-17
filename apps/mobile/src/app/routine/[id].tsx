@@ -5,7 +5,7 @@ import { ApiError, errorMessage as apiError, newIdempotencyKey } from '@/lib/api
 import { appToday } from '@/lib/today';
 import type { ScheduleConflict } from '@mova/shared';
 import { ClashPrompt } from '@/components/domain';
-import { Banner, Button, Card, ErrorState, IconButton, LoadingState, Row, Screen, Section, Text } from '@/components';
+import { Banner, Button, Card, ErrorState, IconButton, LoadingState, Row, RuneIcon, Screen, Section, Text } from '@/components';
 import { spacing } from '@/theme/tokens';
 import { useProfile, useDeactivateRoutine, useReplaceClashingRoutines, useRoutine, useSaveRoutineVersion } from '@/hooks/api';
 import { errorMessage } from '@/lib/api';
@@ -88,6 +88,7 @@ export default function RoutineDetail() {
             ))}
           </Card>
         ))}
+        <Button label="Add training day" variant="secondary" icon={<RuneIcon name="plus" size={20} />} onPress={() => router.push(`/routine/edit?id=${r.id}&add=1`)} />
       </Section>
     </Screen>
   );

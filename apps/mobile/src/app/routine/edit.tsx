@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { routinePlanSchema, type RoutinePlan, type ScheduleConflict } from '@mova/shared';
 import { Banner, Button, Divider, LoadingState, SheetPage, NumberField, Row, Screen, Section, Text, TextField, ToggleRow } from '@/components';
 import { ClashPrompt } from '@/components/domain';
-import { cleanPlan, emptyPlan, RoutineEditor } from '@/components/RoutineEditor';
+import { cleanPlan, emptyPlan, emptySession, RoutineEditor } from '@/components/RoutineEditor';
 import { useCreateRoutine, useProfile, useReplaceClashingRoutines, useRoutine, useSaveRoutineVersion } from '@/hooks/api';
 import { ApiError, errorMessage, newIdempotencyKey } from '@/lib/api';
 import { useDraft } from '@/lib/drafts';
@@ -17,8 +17,11 @@ import { serverFieldErrors, validate } from '@/lib/validation';
  * sessions are separate choices.
  */
 function EditRoutineBody() {
-  const { id, day } = useLocalSearchParams<{ id?: string; day?: string }>();
-  const only = day !== undefined && day !== '' && Number.isInteger(Number(day)) ? Number(day) : undefined;
+  const { id, day, add } = useLocalSearchParams<{ id?: string; day?: string; add?: string }>();
+  const dayOnly = day !== undefined && day !== '' && Number.isInteger(Number(day)) ? Number(day) : undefined;
+  // "Add training day" on an existing routine opens just a new, empty day at the end of its plan.
+  const [addedIndex, setAddedIndex] = useState<number | undefined>(undefined);
+  const only = dayOnly ?? addedIndex;
   const existing = useRoutine(id);
   const profile = useProfile();
   const create = useCreateRoutine();
@@ -40,10 +43,15 @@ function EditRoutineBody() {
   // Start from the current version when editing (unless a newer local draft exists).
   useEffect(() => {
     if (id && existing.data && draft.restored && !loaded) {
-      if (!draft.value.title) draft.setValue(existing.data.plan);
+      if (add === '1') {
+        const base = existing.data.plan;
+        const last = base.sessions.at(-1)?.dayOfWeek ?? 0;
+        draft.setValue({ ...base, sessions: [...base.sessions, emptySession(last + 2 > 6 ? (last + 2) % 7 : last + 2)] });
+        setAddedIndex(base.sessions.length);
+      } else if (!draft.value.title) draft.setValue(existing.data.plan);
       setLoaded(true);
     }
-  }, [id, existing.data, draft, loaded]);
+  }, [id, existing.data, draft, loaded, add]);
 
   if (id && (existing.isPending || !loaded)) return <LoadingState />;
   const isActive = existing.data?.status === 'active';
@@ -137,10 +145,10 @@ function EditRoutineBody() {
 }
 
 export default function EditRoutine() {
-  const { id, day } = useLocalSearchParams<{ id?: string; day?: string }>();
+  const { id, day, add } = useLocalSearchParams<{ id?: string; day?: string; add?: string }>();
   const only = day !== undefined && day !== '' && Number.isInteger(Number(day));
   return (
-    <SheetPage title={only ? 'Edit training day' : id ? 'Edit routine' : 'New routine'}>
+    <SheetPage title={add === '1' ? 'Add training day' : only ? 'Edit training day' : id ? 'Edit routine' : 'New routine'}>
       <EditRoutineBody />
     </SheetPage>
   );

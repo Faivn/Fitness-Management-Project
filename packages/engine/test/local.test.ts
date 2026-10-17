@@ -122,6 +122,28 @@ describe('core flows', () => {
     expect(res.sessionsCreated).toBeGreaterThan(0);
   });
 
+  it('adds a training day to an existing active routine and schedules it', async () => {
+    const { api } = await fresh(false);
+    const today = todayIn(TZ);
+    const dow = new Date(today + 'T12:00:00Z').getUTCDay();
+    const day = (title: string, d: number) => ({ title, activityType: 'strength', dayOfWeek: d, exercises: [{ name: 'Squat', targetSets: 3 }] });
+    const base = { title: 'R', goalIds: [], assumptions: [], warnings: [] };
+    const made: any = await api.call('POST', 'routines', { plan: { ...base, sessions: [day('Lower', dow)] }, activate: true, schedule: { startDate: today, weeks: 2 }, idempotencyKey: key() });
+    const other = (dow + 2) % 7;
+    const res: any = await api.call('POST', `routines/${made.routine.id}/versions`, {
+      plan: { ...base, sessions: [day('Lower', dow), day('Upper', other)] },
+      rescheduleFuture: true,
+      activate: false,
+      schedule: { startDate: today, weeks: 2 },
+      acceptConflicts: true,
+      idempotencyKey: key(),
+    });
+    expect(res.sessionsCreated).toBeGreaterThan(2);
+    const list: any[] = await api.call('GET', `workout-sessions?from=${today}&to=${addDays(today, 14)}`);
+    const titles = new Set(list.filter((x) => x.status === 'scheduled').map((x) => x.title));
+    expect(titles).toEqual(new Set(['Lower', 'Upper']));
+  });
+
   it('plans meals only after approval and updates the shopping list', async () => {
     const { api } = await fresh();
     const today = todayIn(TZ);

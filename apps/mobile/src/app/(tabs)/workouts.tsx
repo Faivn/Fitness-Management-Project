@@ -27,7 +27,8 @@ export default function Workouts() {
     );
 
   const upcomingList = (upcoming.data ?? [])
-    .filter((s) => s.plannedDate)
+    // Done, skipped and cancelled workouts leave this list; what was done lives on in Exercise history.
+    .filter((s) => s.plannedDate && (s.status === 'scheduled' || s.status === 'in_progress'))
     .sort((a, b) => `${a.plannedDate}${a.plannedTime ?? ''}`.localeCompare(`${b.plannedDate}${b.plannedTime ?? ''}`));
 
   return (
