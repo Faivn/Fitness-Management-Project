@@ -1,566 +1,435 @@
 ---
-version: alpha
-name: Oura Ring
-website: "https://ouraring.com"
-description: >-
-  A consumer-health interface for a titanium sleep-tracking ring, anchored on warm sandstone canvases (#f7f1e8, #efe6db) over a graphite ink (#1c1b1a) and rendered in AkkuratLL grotesque at weights 300 through 700, with Editorial New serif italic dropped in once per heading as the brand's one ornamental gesture — the "Made for you", "voice", "your every day" phrases that turn marketing copy into magazine pull-quotes. The signature CTA is a full-pill dark-graphite button on cream; mustard (#af751b) and indigo (#4a4af4) sit as scoped brand voltages while photography of the ring on skin carries the warmth.
-seo:
-  title: "Oura Ring Design System for React — AkkuratLL, Editorial New italic, 22 components"
-  metaDescription: "Oura Ring's consumer-health design system as a DESIGN.md file. Sandstone #f7f1e8 canvas, graphite #1c1b1a ink, AkkuratLL + Editorial New italic, 22 components for React and AI tools."
-  highlights:
-    - "Two-typeface duet — AkkuratLL grotesque handles 90% of the page; Editorial New serif italic appears exactly once per heading on the phrase that carries the emotional turn"
-    - "Sandstone canvas ladder — three warm cream tints (#fefaef, #f7f1e8, #efe6db) replace the white-card convention, with photography of the ring on skin doing the warmth work"
-    - "Full-pill CTAs at 48px height — primary action is dark graphite #1e2427 on cream sandstone, never the saturated indigo or mustard the design tokens reserve"
-    - "Weight 300 hero at 80–96px — the display tier sits airy and editorial; weight 700 is reserved for the small 18px sub-heads in caps"
-    - "Mustard and indigo as scarcity voltage — #af751b and #4a4af4 live in the token system as accents that the homepage barely deploys, letting graphite and cream carry the page"
-  tags:
-    - "Consumer Electronics"
-    - "Healthcare & Wellness"
-  lastUpdated: "2026-05-13"
-  author:
-    name: "Dov Azencot"
-    url: "https://x.com/dovazencot"
-  opening: |
-    Oura's storefront is built around an unusual contradiction for a wearable-health brand: the page rejects every fitness-tech cliché. There is no neon-green heart-rate gradient, no dashboard mockup behind glass, no slate-and-cyan dark canvas. The chassis is a warm sandstone (#f7f1e8) tinted just past cream, body type runs AkkuratLL at 16px / 24px line-height, and the hero h1 sits at 96px weight 500 with negative tracking — the editorial cadence of a magazine cover. Once per heading, a single phrase ("Made for you", "a voice", "your every day") flips to Editorial New serif italic. That one swap is the entire brand-voice signature.
-
-    This page captures the homepage system as a DESIGN.md file — Google Labs' open spec for machine-readable design tokens. Inside: 22 color tokens grouped into ink, sandstone-canvas, hairline, brand-voltage, and accent layers; 12 typography tokens covering AkkuratLL across weights 200 through 700 plus the Editorial New italic display-emphasis pair; a 6-step radius scale that pivots between 12px medium chrome and full-pill CTAs; an 8px-based spacing rhythm dominated by 8px (39 occurrences) and 16px (13); and 22 components covering the top nav, hero card, ring product tiles, membership panel, dark "in the news" rail, footer email capture, and the inverted dark surface used for editorial section breaks.
-
-    Feed the file to Claude, Cursor, GitHub Copilot, or any agent that reads structured tokens. The agent reproduces Oura's actual voice — sandstone restraint, two-typeface italic duet, full-pill CTAs, photography-first warmth — instead of a generic health-tech theme of dark dashboards and neon vitals. Reference tokens directly in Tailwind config, audit an existing wellness storefront against this baseline, or read the file as a study in how to sell a sleep-tracking ring without ever showing a sleep chart on the homepage.
-  related:
-    - href: "/design"
-      title: "Browse all design systems"
-      description: "The full directory of DESIGN.md files on shadcn.io, with live mockups for each."
-    - href: "https://ouraring.com"
-      title: "Oura Ring — official site"
-      description: "The Finnish smart-ring brand's own storefront — the source for this design system."
-    - href: "https://github.com/google-labs-code/design.md"
-      title: "The DESIGN.md specification"
-      description: "Google Labs' open spec for machine-readable design system files."
-  questions:
-    - id: "primary-color"
-      title: "What is Oura's primary brand color?"
-      answer: "Oura does not run a saturated brand voltage on the homepage. The dominant token is the warm cream-sandstone canvas #f7f1e8 (clustered frequency 512 across surface, hairline, and background), paired with graphite ink #1c1b1a for text and #1e2427 for the primary CTA fill. Mustard #af751b lives in the token system as `--color-mustard-500` and indigo #4a4af4 as `--color-fill-brand-indigo`, but the homepage deploys each only once or twice — both are scarcity accents rather than load-bearing brand voltages. The page is carried by sandstone and graphite, with photography of the ring on skin supplying the warmth that pigment would otherwise handle."
-    - id: "typography"
-      title: "What typography does Oura use, and what should I substitute if AkkuratLL is unavailable?"
-      answer: "Oura runs AkkuratLL as the default sans across the page (declared as `--font-sans` and `--default-font-family`) at weights 200, 300, 400, 500, 600, 700. Editorial New serif appears as `--font-serif`, deployed only on italic emphasis spans inside headings — phrases like 'Made for you', 'a voice', 'your every day'. If AkkuratLL is unavailable, Söhne, Untitled Sans, or Inter at the same weights are the closest grotesque substitutes. For Editorial New, PP Editorial New is the direct source; Cormorant Garamond italic or GT Sectra Display italic are acceptable approximations. Never substitute a slab or condensed display face — the italic-serif moment relies on humanist contrast against the sans, and a slab would shift the page from health-editorial to publication-magazine."
-    - id: "pill-cta"
-      title: "Why does Oura use full-pill CTAs at 48px height?"
-      answer: "The primary action surface is a 48px-tall capsule with a 33554432px (`9999px`-class) border-radius — full-pill geometry — fill `#1e2427` (near-black graphite), text `#f7f1e8` (cream sandstone), padding 12px 24px. The pill reads as a wearable-object signal: the same continuous-curve geometry as the ring itself. Where most consumer-electronics storefronts use squared or 8px-rounded rectangles for primary CTAs, Oura uses the full pill because the button is geometric kin to the product. The secondary CTA inverts to cream-on-graphite at the same height with a 1px hairline border."
-    - id: "italic-serif"
-      title: "Why does Editorial New italic appear only on a single phrase per heading?"
-      answer: "Across the homepage extraction, every Editorial New italic span sits at the same size and weight as its surrounding AkkuratLL heading — 96px / 500 at the hero, 80px / 300 inside section heads, 40px / 300 in mid-page beats. The italic break-out is editorial-magazine syntax: a sans-serif headline interrupted by a single italicized noun-phrase. It is the strongest voice signature in the system because it is scoped so narrowly — one phrase per heading, never two. Using it for body emphasis, button text, or product titles destroys the editorial scarcity that makes the moment land."
-    - id: "spacing-scale"
-      title: "What spacing rhythm does Oura use?"
-      answer: "The system snaps to an 8px base, with 8px (39 occurrences) and 16px (13) as the dominant breathing units. The primary button uses 12px 24px padding. Card chrome uses asymmetric 24px 0px 0px 24px / 0px 0px 24px 24px to render the top-half-rounded and bottom-half-rounded panel splits visible in the hero ring-card grid. Section vertical rhythm runs 32px and 48px. Token-level CSS variables expose a full 2 / 4 / 8 / 12 / 16 / 24 / 40 / 80px ladder under `--components-spacing-*`, but the rendered page leans on the lower half — 8 / 12 / 16 / 24."
-    - id: "use-in-project"
-      title: "Can I use this DESIGN.md to build my own React app?"
-      answer: "Yes — the file is structured to feed Claude, Cursor, or any AI agent that reads structured design tokens. The agent reproduces Oura's actual chassis: sandstone canvas, graphite ink, AkkuratLL + Editorial New italic duet, full-pill primary CTAs, 12px-rounded card chrome, photography-friendly warm tints. Every color, type style, radius, and spacing value is a quoted token ready to paste into Tailwind config, CSS variables, or your own component library. Pair with macro-photography of a product on skin or in soft warm light to land the brand voice fully — the chrome is calibrated to recede behind imagery, so without photography the system reads thinner than it should."
+name: Mova
+description: >
+  Mobile-first design system for Mova, a calm, premium, AI-assisted fitness workspace
+  with a modern feminine voice: blush-white pages, white cards, a berry-rose accent,
+  lilac for the companion, soft peach warmth, plum-black text, very round shapes,
+  and a floating tab bar. Built for a phone held in one hand.
+version: 2.1
+platform: ios, android, web (responsive, phone first)
+research: docs/research/MOBBIN_DESIGN_SYSTEM_RESEARCH.md, docs/research/MOBBIN_FEMININE_PALETTE_RESEARCH.md
 
 colors:
-  ink: "#1c1b1a"
-  ink-graphite: "#1e2427"
-  ink-deep: "#0c0c14"
-  ink-warm: "#4a4741"
-  ink-soft: "#838280"
-  ink-quiet: "#a8a5a0"
-  ink-disabled: "#d3d1ce"
-  canvas-cream: "#fefaef"
-  canvas-sandstone: "#f7f1e8"
-  canvas-sandstone-deep: "#efe6db"
-  on-ink: "#f7f1e8"
-  on-ink-pure: "#ffffff"
-  hairline: "#ececec"
-  hairline-warm: "#eadccf"
-  brand-mustard: "#af751b"
-  brand-mustard-soft: "#ffefd8"
-  brand-amber: "#ffb648"
-  brand-indigo: "#4a4af4"
-  brand-indigo-deep: "#2f2fc1"
-  brand-indigo-soft: "#a8a9fc"
-  accent-sky: "#b5e4fe"
-  accent-olive: "#5b6550"
+  # Blush ladder: the page is a warm blush-white, cards are white, wells sit one step down in soft pink.
+  page: "#FAF5F6"          # app background
+  page-top: "#FFF9F7"      # top of the page gradient
+  surface: "#FFFFFF"       # cards, sheets, tab bar
+  well: "#F2E6EB"          # inputs, tracks, inactive chips, grouped rows on cards
+  hairline: "#EFE1E5"      # 1px dividers
+  ink: "#2A2230"           # plum-black: all primary text
+  ink-secondary: "#5A4F5F"
+  ink-tertiary: "#73677A"  # meets 4.5:1 on page and surface
+  ink-disabled: "#B5ABB8"
+  on-ink: "#FFFFFF"        # text and icons on rose or ink fills
+  # The one accent: berry rose. Primary buttons, selected states, progress, the thing that matters.
+  rose: "#B03F6B"          # white text on it is 5.6:1
+  rose-deep: "#8E2F55"     # text and icons that sit on rose-wash
+  rose-wash: "#FBE7EE"     # tinted fills behind rose content
+  blush: "#F6C9D6"         # decorative only: ring tracks, illustrations, glows (never text)
+  # Companion voice: lilac, so AI output never looks like saved data.
+  lilac: "#6552B8"         # star, "Draft" tags, proposal accents (text-safe on white and lilac-wash)
+  lilac-wash: "#EFEBFA"
+  lilac-soft: "#D9D0F2"    # decorative only
+  # Warmth
+  peach: "#F4B8A0"         # decorative only: gradient glow, empty-state art
+  peach-wash: "#FFF0E8"
+  # Status (always paired with words or an icon, never colour alone)
+  positive: "#2F6B58"      # a calm green so success never reads as pink
+  positive-wash: "#E3EFE9"
+  caution: "#9A5A2E"
+  caution-wash: "#FDEBDD"
+  negative: "#B3261E"      # a true red, clearly different from rose
+  negative-wash: "#FBE4E1"
+  scrim: "rgba(42, 34, 48, 0.45)"
 
 typography:
-  display-hero:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 96px
-    fontWeight: 500
-    lineHeight: 1
-    letterSpacing: "-2.4px"
-  display-hero-italic:
-    fontFamily: "\"Editorial New\", serif"
-    fontSize: 96px
-    fontWeight: 500
-    lineHeight: 1.25
-    letterSpacing: "-2.4px"
-  display-lg:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 80px
-    fontWeight: 300
-    lineHeight: 1
-    letterSpacing: "-2px"
-  display-lg-italic:
-    fontFamily: "\"Editorial New\", serif"
-    fontSize: 80px
-    fontWeight: 300
-    lineHeight: 1
-    letterSpacing: "-2px"
-  display-md:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 48px
-    fontWeight: 200
-    lineHeight: 1
-    letterSpacing: 0
-  heading-lg:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 40px
-    fontWeight: 300
-    lineHeight: 1
-    letterSpacing: 0
-  heading-lg-italic:
-    fontFamily: "\"Editorial New\", serif"
-    fontSize: 40px
-    fontWeight: 300
-    lineHeight: 1
-    letterSpacing: 0
-  heading-sm:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 24px
-    fontWeight: 400
-    lineHeight: 1.25
-    letterSpacing: 0
-  eyebrow:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 18px
-    fontWeight: 700
-    lineHeight: 1.5
-    letterSpacing: 0
-  body-lg:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 16px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  body-strong:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 16px
-    fontWeight: 700
-    lineHeight: 1.5
-    letterSpacing: 0
-  caption:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  caption-strong:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 14px
-    fontWeight: 700
-    lineHeight: 1.5
-    letterSpacing: 0
-  micro:
-    fontFamily: "AkkuratLL, sans-serif"
-    fontSize: 12px
-    fontWeight: 400
-    lineHeight: 1.5
-    letterSpacing: 0
-  pull-quote:
-    fontFamily: "\"Editorial New\", serif"
-    fontSize: 30px
-    fontWeight: 100
-    lineHeight: 1.5
-    letterSpacing: 0
-
-rounded:
-  none: "0px"
-  xs: "4px"
-  sm: "6px"
-  md: "8px"
-  lg: "12px"
-  xl: "24px"
-  pill: "9999px"
+  family: "Inter (400, 500, 600, 700), three subset files in apps/mobile/assets/fonts (about 45 KB each); the page draws in the platform sans first on the web and swaps to Inter when it arrives"
+  scale:
+    display:  { size: 30, line: 38, weight: 600, tracking: -0.3, use: "Greeting on Overview and onboarding headlines" }
+    title:    { size: 24, line: 30, weight: 600, use: "Tab titles and sheet titles (22 in sheets)" }
+    heading:  { size: 20, line: 26, weight: 600, use: "Card titles" }
+    heading-sm: { size: 18, line: 24, weight: 600, use: "Dense list headings (weekdays, More options)" }
+    figure:   { size: 32, line: 36, weight: 600, tracking: -0.5, use: "Big numbers in rings and stats, with a small unit beside them" }
+    body:     { size: 16, line: 24, weight: 400, use: "Reading text, inputs" }
+    body-medium: { size: 16, line: 24, weight: 500, use: "Item names (meals, exercises)" }
+    body-strong: { size: 16, line: 24, weight: 600, use: "Names and buttons" }
+    small:    { size: 14, line: 21, weight: 400, use: "Descriptions and secondary lines" }
+    label:    { size: 14, line: 20, weight: 500, use: "Field labels, small buttons, chips" }
+    caption:  { size: 12, line: 16, weight: 500, use: "Meta, units, helper text" }
+    eyebrow:  { size: 12, line: 16, weight: 600, tracking: 0.8, case: upper, use: "Section labels" }
+  rules:
+    - "One typeface everywhere. Hierarchy comes from weight and size, never from italics or a second family."
+    - "No italic or slanted text anywhere, including greetings."
+    - "Weight carries hierarchy, not size jumps. Labels are medium (500); 700 is not used in the interface."
+    - "Numbers that change (timers, totals) sit next to a small unit in caption or label size."
+    - "Minimum text size is 12; anything a person must read to act is 14 or larger."
 
 spacing:
-  xxxs: "2px"
-  xxs: "4px"
-  xs: "8px"
-  sm: "12px"
-  base: "16px"
-  lg: "20px"
-  xl: "24px"
-  xxl: "32px"
-  band: "40px"
-  section: "48px"
+  unit: 4                 # everything is a multiple of 4; layout rhythm is 8
+  scale: { xxs: 2, xs: 4, sm: 8, md: 12, base: 16, lg: 24, xl: 32, 2xl: 48, 3xl: 64 }
+  screen-gutter: 16       # left and right margin on a 390-wide phone
+  card-padding: 20        # inside cards; 16 for dense list cards
+  card-inner-gap: 8       # between text lines inside a card (4 between a title and its summary)
+  card-block-gap: 12      # between blocks inside a card (text, ring, button, list)
+  card-gap: 12            # between cards in a stack
+  group-gap: 24           # between two unrelated groups of cards
+  section-gap: 32         # between titled sections, with a centred hairline
+  section-title-gap: 12   # eyebrow to its first card
+  header-height: 64
+  touch-target: 44
+  control-height: { input: 48, button: 48, button-sm: 40, chip: 36, row: 56, nav: 64 }
 
-components:
-  button-primary:
-    backgroundColor: "{colors.ink-graphite}"
-    textColor: "{colors.on-ink}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.pill}"
-    padding: "12px 24px"
-    height: "48px"
-    border: "0"
-  button-primary-hover:
-    backgroundColor: "{colors.ink}"
-    textColor: "{colors.on-ink}"
-    rounded: "{rounded.pill}"
-  button-secondary:
-    backgroundColor: "{colors.canvas-sandstone}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.pill}"
-    padding: "12px 24px"
-    height: "48px"
-    border: "1px solid {colors.hairline}"
-  button-on-dark:
-    backgroundColor: "{colors.on-ink-pure}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.body-strong}"
-    rounded: "{rounded.pill}"
-    padding: "12px 24px"
-    height: "48px"
-  button-text-link:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.caption-strong}"
-    rounded: "{rounded.none}"
-  top-nav:
-    backgroundColor: "{colors.canvas-sandstone}"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.body-lg}"
-    height: "64px"
-    padding: "12px 24px"
-    border: "0"
-  nav-link:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.body-lg}"
-    padding: "12px 0px"
-    rounded: "{rounded.none}"
-  hero-section:
-    backgroundColor: "{colors.canvas-sandstone}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.display-hero}"
-    padding: "48px 24px"
-    rounded: "{rounded.xl}"
-  ring-product-card:
-    backgroundColor: "{colors.canvas-sandstone-deep}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.heading-sm}"
-    rounded: "{rounded.xl}"
-    padding: "20px"
-    border: "0"
-  ring-product-card-top:
-    backgroundColor: "{colors.canvas-sandstone-deep}"
-    textColor: "{colors.ink-graphite}"
-    rounded: "{rounded.xl}"
-    padding: "24px 0px 0px 24px"
-  ring-product-card-bottom:
-    backgroundColor: "{colors.canvas-sandstone-deep}"
-    textColor: "{colors.ink-graphite}"
-    rounded: "{rounded.xl}"
-    padding: "0px 0px 24px 24px"
-  membership-panel:
-    backgroundColor: "{colors.canvas-cream}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.heading-lg}"
-    rounded: "{rounded.xl}"
-    padding: "48px 24px"
-  pull-quote-band:
-    backgroundColor: "{colors.canvas-sandstone}"
-    textColor: "{colors.ink-graphite}"
-    typography: "{typography.display-lg}"
-    padding: "20px 48px 28px"
-  editorial-rail-dark:
-    backgroundColor: "{colors.ink-deep}"
-    textColor: "{colors.on-ink-pure}"
-    typography: "{typography.heading-sm}"
-    rounded: "{rounded.xl}"
-    padding: "32px"
-  press-card-dark:
-    backgroundColor: "{colors.ink-graphite}"
-    textColor: "{colors.on-ink-pure}"
-    typography: "{typography.caption}"
-    rounded: "{rounded.lg}"
-    padding: "20px"
-  pill-tag:
-    backgroundColor: "{colors.canvas-cream}"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.caption-strong}"
-    rounded: "{rounded.pill}"
-    padding: "8px 16px"
-    height: "32px"
-  text-input:
-    backgroundColor: "{colors.ink-warm}"
-    textColor: "{colors.on-ink-pure}"
-    typography: "{typography.body-lg}"
-    rounded: "{rounded.lg}"
-    padding: "8px 48px 8px 20px"
-    height: "40px"
-    border: "1px solid {colors.hairline}"
-  newsletter-form:
-    backgroundColor: "{colors.canvas-sandstone}"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.body-lg}"
-    padding: "16px 24px"
-  hairline-rule:
-    backgroundColor: "{colors.hairline}"
-    height: "1px"
-    border: "0"
-  eyebrow-label:
-    backgroundColor: "transparent"
-    textColor: "{colors.ink-warm}"
-    typography: "{typography.eyebrow}"
-    padding: "0px"
-  footer-dark:
-    backgroundColor: "{colors.ink-deep}"
-    textColor: "{colors.canvas-sandstone}"
-    typography: "{typography.body-lg}"
-    padding: "48px 24px"
-    border: "0"
-  footer-link:
-    backgroundColor: "transparent"
-    textColor: "{colors.canvas-sandstone}"
-    typography: "{typography.caption}"
-    padding: "8px 0px"
+grid:
+  columns: 4              # phone content grid (390): 4 columns, 16 gutter margins, 12 column gap
+  column-gap: 12
+  content-width: "device width minus 32"
+  max-content-width: 560  # tablets and desktop: centred, same rules
+  patterns:
+    full: "1 column, one card per row (default)"
+    two-up: "2 equal columns, 12 gap: paired tiles and quick actions"
+    three-up: "3 equal columns, 8 gap: compact stats (macros, summary figures)"
+    week-strip: "7 equal columns, 4 gap: weekday or date rail"
+    split-row: "label flex + control fixed (216 for segmented, 36 to 44 for icon buttons), 12 gap"
+  breakpoints: { phone: "< 600: 4 columns", tablet: ">= 600: content capped at 560, centred" }
+
+radii:
+  input: 16
+  card: 24
+  sheet: 32
+  pill: 999
+
+elevation:
+  card: "none (a white card on the page needs no shadow)"
+  floating: "0 8px 28px rgba(176, 63, 107, 0.14)"   # tab bar, FAB-like controls
+  sheet: "0 -8px 32px rgba(42, 34, 48, 0.12)"
+
+motion:
+  fast: 120ms
+  base: 200ms
+  slow: 320ms
+  easing: "cubic-bezier(0.2, 0, 0, 1)"
+  reduced-motion: "Replace slides and fades with instant state changes; keep progress values updating."
 ---
 
-## Overview
+# Mova Design System
 
-Oura's storefront is the most editorial interface in the smart-wearable category — a sandstone-cream chassis (`{colors.canvas-sandstone}` — #f7f1e8) carrying warm graphite ink (`{colors.ink-graphite}` — #1e2427), with one Editorial New serif italic phrase dropped into every heading as the brand's only ornamental gesture. Where most fitness-wearable storefronts open with a dark dashboard mockup behind glass and a neon-cyan heart-rate gradient, Oura opens with a 96px AkkuratLL hero at weight 500 and an italicized "Made for you" serif span — the page reads as a magazine cover, not a product spec sheet.
+## 1. Character
 
-The type system is bi-modal. **AkkuratLL** grotesque sans handles 90% of the page across weights 200, 300, 400, 500, 600, 700 — body, navigation, button labels, product names, footer columns. **Editorial New** serif italic appears as `--font-serif` at the same point sizes as its surrounding sans head, scoped to one noun-phrase per heading: "Made for you" at 96px / 500, "a voice" at 40px / 300, "your every day" at 80px / 300. This is the system's strongest editorial decision — one typeface holds the page; one italic phrase holds a single emotional turn per section.
+Mova is a quiet, encouraging place to plan training and eating. The interface should feel like soft morning light on a vanity table: blush-white, warm, uncluttered, with one berry-rose accent that says "this is yours, this is progress" and gentle lilac when the companion speaks.
 
-**Italic-as-emphasis**: Oura's interface inherits its voice from print-magazine typography — a sans-serif headline interrupted by a single italicized phrase that names the brand promise. Where most consumer-electronics brands separate display and emphasis with weight (regular vs bold), Oura separates them with style (grotesque vs italic-serif). Where the typical health-tech storefront amplifies authority with deep slate panels and chart cards, Oura runs warm cream panels and lets a macro-photograph of the ring on a knuckle carry the entire technical claim.
+Four words guide every decision: **calm**, **clear**, **yours**, **kind**.
 
-**Key Characteristics:**
-- Warm cream-sandstone canvas (`{colors.canvas-sandstone}` — #f7f1e8) used 512 times across surface, border, and background — the dominant chassis tone. Tinted just enough to read as paper, not screen.
-- Graphite ink (`{colors.ink-graphite}` — #1e2427) for the primary CTA fill, paired with the deeper `{colors.ink}` (#1c1b1a) for body text. Two near-blacks, neither pure.
-- Full-pill geometry (`{rounded.pill}` — 9999px-class) on every primary CTA at 48px height — the same continuous-curve grammar as the titanium ring itself.
-- AkkuratLL is the default sans across weights 200 through 700; Editorial New italic appears exactly once per heading, never on body, never on buttons.
-- Dual chrome-card geometry on the hero ring-grid: `24px 0px 0px 24px` for the top-rounded panel and `0px 0px 24px 24px` for its bottom-rounded sibling — the split corner grammar that lets product imagery span two stacked panels.
-- Photography carries warmth: macro-shots of the ring on skin under low warm light, no clinical white-bench studio, no abstract data-visualization renders.
-- Dark editorial rail (`{colors.ink-deep}` — #0c0c14) used for the "In the news" press section and the footer — the page inverts to a dark canvas exactly twice per scroll.
-- Section rhythm `48px 24px` interior padding inside cards; `0px 0px 32px` for stacked vertical breathing — denser than the 80px Apple-marketing standard, looser than a magazine column.
+- **Calm.** Few colours, very round shapes, generous space, no streaks, flames, confetti or red badges.
+- **Clear.** One idea per card, one primary action per screen, text that says what will happen.
+- **Yours.** Everything shown is the person's own plan. AI output is always labelled a draft until they approve it.
+- **Kind.** Warm wording, no shaming, rest days treated as part of the plan. Colour is feminine and modern, never childish: no glitter, no cartoon pinks, no pastel overload.
 
-## Colors
+This system is **mobile-first**: it is designed at 390 × 844 and scales up. Nothing depends on hover.
 
-### Ink
-- **Graphite Ink** (`{colors.ink}` — #1c1b1a): frequency 1. Used as background on the dark inverted panels. The deepest near-black in the system — chosen instead of pure `#000000` to keep the page warm rather than pharmaceutical. Token surfaces in `--color-gray-550` / `--color-gray-600` / `--color-component-overlay-bg`.
-- **CTA Graphite** (`{colors.ink-graphite}` — #1e2427): frequency 3. Used as bg (1), gradient stops (2). The exact fill of `{component.button-primary}` and the dark press-card surface. Cooler than `{colors.ink}` by a few hue degrees — the small chromatic shift is intentional so buttons read as objects rather than ink stains.
-- **Deep Tile** (`{colors.ink-deep}` — #0c0c14): the inverted-canvas hex for the footer and the "In the news" editorial rail. The faint purple cast (oklch hue 284°) is what separates Oura's dark surface from a flat neutral.
-- **Warm Graphite** (`{colors.ink-warm}` — #4a4741): frequency 52. Used as text (39), bg (7), border (6). The workhorse body-text color and the nav-link rest tone — the warm-gray that everything below display size sits on. Token name `--color-sandstone-500`.
-- **Soft Graphite** (`{colors.ink-soft}` — #838280): frequency 3. Used as text (2) and border (1). A mid-gray reserved for sub-labels and meta information.
-- **Quiet Graphite** (`{colors.ink-quiet}` — #a8a5a0): frequency 24, all text. The disabled-state tone and the caption color on secondary metadata.
-- **Disabled** (`{colors.ink-disabled}` — #d3d1ce): a near-hairline gray used as the text color for disabled buttons and form labels.
+### Why this palette
+Research on women-focused and wellness apps ([see note](docs/research/MOBBIN_FEMININE_PALETTE_RESEARCH.md)) shows the apps that feel modern, not saccharine, keep the page nearly white and let one saturated rose carry meaning, adding lilac and peach only as soft washes. Mova follows that: blush-white and white do the work; berry rose is used sparingly and always at accessible contrast; lilac belongs to the companion; peach is atmosphere.
 
-### Canvas
-- **Cream** (`{colors.canvas-cream}` — #fefaef): the lightest sandstone in the ladder. Tinted just past pure white. Used as the membership panel background and the pill-tag fill.
-- **Sandstone** (`{colors.canvas-sandstone}` — #f7f1e8): the dominant canvas tint, surfacing as `--color-sandstone-200` and clustering at frequency 512 with the gray-100 hairline neighbor. Used as the page floor, the hero card background, and the on-dark button text color.
-- **Sandstone Deep** (`{colors.canvas-sandstone-deep}` — #efe6db): the warm-tile background inside the hero ring-product cards. One step deeper than the page canvas — just enough chromatic separation for the card to read as a surface without a border.
-- **On Ink** (`{colors.on-ink}` — #f7f1e8): the text color for content sitting on the graphite CTA — the same sandstone hex as the page floor. The button label reads as cut-out cream against dark, not white-on-black.
-- **Pure White** (`{colors.on-ink-pure}` — #ffffff): frequency 17. Used as text (8), bg (5), border (3), shadow (1). Reserved for the dark editorial rail and footer where sandstone is too warm and the press headlines need pure-white legibility.
+## 2. Principles
 
-### Hairline
-- **Hairline** (`{colors.hairline}` — #ececec): frequency 512. Used as border (398), text (94), bg (19), gradient (1). The dominant 1px border tone — every product tile, button outline, and hairline rule sits on this exact warm gray. Functions across the page as separator-not-shadow.
-- **Warm Hairline** (`{colors.hairline-warm}` — #eadccf): a sandstone-tinted hairline used inside warm-tile sections where the cooler `{colors.hairline}` would visually pop. Scoped narrowly.
+1. **One thing at a time.** Each card answers one question (What is today's workout? How far into my fast am I?). If a card needs two answers, it is two cards.
+2. **One ring per card, one number per ring.** Progress is a ring or a bar, never both, never stacked.
+3. **Edit on the object.** A pencil on a card edits that card in a short sheet. Long forms are a last resort.
+4. **Labels, not colour.** Status always has a word or icon. Rose means progress or selected, never "good"; success is a separate green.
+5. **Draft until approved.** Anything the companion produces is marked as a proposal and changes nothing until the person approves.
+6. **Honest empty states.** Say what is missing and offer one next step. Never fill space with invented data.
+7. **Thumb-first.** Primary actions live in the lower half of the screen. Nothing important sits only in a corner that needs a stretch.
 
-### Brand Voltage
-- **Mustard** (`{colors.brand-mustard}` — #af751b): frequency 2, both gradient. Token `--color-mustard-500`. The mustard accent appears on the homepage only in a faint warm gradient — Oura keeps the most chromatic color in the system reserved for product-color callouts (the Oura Ring Gold finish) rather than as a UI voltage.
-- **Mustard Soft** (`{colors.brand-mustard-soft}` — #ffefd8): a cream-mustard tint used as a faint warm wash behind season-collection product callouts.
-- **Amber** (`{colors.brand-amber}` — #ffb648): frequency 1, gradient. The brighter mustard sibling reserved for membership badge highlights — the "Oura Membership gives your body a voice" panel uses this in micro-gradient.
-- **Indigo** (`{colors.brand-indigo}` — #4a4af4): the saturated brand-indigo. Token `--color-fill-brand-indigo`. Reserved for the embedded video player chrome and a small handful of in-app product moments — barely visible on the homepage itself.
-- **Indigo Deep** (`{colors.brand-indigo-deep}` — #2f2fc1): token `--color-primary-dark`. The darker indigo sibling used for indigo-on-light hover and focus states.
-- **Indigo Soft** (`{colors.brand-indigo-soft}` — #a8a9fc): token `--color-primary-light`. A washed lavender variant used for indigo-on-dark text and decorative chips.
+## 3. Colour
 
-### Accent
-- **Sky Wash** (`{colors.accent-sky}` — #b5e4fe): frequency 1, gradient. A pale-sky accent used only in the membership-panel atmospheric gradient — appears once per scroll. Outside the warm sandstone family entirely; the contrast is deliberate.
-- **Olive** (`{colors.accent-olive}` — #5b6550): frequency 1, all text. Token `--color-olive-700`. A muted olive reserved for occasional health-claim headlines on the women's-health and longevity sub-rails. Never as a button fill.
+### Surfaces (back to front)
+`page` (a faint `page-top` → `page` fade with a soft lilac glow at the top right and a peach glow at the bottom left, each under 40% opacity) → `surface` (cards, sheets, tab bar) → `well` (inputs, tracks, segmented controls, grouped rows on a card).
 
-## Typography
+- Cards are white on the page. They have **no border and no shadow**; the contrast between `surface` and `page` is the edge.
+- Inputs are `surface` with **no outline**. When an input sits on a white card it uses `well` instead so it stays visible.
+- Inside a white card, secondary groups use `well`, not another white card.
 
-### Font Family
+### Accent and meaning
+| Token | Use |
+|---|---|
+| `ink` (plum-black) | All primary text and icons on light surfaces |
+| `rose` | Primary button, selected tab pill, selected segment and chip, checked checkbox, send button, progress rings and bars, positive-state toggle |
+| `rose-wash` | Soft fill behind rose icons and "Active" tags, selected rows |
+| `rose-deep` | Text and icons on `rose-wash` |
+| `blush` | Decoration only: ring tracks, glows, illustration fills. Never carries text |
+| `lilac` / `lilac-wash` | Companion only: the star button, "Draft" and "Proposal" tags, proposal cards |
+| `peach` / `peach-wash` | Warm atmosphere: page glow, empty-state art, rest-day notes |
+| `positive`, `caution`, `negative` | Status text and tags, always with a word. Success is green so it never reads as brand |
 
-The system runs **AkkuratLL** as the default sans across the entire page — declared as both `--font-sans` and `--default-font-family`. Weights 200, 300, 400, 500, 600, 700 are all in use, with the heaviest end (700) reserved for the small 18px eyebrow labels in caps and the very thin 200 / 300 reserved for the 80–96px hero display. **Editorial New** serif appears as `--font-serif`, deployed only on `<em>` spans inside headings — one italicized noun-phrase per section.
+Rose is used on **one primary action and the current selection per screen**. If three things on a screen are rose, two of them should not be.
 
-The split is editorial:
-- AkkuratLL 400 → body, captions, footer, button labels
-- AkkuratLL 300 → display tier at 40px and 80px sizes
-- AkkuratLL 500 → the 96px hero only
-- AkkuratLL 700 → the 18px eyebrow heads and 14px body-strong
-- Editorial New italic 300 / 500 → exactly one noun-phrase per heading ("Made for you", "a voice", "your every day")
+### Contrast
+Body text on `page` and `surface` is at least 7:1 (`ink`) and secondary text at least 4.5:1 (`ink-tertiary`). White on `rose` is 5.6:1, `rose-deep` on `rose-wash` is 6.6:1, `lilac` on white is 6.1:1 and on `lilac-wash` 5.2:1; every pair above clears 4.5:1. Disabled text is exempt but still readable.
 
-### Hierarchy
+## 4. Typography
 
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.display-hero}` | 96px | 500 | 1 | -2.4px | The single homepage hero h1 — "Sleeker. Smarter. Made for you." |
-| `{typography.display-hero-italic}` | 96px | 500 | 1.25 | -2.4px | The italicized phrase inside the hero — "Made for you" |
-| `{typography.display-lg}` | 80px | 300 | 1 | -2px | Pull-quote headlines mid-page — "Built for accuracy" |
-| `{typography.display-lg-italic}` | 80px | 300 | 1 | -2px | The italicized phrase inside an 80px head — "your every day" |
-| `{typography.display-md}` | 48px | 200 | 1 | 0 | Pull-quote band at weight 200 — the airy mid-page beats |
-| `{typography.heading-lg}` | 40px | 300 | 1 | 0 | Section heads on membership and longevity sub-rails |
-| `{typography.heading-lg-italic}` | 40px | 300 | 1 | 0 | The italicized phrase inside a 40px head — "a voice" |
-| `{typography.heading-sm}` | 24px | 400 | 1.25 | 0 | Card and panel sub-heads |
-| `{typography.eyebrow}` | 18px | 700 | 1.5 | 0 | All-caps eyebrow labels — "FORM MEETS FUNCTION" |
-| `{typography.body-lg}` | 16px | 400 | 1.5 | 0 | Default running text — AkkuratLL 16/24 |
-| `{typography.body-strong}` | 16px | 700 | 1.5 | 0 | Button labels and inline emphasis |
-| `{typography.caption}` | 14px | 400 | 1.5 | 0 | Press-card body, secondary captions |
-| `{typography.caption-strong}` | 14px | 700 | 1.5 | 0 | Press headlines, pill-tag labels |
-| `{typography.micro}` | 12px | 400 | 1.5 | 0 | Fine-print, footer legal, breadcrumbs |
-| `{typography.pull-quote}` | 30px | 100 | 1.5 | 0 | Editorial New serif pull-quote at weight 100 — the lightest type in the system |
+**Typeface: Inter.** A modern, clean, highly legible sans designed for screens: even letter shapes, clear numerals and a wide weight range, so hierarchy comes from weight and size alone. It is neutral enough to let the blush palette and rounded shapes carry the feminine warmth, stays crisp at 12–14px, and feels at home next to the iOS and Android system fonts. It is loaded from three Latin-subset files (400, 500, 600; about 45 KB each, `apps/mobile/assets/fonts`) so the first load stays small. On the web the first screen draws straight away in the platform sans and swaps to Inter when the font arrives; on phones the fonts are bundled. Researched in [`docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md`](docs/research/MOBBIN_TYPOGRAPHY_RESEARCH.md).
 
-### Principles
+Custom fonts carry their weight in the family name, so `Text` turns a weight into a family (400 → Regular, 500 → Medium, 600 → SemiBold, 700 → Bold) and never fakes bold. Inputs and headers set their family explicitly.
 
-Oura's hero h1 sits at weight 500 with -2.4px tracking — the heavy tracking-tighten is what gives the 96px headline its compressed magazine cadence. The mid-page beats drop the weight to 300 and 200, so the page literally lightens as it scrolls. Editorial New italic appears at the same point size as its surrounding sans head, never resized — the only thing that changes is the typeface and the slant. Letter-spacing stays at 0 below 40px; negative tracking is reserved for display sizes 40px and up. Line-heights run tight at 1 for display tiers, loose at 1.5 for body — the rhythm reads as an editorial spread, not a SaaS dashboard.
+| Role | Size / line | Weight | Used for |
+|---|---|---|---|
+| Display | 28 / 36 | 600, -0.3 tracking | Onboarding headlines |
+| Title | 22 / 28 | 600 | Tab titles, sheet titles; Overview status headline is 24 / 30 |
+| Heading | 18 / 24 | 600 | Card titles ("Needs an update", "On the Menu") |
+| Heading small | 16 / 22 | 600 | Weekday cards, "More options" |
+| Figure | 30 / 34 | 600, -0.5 tracking | Big numbers in rings and stats |
+| Body | 14 / 22 | 400 (names 500, buttons 600) | Reading text, inputs, meal and exercise names |
+| Small | 14 / 21 | 400 | Descriptions, secondary lines |
+| Label | 14 / 20 | 500 | Field labels, small buttons, chips |
+| Caption | 12 / 16 | 500 | Meta, units, helper text |
+| Eyebrow | 12 / 16 | 600, +0.8, uppercase | Section labels such as `YOUR ROUTINES` |
 
-If AkkuratLL is unavailable, **Söhne** or **Untitled Sans** at the same weights are the closest substitutes. For Editorial New, **PP Editorial New** is the direct source and **Cormorant Garamond italic** or **GT Sectra Display italic** are acceptable approximations. Never substitute a slab-serif or condensed display face — the italic-serif moment relies on humanist contrast against the sans, and a slab would shift the page from health-editorial to publication-magazine.
+**Greeting:** the Overview has no greeting line; the header shows the name and long date beside the avatar. No italic, no coloured word anywhere.
+**Numerals:** large figures use the 600 weight with a small unit beside them (for example `32` with `ml`), the pattern seen in the reference health apps.
 
-## Layout
+## 5. Layout, spacing and grid
 
-### Spacing System
-- **Base unit:** 8px.
-- **Tokens:** `{spacing.xxxs}` 2px · `{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.base}` 16px · `{spacing.lg}` 20px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px · `{spacing.band}` 40px · `{spacing.section}` 48px.
-- **Dominant rhythm:** 8px (39 occurrences) and 16px (13) — the body breathing units.
-- **Button padding:** `12px 24px` — the canonical pill CTA padding, 12 occurrences across the page.
-- **Card chrome:** asymmetric `24px 0px 0px 24px` for top-rounded panels and `0px 0px 24px 24px` for bottom-rounded siblings — 6 occurrences each, the split-corner grammar that lets the hero ring grid render as two stacked panels with a continuous photograph.
-- **Section vertical rhythm:** `0px 0px 32px` between stacked cards; `20px 48px 28px` inside the pull-quote band.
+Measured against the reference apps ([Alan](https://mobbin.com/screens/65cf48fa-1754-405a-a945-68d640373445), [Bevel](https://mobbin.com/screens/5e9f39ef-11f4-4dac-a75d-1106b70e9f5f), [Cal AI](https://mobbin.com/screens/0b3110f9-55d7-4828-94ba-231ba6ad8bfd), [Future Pro](https://mobbin.com/screens/d8f2e00a-c4e6-4d2d-8af4-edcff4f5e25d), [Runna](https://mobbin.com/screens/7e17aa1e-5ddb-4327-832b-201fde677aa2), [Centr](https://mobbin.com/screens/718c28d7-fa13-491b-8fa1-f695bc360164)): they keep a 16 side margin, about 12 between cards, 20 inside a card, and lay paired content out as 2-up or 3-up tiles rather than ever-longer single columns.
 
-### Grid & Container
-- **Max content width:** ~1440px (the `--breakpoint-xxl` token).
-- **Hero ring grid:** two-up card pair at desktop, stacking vertically at mobile.
-- **Press rail:** 2–3-up dark cards at desktop, 1-up at mobile.
-- **Footer:** 4-column dark link list at desktop, accordion at mobile.
+### The 4-point base, 8-point rhythm
+Every size, padding and gap is a multiple of 4. Layout rhythm (gaps between things) uses 8, 12, 16, 24, 32. Odd values such as 6, 10, 14, 18 are not used; tight optical nudges may use 2.
 
-### Whitespace Philosophy
-The warm canvas + 24px-rounded card chrome + 48px section padding create a magazine-spread pacing — Oura reads as an editorial feature on the ring rather than a marketing storefront. Section gaps stay generous (48px) so each card breathes; internal card padding stays compact (20–24px) so the ring photography sits as close to the headline as possible without crowding.
+### Margins and gutters
+- **Screen gutter:** 16 left and right on a 390-wide phone. Cards run the full width inside it.
+- **Column grid:** 4 columns with a 12 column gap for card layouts. Content spans all 4 by default.
 
-## Elevation & Depth
+### Vertical rhythm
+| Between | Space |
+|---|---|
+| Text lines inside a card | 8 (4 between a title and its summary) |
+| Blocks inside a card (text, ring, button, list) | 12 |
+| Cards in a stack | 12 |
+| Two unrelated groups of cards | 24 |
+| Titled sections | 32, with a 1px `hairline` centred in the gap |
+| Section eyebrow and its first card | 12 |
+| Header (64) and first content | 8 |
+| Last item and the nav | `nav height (64) + 12 + bottom inset + 16` of scroll padding |
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | No shadow, no border | Hero card, body sections, top nav |
-| Hairline | 1px `{colors.hairline}` border | Secondary buttons, text inputs, divider rules |
-| Tile lift | Surface color step (`{colors.canvas-sandstone}` → `{colors.canvas-sandstone-deep}`) | Hero ring cards, membership panel — color step replaces shadow |
-| Dark inversion | `{colors.ink-deep}` background on cream | "In the news" press rail, footer |
-| Drop shadow | `0 4px 4px #00000026` (`--drop-shadow-lg`) | Reserved for the membership-panel imagery overlay — used twice on the page |
+### Card internals
+Padding 20 on all sides (16 for dense list cards such as weekday and routine rows). Text lines are 8 apart (4 between a title and its one-line summary); separate blocks such as a ring, a button or a list are 12 apart. Rows inside a card are at least 56 tall and are separated by a hairline, with the row's own padding doing the spacing, so no extra gaps are added.
 
-The elevation philosophy is **surface-step as separation**: where most consumer-electronics storefronts use shadow tiers to ladder cards, Oura uses a 2-step warm-tint ladder (canvas → canvas-deep) and lets the chromatic shift do the lifting. The drop shadow is reserved for product photography composition only, never for chrome. The dark editorial rail at `{colors.ink-deep}` provides the strongest elevation moment per scroll — the entire surface flips to near-black, then returns to sandstone.
+### Grid patterns
+| Pattern | Columns | Gap | Use in Mova |
+|---|---|---|---|
+| Full | 1 | 12 | Overview cards, routines, goals, meal days |
+| Two-up | 2 | 12 | Paired tiles and quick actions (for example Fasting beside a second module if one is enabled) |
+| Three-up | 3 | 8 | Compact figures: sessions done this week, planned, rest days |
+| Week strip | 7 | 4 | Weekday selector in Meal plan and Schedule; each cell at least 44 wide |
+| Split row | flex + fixed | 12 | Settings units (label left, 216 segmented right), toggle rows, list row with trailing control |
 
-## Shapes
+Tiles in a 2-up or 3-up row share one height (the tallest sets it) and use the same radius and padding as a full card, reduced to 16 inside when the tile is under 160 wide.
 
-### Border Radius Scale
+### Alignment
+- Text, icons and controls inside a card share one left edge (the card padding). A ring or icon beside text is aligned on its centre line, and stacked text blocks left-align to each other (as the Fasting card does).
+- Section labels align to the gutter, not to the card padding.
+- Trailing controls (chevrons, edit pencils, archive icons) sit on the card's right padding edge and align to the first line of text.
 
-| Token | Value | Use |
-|---|---|---|
-| `{rounded.none}` | 0px | Section dividers, hairline rules, full-bleed photography |
-| `{rounded.xs}` | 4px | Form-field inner radii, micro-chip borders |
-| `{rounded.sm}` | 6px | Eyebrow-pill chips, secondary tag rows |
-| `{rounded.md}` | 8px | Mid-chrome — press-card corners, dropdown panels |
-| `{rounded.lg}` | 12px | Default panel chrome — text inputs, secondary cards |
-| `{rounded.xl}` | 24px | Hero ring cards, membership panel, editorial dark rail |
-| `{rounded.pill}` | 9999px | Every primary CTA, every pill-tag — the full-pill grammar |
+### Safe areas and keyboard
+The header respects the top inset. The floating nav sits 12 above the bottom inset. Screens with a composer lift above the keyboard; the nav hides while a native keyboard is open.
 
-The two radii that carry the page are `{rounded.xl}` (24px) and `{rounded.pill}` (full). 24px appears 6 times in the extraction across card chrome. Full-pill geometry shows up 26 times — every interactive element that reads as an "action". The mid-tier radii (4 / 6 / 8 / 12) appear in form fields and dropdown chrome but never on the dominant card surfaces.
+### Wide screens
+Content is capped at 560 wide and centred; the nav row is capped to the same width. Cards never stretch beyond 560.
 
-### Photography
-Oura's photography is the brand's load-bearing visual asset:
-- Macro-shots of the ring on a single knuckle, low warm light, soft focus background
-- Hand-skin tones — never face crops, often partial gesture or just-fingers framing
-- The ring on its charging base in cream-tinted soft-light scenes
-- Lifestyle shots of the ring under a watch cuff or against a cream linen surface
+## 6. Navigation
 
-When photography is absent, the system falls back to warm-tile surfaces (`{colors.canvas-sandstone-deep}`) or dark inverted panels. Photography is never decorative — every shot carries the product.
+### Floating nav (bar plus companion button)
+Modelled on [Alan](https://mobbin.com/screens/1d8e8577-abc5-4234-8d8e-ebdfd43eae92) and echoed by [Fresha](https://mobbin.com/screens/4896d295-e23e-4adc-8b6c-75767d1058a1), [Future Pro](https://mobbin.com/screens/d8f2e00a-c4e6-4d2d-8af4-edcff4f5e25d), [Superpower](https://mobbin.com/screens/e161ce23-7a66-4f9f-ba68-0c8621498ddd), [Apple News](https://mobbin.com/screens/29622411-b22a-485f-8851-74db23307865) and [Gentler Streak](https://mobbin.com/screens/14694404-10b6-403b-a01e-6b0afbbd4346).
 
-## Components
+- **Two floating pieces on one row**, 16 from the sides and 12 above the bottom safe area, 12 apart: a white **pill bar** (flex, 64 tall, `floating` shadow) and a separate **round companion button** (64 × 64, white, same shadow) holding the Mova mascot.
+- **Bar:** three destinations, **Overview**, **Workouts**, **Meal plan**. Each item stacks a filled 22 icon over an 11/500 label.
+- **Active item:** a soft `rose-wash` capsule that wraps both the icon and the label (it fills the item); icon `rose`, label `rose-deep`. **Inactive:** icon and label in `ink-tertiary`, no capsule.
+- **Companion button:** the only way into Mova Companion. Opens the chat; no other floating button exists. Accessible name "Open the Mova companion".
+- Hides while a native keyboard is open. The **Overview header only** carries the profile **avatar** (44, top left, display only, not tappable): a friendly round character picked at random the first time the app opens on a device (6 palettes: rose, lilac, peach, mint, blush, mauve, times 7 accessories: bear, cat, bunny, bun, sprout, bow, none) and kept after that and the History and Settings round icon buttons (44) at the top right. Workouts shows New routine (plus) and Schedule (calendar); Meal plan shows just its title. The buttons are filled **white at 72% opacity** so they lift off the blush page (a `well` fill would disappear into it); the active one turns `rose` with an `on-ink` icon.
 
-### Top Navigation
+### Sub-pages
+Every pushed page has a **back chevron** at the top left that returns to the previous page (or to Overview when there is none). Sheets and modals use an **×** at the top right.
 
-**`top-nav`** — Sandstone nav bar pinned to the top of every page. Height 64px, `{colors.canvas-sandstone}` background, no border. Carries the Oura wordmark at left, primary horizontal menu (Why Oura, Shop, Membership, Health, App) and a search / sign-in / cart cluster at right. Menu items in `{typography.body-lg}` (AkkuratLL 16px / 1.5) with `{colors.ink-warm}` text and 12px 0px padding per link.
-
-**`nav-link`** — Individual top-nav item. Transparent background, `{colors.ink-warm}` text, 12px vertical padding, `{rounded.none}` corners. No underline at rest.
+## 7. Components
 
 ### Buttons
+| Variant | Fill | Text | Use |
+|---|---|---|---|
+| Primary | `rose` | `on-ink` | The one main action ("New routine", "Add goal") |
+| Secondary | `well` (blush) | `ink` | Everything else ("Open meal plan", "Set time") |
+| Ghost | none | `rose-deep` | Low-emphasis text actions ("Exercise history") |
+| Danger | `negative-wash` | `negative` | Destructive confirmations |
 
-**`button-primary`** — The signature graphite pill CTA. Background `{colors.ink-graphite}` (#1e2427), text `{colors.on-ink}` (sandstone #f7f1e8), type `{typography.body-strong}` (AkkuratLL 16px / 700), padding `12px 24px`, height 48px, `{rounded.pill}` full pill. Used for "Discover Oura Ring 4", "Get started", "Shop now".
+48 tall, pill radius, 16/500 label, 24 horizontal padding. **No outlines on any variant.** Small buttons are 40 tall. Buttons in the same row share the same height and, when side by side, equal width. Pressed state lowers opacity to 0.85; disabled uses 40% opacity.
 
-**`button-primary-hover`** — Hover state darkens to `{colors.ink}` (#1c1b1a). The only state change documented in the system at the page-chrome level.
+### Cards
+`surface`, radius 24, padding 20, gap 12 inside. A tappable card shows a trailing chevron or an arrow-up-right icon. A card with an edit action shows a **pencil icon button (32)** at its top right.
 
-**`button-secondary`** — Sandstone pill button with hairline outline. Background `{colors.canvas-sandstone}`, text `{colors.ink-graphite}`, 1px `{colors.hairline}` border, same padding and height as primary. Used for "Learn more" and "Compare rings".
+### Expandable card
+A card whose header is the title (20 or 18) with an optional one-line summary and a chevron. The body holds details and, at most, one secondary button. Items inside are separated by **hairline dividers**, with no icons unless they carry meaning.
 
-**`button-on-dark`** — Inverted CTA for dark editorial surfaces. Background `{colors.on-ink-pure}` (white), text `{colors.ink-graphite}`, same pill geometry and 48px height. Used inside the "In the news" dark rail.
+### List row
+Left: optional 40 icon tile. Middle: item name (body-medium) with an optional caption above (eyebrow) or a grey line below (small). Right: chevron or a control. Rows are at least 56 tall.
 
-**`button-text-link`** — Inline text button, no background. Used for "Read more" beneath press cards. Type `{typography.caption-strong}` (AkkuratLL 14px / 700), `{colors.ink-warm}` text.
+### Section header
+Eyebrow label left, optional text action right. Sections are separated by a hairline divider and 32 of space.
 
-### Cards & Containers
+### Field contrast
+A field's fill depends on what it sits on, so it never matches its background: on a **white card or sheet** a field is a blush `well`; on the **blush page or on a tinted block** (lilac proposal card, tinted note, exercise block) it is **white**. The app does this with a field-tone context: `Screen` sets white, a white `Card` or `ExpandableCard` sets well, tinted cards and the exercise block set white, and sheets set well. Selected states (rose) never depend on this.
 
-**`hero-section`** — Sandstone hero card containing the 96px h1 and the inline italic phrase. Background `{colors.canvas-sandstone}`, padding `48px 24px`, `{rounded.xl}` corners. Holds a left-aligned text column and a right-aligned ring photograph.
+### Companion page
+Mova Companion is a standalone page with **no nav bar**. It shares the app's look: the blush gradient, a transparent header with a back chevron and a 20/600 title, rose bubbles for the person, lilac-wash bubbles and proposal cards for the assistant, and the same composer. Sub-page titles are 20/600; tab titles are 24/600.
 
-**`ring-product-card`** — The atomic catalogue unit on the hero ring grid. Background `{colors.canvas-sandstone-deep}` (one step deeper than the page canvas), `{rounded.xl}` corners, padding 20px. Carries a centered ring photograph, a 24px AkkuratLL product name (e.g., "Oura Ring 4", "Oura Ring · Ceramic"), a short price line, and a `{component.button-primary}` at the bottom.
+### Inputs
+`well` (a soft blush) on both page and white cards, radius 16, 48 tall, 16 text, **no outline**. The label sits above at 14/500 (regular 400 inside dense editors). Focus is shown by a `rose` caret and a faint `rose-wash` ring that fades in; errors add a 1px `negative` outline and a message below. Placeholders use `ink-disabled`.
 
-**`ring-product-card-top`** — The top half of a vertically split ring-card panel. Same sandstone-deep fill, asymmetric padding `24px 0px 0px 24px` to carry the top-rounded geometry. The lower half (with `0px 0px 24px 24px`) stacks beneath it so a continuous ring photograph can span both panels.
+### Selection controls
+- **Segmented control:** `well` track, selected segment `rose` with `on-ink` text, pill radius, no borders. In Settings it sits **on the same row as its label**, with a fixed 216 width so stacked rows align.
+- **Pill select (chips):** `well` pills, selected `rose` with white text. Multi-select pills expose a checked state to assistive tech.
+- **Checkbox:** 24 square, radius 6, 2px `ink-disabled` border; checked = `rose` fill with a white check.
+- **Toggle:** the platform's standard switch shape; **on = `rose`**, off = `blush`; thumb white. Rows have the label (500) and an optional grey description.
 
-**`ring-product-card-bottom`** — The bottom-rounded sibling. Mirror padding `0px 0px 24px 24px`.
+### Progress ring
+96 diameter, 8 stroke, `blush` track, `rose` arc with round caps, starting at 12 o'clock. The figure inside is `figure` style. Empty state shows an empty track and a dash. One ring per card; paired with text to its right (title, "0h 53m of 16h 0m", "Ends at 10:44") aligned on one left edge.
 
-**`membership-panel`** — Cream panel with the centered 80px-300 pull-quote ("Oura Membership gives your body a voice"). Background `{colors.canvas-cream}`, `{rounded.xl}` corners, padding `48px 24px`. The italic span inside the headline sits in `{typography.display-lg-italic}` (Editorial New 80px / 300).
+### Composer (companion)
+One white rounded container (radius 24, min 48 tall) holding the input and a **36 round button** on the right:
+- **Empty:** a `lilac-wash` circle with a **star** icon in `lilac`. Tapping opens the options sheet.
+- **With text:** a `rose` circle with a white **arrow-up** (send). While sending, a spinner replaces the arrow.
+- Input grows from 1 to 5 lines; Enter sends on web, Shift+Enter adds a line. A one-line grey note below says the demo assistant is simulated and nothing is saved until approval.
 
-**`pull-quote-band`** — Editorial mid-page band carrying the 80px / 300 weight pull quote with an italic phrase. Background `{colors.canvas-sandstone}`, padding `20px 48px 28px`.
+### Options sheet
+A centred card (radius 32) over the scrim, titled "What would you like to do?" with a × on the right, then full-width option rows (`well`, radius 16, 56 tall). When the assistant offers a draft, the first option is that action. No action buttons appear inside chat bubbles except links to review an existing proposal.
 
-**`editorial-rail-dark`** — The dark "In the news" rail. Background `{colors.ink-deep}` (#0c0c14), text `{colors.on-ink-pure}` (white), type `{typography.heading-sm}` (AkkuratLL 24px / 400), `{rounded.xl}` corners, padding 32px. Carries 2–3 press cards inside.
+### Modal and bottom sheet
+`surface`, radius 32, padding 24, 16 gap. Title left, **× right**. A primary button at the bottom spans the width of the inputs above it. Tapping the scrim closes the sheet.
 
-**`press-card-dark`** — Individual press headline card inside the dark editorial rail. Background `{colors.ink-graphite}` (#1e2427), text `{colors.on-ink-pure}`, type `{typography.caption}` (AkkuratLL 14px / 400), `{rounded.lg}` corners, padding 20px. Carries a publication name, a 1–2 line headline, and a `{component.button-text-link}`.
+### Tags
+Pill, 12/500: `positive-wash` + `positive` for Active, `well` + `ink-tertiary` for plain Draft, `lilac-wash` + `lilac` for companion Draft and Proposal, `rose-wash` + `rose-deep` for Selected or Today, status washes for others.
 
-**`pill-tag`** — A small cream-pill label used for product variant chips ("New", "Best for sleep"). Background `{colors.canvas-cream}`, text `{colors.ink-warm}`, type `{typography.caption-strong}` (14px / 700), `{rounded.pill}`, padding `8px 16px`, height 32px.
+### Icons
+One family, one stroke, a small size ladder. Researched in [`docs/research/MOBBIN_ICON_RESEARCH.md`](docs/research/MOBBIN_ICON_RESEARCH.md).
 
-### Inputs & Forms
+- **Family:** Rune Icons only, outline, 24-px grid, 2px round stroke. Where Rune has no glyph (dumbbell, footprints, utensils, droplet, chat-plus) Mova draws one on the same grid and stroke. No second icon library is used anywhere.
+- **Filled** icons appear only in the nav bar and are tinted by state (rose when active, `ink-tertiary` otherwise). All other icons are outline.
+- **Sizes:** `16` inline with small text and status badges · `20` inside buttons, 36 and 32 round controls, composer button, chevrons · `24` navigation, 44 round header buttons, list-row leading tiles, set logging · `28+` empty states and illustrations. Never 14, 18, 22 or 26.
+- **Containers by role:**
+  - Round header and sheet controls: 44 (header), 36 (sheet), 32 (card action); fill white at 72% opacity, icon `ink`.
+  - Leading tiles in rows: 44 rounded square (`radius lg`), fill `well`, glyph 24 in `rose-deep`.
+  - Bare glyphs sit beside text: 16 in `ink-tertiary` for meta, 20 in `ink` or `ink-secondary` for actions.
+- **Colour by meaning:** `ink` for actions, `ink-tertiary` for decoration and chevrons, `rose` for the active or selected item, `lilac` for the companion (star), status colours only inside status badges, `on-ink` on filled rose or ink.
+- **Pairing:** an icon never carries meaning alone; a label, accessible name or adjacent text always does (status badges are icon plus word).
+- **Chevrons:** `chevron-right` 20 in `ink-tertiary` on tappable rows; `chevron-down`/`up` 20 on expandable cards.
 
-**`text-input`** — Email-capture form field used in the footer. Background `{colors.ink-warm}` (#4a4741), text `{colors.on-ink-pure}` (white), 1px `{colors.hairline}` border, type `{typography.body-lg}` (AkkuratLL 16px), `{rounded.lg}` corners, padding `8px 48px 8px 20px` (the extra right padding accommodates the submit-arrow icon), height 40px.
+### Mascot
+The Mova bubble mascot has **one face and several poses**. Every pose is the same rose-faced bubble with plum-black eyes and blush cheeks, drawn in the palette (never yellow or mustard); only the pose and a small prop change, and each pose is tied to a state:
 
-**`newsletter-form`** — Pre-footer email-capture row. Single `{component.text-input}` field with an inline submit arrow on the right. Padding `16px 24px`.
+| State | Pose |
+|---|---|
+| Rest day on Overview | `rest` (eyes closed) |
+| Nothing scheduled, quiet history, Fasting page | `calm` |
+| No routine yet, empty routines | `planning` |
+| No meal plan | `nutrition` |
+| Empty goals, companion greeting | `focus` / `welcome` |
+| Hydration | `hydration` |
+| Records and monthly review | `checklist` |
+| Today's workout done, every goal achieved | `celebration` |
+| Companion is thinking, empty exercise history | `thinking` (with a small lilac "?" bubble) |
 
-### Decoration
+The **companion button in the nav is always the same**: the `thinking` face without its "?" bubble, on every page. On white it needs at least a 30px body (about a 72 px canvas); the companion button uses a 76 px canvas. Each drawn mascot gets its own gradient ids so several can sit on a page, including inside hidden tabs, without losing their fill. Source SVGs are in `assets/illustrations/mova/`.
 
-**`hairline-rule`** — 1px horizontal rule in `{colors.hairline}`. Replaces every place a drop shadow would normally separate sections in other systems.
+### Bottom sheets
+Mova Companion, Settings, History, Schedule and New routine (and Edit routine) open as **bottom sheets** over the page you were on, not as new pages.
+- **Shape:** page-coloured surface, 32 top radius, up to 780 tall (never above the top inset), 640 max width, a 40 × 5 handle, a 22/600 title on the left and round controls on the right (close, plus back, add or new chat when needed). **Every round control in a sheet header is 36**, the same in Settings, History, Goals and the companion. The companion sheet hides its title to give the chat more room; its header keeps a **sticky new-chat button (a chat bubble with a plus inside)** beside the close button, both outside the scrolling thread, and the title stays available to screen readers, a dimmed scrim behind.
+- **Close:** drag the handle or title down (past 110 or with a quick flick; otherwise it springs back), tap the scrim, press Escape on the web, or press the close button. All four work; none is required.
+- **Motion:** slides up in 260ms and down in 200ms; the scrim fades with it.
+- **Accessibility:** the sheet is a modal dialog with an accessible name, the handle exposes a "close" action to screen readers ("Drag down to close Settings"), the close button is 44 × 44, and content scrolls inside the sheet while the header stays put.
+- **Sub-views stay inside the sheet:** Settings opens Goals in the same sheet with a back chevron and an add (+) button beside the close button, instead of pushing a new page. The date pill in History is white like every other card.
+- Fields inside a sheet follow the field-contrast rule (white fields on the page-coloured sheet, blush fields in white cards).
 
-**`eyebrow-label`** — Small all-caps eyebrow text above section headings. Type `{typography.eyebrow}` (AkkuratLL 18px / 700), `{colors.ink-warm}` text. Used for category labels like "FORM MEETS FUNCTION".
+### Dividers
+1px `hairline`. Used between sections, between rows inside a card, and between settings groups. Never as a box outline.
 
-### Footer
+### Banners
+`positive-wash`, `caution-wash` or `negative-wash` fill, radius 16, an icon, one sentence. Informational notes use `well`.
 
-**`footer-dark`** — Dark footer with 4-column link list. Background `{colors.ink-deep}` (#0c0c14), text `{colors.canvas-sandstone}` (the cream-on-dark inversion is the brand's strongest contrast moment), type `{typography.body-lg}` (AkkuratLL 16px / 1.5), padding `48px 24px`. The footer inverts to dark because the hero opens on cream — the page bookends with a sandstone-to-near-black arc.
+## 8. Screens
 
-**`footer-link`** — Individual footer link. Transparent background, `{colors.canvas-sandstone}` text, type `{typography.caption}` (AkkuratLL 14px / 400), 8px vertical padding. Hover state is undocumented in the extraction.
+### Overview
+Top-right: History and Settings round buttons. Then a small uppercase date, and the greeting in `display` (plain text, no italics). Cards in order: **Needs an update** (expandable, only when relevant) → **Today's workout** (card, no label, no "See all") → **On the Menu** (expandable; item names medium; hairline dividers; secondary "Open meal plan" button) → **Fasting** (one card: ring on the left; "Fasting" label, progress text and end time on one left edge; the whole card opens the fasting page). Hydration is not shown. Empty states are a single honest card with one action.
 
-## Do's and Don'ts
+### Workouts
+The header carries two round icon buttons at the top right, like Overview: **plus (New routine)** and **calendar (Schedule)**. Both open bottom sheets; there is no full-width New routine button and no "See all" link. Sections are **Your routines** (card per routine; tap opens it) and **Upcoming workouts** (next 14 days), separated by a hairline. **Exercise history** is a plain left-aligned text action at the end. Opening a routine shows one card per training day with a **pencil** that edits only that day in a sheet; there is no version history and no routine-level text block.
 
-### Do
-- Anchor every page on the cream-sandstone canvas `{colors.canvas-sandstone}` (#f7f1e8). Pure white reads as health-tech-lab; the warm tint is the brand differentiator.
-- Use `{colors.ink-graphite}` (#1e2427) for the primary CTA fill and `{colors.ink}` (#1c1b1a) for body text — the two-near-black system. Never `#000000`, which reads as pharmaceutical.
-- Render every primary action surface at `{rounded.pill}` (9999px-class). The full-pill geometry is the system's strongest tactile signal — the same continuous curve as the titanium ring itself.
-- Reserve Editorial New italic for exactly one noun-phrase per heading. "Made for you", "a voice", "your every day" — that scoping is what makes the italic moment land.
-- Preserve the asymmetric `24px 0px 0px 24px` / `0px 0px 24px 24px` card-pair grammar for the hero ring grid. The split-corner panels carry a continuous ring photograph across two stacked surfaces.
-- Use the 2-step warm-tint ladder (`{colors.canvas-sandstone}` → `{colors.canvas-sandstone-deep}`) for card elevation. Color step replaces shadow.
-- Apply hairline borders (`1px solid {colors.hairline}`) instead of drop shadows for every UI elevation moment. Drop-shadow is reserved for photography composition.
-- Invert to `{colors.ink-deep}` (#0c0c14) exactly twice per scroll — once at the editorial press rail, once at the footer. The dark surface earns its weight through scarcity.
+### Meal plan
+Timetable and Shopping list tabs. Seven expandable cards, one per weekday, titled at 18/600; meal names medium; slot labels as eyebrows; hairlines between meals.
 
-### Don't
-- Don't use pure black (#000000) for body text — it reads as pharmaceutical against sandstone and breaks the warm-graphite continuity. Reserve true black only for the `--color-black` gradient-stop token, never for surface fills.
-- Don't paint the brand-indigo `{colors.brand-indigo}` (#4a4af4) across primary CTAs — the homepage barely deploys this color and using it as a button fill destroys the graphite-and-cream restraint. Indigo is scoped to embedded video chrome and in-app moments.
-- Don't run Editorial New italic on more than one phrase per heading. Two italicized spans in a single h1 read as decoration rather than emphasis; the scarcity is the design.
-- Don't render the primary CTA at 8px or 12px radius — every "action" element uses the full pill. A `{rounded.md}` (8px) button immediately reads as a different brand.
-- Don't substitute a slab-serif or condensed display face for Editorial New. The italic-serif moment relies on humanist contrast against AkkuratLL; a slab would shift the page from health-editorial to publication-magazine.
-- Don't add `box-shadow` to product cards or panels. The system uses surface-color steps for separation; shadows immediately read as Material-Design dashboard.
-- Don't invert the membership panel to dark. Oura's mid-page editorial moments stay on cream because the brand reserves the dark-canvas inversion for the press rail and footer — using it three times destroys the bookend.
-- Don't pair the brand-mustard `{colors.brand-mustard}` (#af751b) with the brand-indigo `{colors.brand-indigo}` (#4a4af4) on a single surface — both are scarcity voltages and live in separate sub-rails. Putting them together creates a saturated chord the rest of the page is calibrated to avoid.
+### Fasting
+Status block (mascot, state, since / until), start or end button, then **Schedule** (start time and length, regular-weight labels, save) and, if present, **Recorded fasts**, separated by a hairline. No preset chips and no disclaimers block.
 
-## Known Gaps
+### Goals
+Header "+" opens the add-goal modal (title, equal-width High / Medium / Low segments, full-width Add goal, × top right). Each goal card has a checkbox on the left (achieved) and an archive icon top right.
 
-- AkkuratLL and Editorial New are licensed typefaces not available as public web fonts. Substitutes (Söhne / Untitled Sans for AkkuratLL; PP Editorial New / Cormorant Garamond italic for Editorial New) are documented in the typography section.
-- Oura's product macro-photography (warm-lit ring-on-skin shots, low-key linen surfaces, partial-gesture hand framing) is the brand's load-bearing visual asset, and photography direction is out of scope for a token document.
-- Cart flyout, checkout flow, account dashboard, and the in-app companion chrome are not extracted from the homepage capture.
-- The Oura Ring app's data-visualization chrome (sleep charts, readiness scores, cycle insights) is a separate component system from the marketing storefront and lives behind authentication — those tokens are not present in this extraction.
-- Motion behavior (hover-lift product tiles, scroll-snap pull-quote bands, video-loop hero) is undocumented.
-- The embedded video player chrome uses `{colors.brand-indigo}` (#4a4af4) at saturated weight — that is the only place the saturated indigo appears, and it is a third-party player surface rather than canonical Oura chrome.
-- Dark-mode counterparts for the cream sandstone surfaces were not surfaced — the system documented is the light-dominant variant the storefront ships by default.
-- Letter-spacing on body sizes is reported as "normal" by the extractor; the precise pixel offset is undocumented and may vary by platform.
+### Settings
+Header has a back chevron. Groups, each with an eyebrow and a hairline between them: **Units** (label left, 216-wide segmented control right), **Time zone**, **Goals** (a tappable summary card of active goals or an invitation to add one), **Training equipment** (the section label is the only label; one field with the placeholder "Enter the equipment you use" when empty, saved on blur), **Intermittent fasting** (expandable card with a toggle; "Set time" appears when on), **Reminders** (toggle), **Reset demo data** (button only, with a confirm step).
+
+### Onboarding
+Three short questions, one per screen, researched in [`docs/research/MOBBIN_ONBOARDING_RESEARCH.md`](docs/research/MOBBIN_ONBOARDING_RESEARCH.md). No nav bar, no header: a back chevron (44) and three progress segments (4 tall, `blush` track, `rose` fill) at the top; the mascot (132, one pose per step); a 12/500 uppercase lead-in; a 30/38 headline; then the answer; and a pinned full-width Continue (disabled until answered) at the bottom. Content is capped at 520 wide and centred.
+1. **Name.** "Hi! What should I call you?" One large centred field (60 tall, radius 24, white on the page), auto-focused. "Skip for now" is a centred text link under Continue.
+2. **Experience.** "Have you used a fitness app before?" Two choice cards: "Yes, I have" continues; "No, I'm new to this" goes straight to the Overview with no further questions.
+3. **Routine.** "Do you have a workout routine you follow?" "Yes, I have a routine" opens the routine sheet (exercise, sets, reps only; sets 3 and reps 10 prefilled; no names, weights or days to fill in) and returns to the Overview when saved. "No, create with Mova" goes to the Overview and opens Mova Companion, which asks one question at a time and saves nothing until the person approves.
+
+**Choice card:** a white card (radius 24, min 88 tall, 24 side padding) with a 18/600 title, a 14 hint and a 28 radio mark on the right. The whole surface is the tap target. Selected = `rose-wash` fill, 2px `rose` ring and a rose check (never colour alone); keyboard focus adds a 4px rose-tinted ring; the group is a `radiogroup` and each card a `radio` with a checked state. No auto-advance, so a mis-tap never moves someone on.
+
+Steps ease in over 260ms and skip the movement when reduced motion is on. The headline of each step is announced politely when it changes.
+
+**After onboarding the Overview shows only what exists.** A new person's workspace is empty: no sample routines, sessions, meals or fasting. Empty states say what is missing and offer one action: "No routine yet" (New routine), "On the Menu: No meal plan yet" (Plan my meals, opens the companion on meals), "Fasting: Not set up" (Set up fasting). The greeting adds the person's name ("Good morning, Ada").
+
+### Companion
+Messages: yours on `rose` with white text, assistant on `lilac-wash`. The empty state shows a short greeting. Proposals appear as cards with a "Draft" tag and a Review button. The composer and options sheet are described above.
+
+## 9. States
+
+- **Loading:** a soft spinner with a short label ("Loading…"); content areas keep their space to avoid jumps.
+- **Empty:** one sentence of what is missing plus one action. No illustrations unless they add meaning (the mascot appears only in Fasting and the empty companion).
+- **Error:** a `negative-wash` banner with a retry action; never a blank screen.
+- **Offline / demo:** a single quiet line states that data is saved on this device.
+
+## 10. Motion
+
+Short and soft. Cards expand with a 200ms height ease; sheets fade in 200ms; the progress arc animates to its value over 320ms; message bubbles rise 8px while fading in. Respect reduced-motion by removing movement and keeping state changes instant.
+
+## 11. Accessibility
+
+- All tap targets are at least 44 × 44.
+- Every icon-only control has an accessible name ("Back", "Archive Lower body", "Choose what to ask").
+- Selection is conveyed by state (checked, selected, expanded) as well as colour.
+- Text scales with the system setting; layouts wrap instead of truncating essential content.
+- Rings and bars expose a progress value and label ("Fasting progress toward your target, 6%").
+- Focus order follows reading order; sheets trap focus and return it on close.
+
+## 12. Do and don't
+
+| Do | Don't |
+|---|---|
+| White cards on a pale page with no border | Outlined inputs, outlined buttons, boxed sections |
+| Medium-weight labels and item names | Bold everywhere |
+| One ring per card with text beside it | Stacking rings, bars and charts |
+| A hairline between categories | Heavy bands or extra card nesting |
+| A star that becomes send | Action buttons inside chat bubbles |
+| Back chevron on every sub-page | Dead ends that need the system gesture |
+| Plain words ("Set time") | Internal terms ("Open fasting", "AI version 2") |
+| `rose` for the primary action, selection and progress | Rose on every element, streaks, flames, neon, glitter or cartoon pinks |
+| Lilac only for the companion | Lilac as a second brand colour |
+| Blush and peach as soft glows | Pink text on pink, or blush used for anything the user must read |
+
+## 13. Current build vs. this system
+
+The running app follows version 2.1: the rose palette, the blush page with lilac and peach glows, radii of 24 / 16 / 32, and the floating nav with a separate round companion button. Old token names (`canvas`, `cream`, `brand`, `sage`) remain in `apps/mobile/src/theme/tokens.ts` as aliases of the new values and can be removed gradually.
+
+### Overview layout (current)
+
+Header: avatar, name (16/600) and long date (12) with History and Settings on the right. Then the status section (large Mova mascot on a status glow, 24/30 headline, 14/400 supporting line, button only when work needs attention). Training and Nutrition sit side by side as equal cards: a filled 24 icon on a 40 tile at the top left (Training teal `#1f7a78` on `#dff2ef`, Nutrition apricot `#c2652a` on `#fdeadd`), the uppercase category label on the same line, right of the icon, then an 18/600 title and 14 detail; no chevron, the whole card is the tap target. Fasting is full width with a `FASTING` label top left, elapsed-of-target on the left and a progress ring on the right.
+
+**Icon sizes:** 20 for every icon in sticky headers and sheet controls (History, Settings, Back, Close, chevrons) and for icons in body rows; 24 only for the filled icons on the Overview cards and the floating nav; 16 for inline status marks.
+
+**Overview status illustrations and colours:** needs attention uses the `oops` pose (worried brows, soft frown, sweat drop) on a soft red-pink blob, a 24/600 headline in `#c93445` and a raspberry `#cf3a4a` button (white text, 4.8:1); up to date uses the `cheer` pose on a blush blob with default ink text; not set up uses the `welcome` pose on a rose-wash blob. All blobs are the same organic shape, never a plain circle; there is no green in this section.

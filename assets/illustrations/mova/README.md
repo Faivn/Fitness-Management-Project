@@ -19,6 +19,8 @@ The Mova bubble mascot adds a friendly visual identity to the application. Illus
 - `mova-bubble-thinking.png` — AI thinking and empty states
 - `mova-bubble-nutrition.png` — Meal planning
 - `mova-bubble-calm.png` — Calm and recovery
+- `mova-bubble-oops.svg` — gentle concern: something needs attention (Overview)
+- `mova-bubble-cheer.svg` — happy and proud: all up to date (Overview)
 - `mova-bubble-phone.png` — Check-ins and companion interactions
 
 ## Usage
@@ -37,4 +39,4 @@ The images can be displayed using React Native's `Image` component. Subtle float
 
 ## Asset Format
 
-PNG files are intended for direct display in the application. Corresponding SVG files are included for vector editing or compatible SVG workflows.
+The SVG files are the editable source of truth (warm sandstone, amber and mustard palette from DESIGN.md). The app embeds them with `npm run mascot:generate`. The PNG files are the original pink renders, kept for reference.
