@@ -5,7 +5,7 @@
 **Document status:** Source of truth for the submitted product (describes what is built)\
 **Version:** 2.0\
 **Date:** October 2026\
-**Product:** Mova, a calm, personal fitness workspace with a conversational AI companion\
+**Product:** Mova, a calm personal fitness management workspace\
 **Platforms:** React Native (Expo) for web, iOS and Android; the submitted deployment is the web build\
 **Live build:** https://mova-fitness.vercel.app
 

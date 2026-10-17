@@ -2,19 +2,21 @@
 
 **Product name:** Mova  
 **Tagline:** Your fitness, moving with you.  
-**Product category:** AI-powered personal fitness management  
-**Status:** Product definition and planning  
-**Version:** 1.0
+**Product category:** Personal fitness management workspace  
+**Status:** Built and deployed (https://mova-fitness.vercel.app)  
+**Version:** 2.0
 
 ---
 
 ## 1. Product Overview
 
-Mova is an AI-powered personal fitness workspace designed to bring workout planning, activity tracking, scheduling, meal planning, and progress reviews into one connected experience.
+Mova is a personal fitness management workspace that brings workout planning, activity tracking, scheduling, meal planning, intermittent fasting, and progress reviews into one calm, connected experience. It runs as a React Native app on the web today, with iOS and Android from the same code.
 
 Rather than treating fitness as a collection of disconnected tasks, Mova helps users manage the complete journey: setting goals, creating routines, planning activities, recording what actually happens, adapting to changes, and reflecting on progress over time.
 
-The product combines conversational AI with structured personal records. Users can discuss their goals with an AI companion, generate and refine fitness routines, organise their schedules, log completed activities, and use their accumulated history to make informed adjustments.
+The product combines conversational AI with structured personal records. Users can talk to the Mova companion, which acts on a request straight away: it drafts a routine, a week of meals or a goal, and the person saves it with a single tick. They can also build everything by hand, organise their schedules, log what they actually did, and use their accumulated history to make informed adjustments.
+
+Mova needs no account. Records stay on the person's device; only the text of a companion conversation is sent, through Mova's own server, to the AI provider.
 
 Mova is built around a simple idea: **your fitness plan should work with your real life, not against it.**
 
@@ -75,21 +77,21 @@ These are intended user groups, not yet validated market segments.
 
 Users can discuss their fitness goals, preferences, routines, and constraints with an AI companion.
 
-The AI helps translate those conversations into structured, actionable plans while allowing users to clarify their needs and refine suggestions.
+The companion asks at most one short question, and only when it cannot continue without it. Otherwise it makes a sensible assumption, says so in one line, and proposes immediately. Replies appear as if typed, and a small shimmering Suggestions pill above the message bar offers ready-made requests such as creating a routine, a meal plan or a goal.
 
 ### 6.2 AI-assisted workout planning
 
 Mova can generate workout routines based on the information available about a user's goals and preferences.
 
-Users can review suggested exercises, sets, repetitions, workout days, and other relevant details before approving a routine.
+Suggestions appear as a simple row with a radio. Ticking it saves it and places it on the right page: goals in Goals, routines on Workouts (scheduled for four weeks), meal plans on the Meal plan page. A routine can also be opened in a review sheet with a short summary, one card per training day with its own edit icon, and an Ask for a change button.
 
-AI-generated plans and proposed changes must not become saved commitments without the user's explicit approval.
+AI-generated plans and proposed changes must not become saved commitments unless the user ticks or approves them.
 
 ### 6.3 Workout creation and management
 
 Users can create and edit workouts manually as well as through AI assistance.
 
-They can organise exercises, manage planned sessions, and make changes without depending entirely on AI.
+They can organise exercises, add or edit training days, activate or deactivate a routine, and make changes without depending on AI. Saving a new routine makes it active. If it shares days with an active routine, a short prompt offers to replace the old one or keep both.
 
 ### 6.4 Workout execution and logging
 
@@ -97,7 +99,7 @@ Mova distinguishes between a workout that was planned and a workout that was act
 
 Users can record completed exercises and relevant performance details, including weights, sets, repetitions, and other supported activity information.
 
-They can also record spontaneous workouts and enter historical activities when appropriate.
+They can also record spontaneous workouts and enter historical activities when appropriate. A completed workout leaves the Upcoming list and its sets live on in Exercise history. Planned weights are not asked for; people log the weight they actually lift.
 
 ### 6.5 Flexible scheduling and rescheduling
 
@@ -119,7 +121,7 @@ Past activity records must remain available when a routine changes or a new plan
 
 Mova supports AI-assisted meal planning around users' preferences and familiar foods.
 
-The product can organise meal timetables and generate corresponding shopping lists.
+The Meal plan page is a two-slide pager. The Meals slide shows a full card of the day's meals with day circles (S M T W T F S) beneath it to switch days; the card keeps one fixed height. A cart icon in the header opens the shopping list. Plans always cover every day of the week.
 
 The initial nutrition scope focuses on planning and organisation rather than calorie or macronutrient tracking.
 
@@ -135,11 +137,9 @@ Users can plan and record running and other supported activities alongside their
 
 These activities should contribute to the user's overall fitness history rather than remain isolated from the rest of the workspace.
 
-### 6.10 Optional hydration and intermittent fasting
+### 6.10 Optional intermittent fasting
 
-Mova's broader product scope includes optional hydration tracking and intermittent fasting organisation.
-
-These capabilities should complement the main fitness workspace rather than distract from its core purpose.
+Fasting is optional and lives on the second slide of the Meal plan page. It is turned on there, not in Settings. A centred, clock-style dial (a thin ring with tick marks) shows the elapsed time, percentage, time left, and start and goal times, with a single Start or End button. Only fasts started in the app are recorded, and no health claims are made.
 
 ### 6.11 Monthly reviews and AI-assisted adjustments
 
@@ -161,7 +161,7 @@ A planned workout is not proof that the workout happened. Mova must preserve thi
 
 ### 7.3 User control comes first
 
-AI should assist, recommend, and organise. Users retain control over their plans and must approve AI-generated routines and proposed changes before persistence.
+AI should assist, recommend, and organise. Users retain control over their plans: nothing the AI proposes is saved until the user ticks or approves it, and declining is always one tap.
 
 ### 7.4 History must persist
 
@@ -183,6 +183,10 @@ Mova should provide enough structure to help users stay organised while allowing
 
 Users should be able to understand what was planned, what changed, what happened, and how their records inform future recommendations.
 
+### 7.9 Act first, keep it calm
+
+The assistant should do the useful thing quickly instead of questioning the person. The interface is quiet: bottom sheets instead of new pages, plain wording, no blame, no streaks, and no alarming colours beyond a gentle red-pink when something needs attention.
+
 ## 8. Product Scope
 
 Mova's intended scope covers the complete personal fitness management experience, including the following areas.
@@ -201,7 +205,7 @@ Mova's intended scope covers the complete personal fitness management experience
 - Unified schedules and reminders.
 - Running and other activity planning and logging.
 - Monthly reviews and AI-assisted plan adjustments.
-- Optional hydration and intermittent fasting organisation.
+- Optional intermittent fasting.
 - Basic settings and preferences.
 
 The product should be designed as a connected system, not as a collection of unrelated standalone features.
@@ -217,6 +221,8 @@ The following are outside the initial defined scope unless separately prioritise
 - A dedicated food discovery or substitution engine.
 - Calorie and macronutrient tracking.
 - Meal-consumption logging.
+- Hydration tracking (planned originally, not part of the product).
+- User accounts and syncing across devices.
 
 These exclusions establish the current scope; they do not imply that every other capability must be postponed until a later version.
 
@@ -224,7 +230,7 @@ These exclusions establish the current scope; they do not imply that every other
 
 The following rules underpin the product's behaviour:
 
-1. AI-generated routines and proposed edits require explicit user approval before they are saved.
+1. AI-generated routines, meal plans, goals and proposed edits are saved only when the user ticks or approves them.
 2. Planned sessions and actual completed sessions must be represented separately.
 3. Original planned dates and relevant rescheduling or missed-workout history must be preserved.
 4. Historical workout logs must not be erased when routines change or new months begin.
@@ -232,28 +238,31 @@ The following rules underpin the product's behaviour:
 6. Monthly reviews must be grounded in saved records and accurately represent planned, completed, missed, rescheduled, and spontaneous activities.
 7. Meal planning must support timetables and shopping lists without introducing out-of-scope calorie or macronutrient tracking.
 8. Users must retain manual control over workout creation and management.
+9. A new routine is active when saved; routines that share days prompt Replace or Keep both, and a routine can be activated or deactivated manually.
+10. A completed workout leaves the Upcoming list and is kept in Exercise history.
+11. The assistant never claims something was saved; the app saves it on the tick.
+12. Meal plans cover every day of the plan.
 
 The detailed functional requirements, workflows, edge cases, acceptance criteria, data behaviours, and technical implementation guidance are maintained in the Product Specification.
 
 ## 10. Technology Direction
 
-Mova's current technology direction is:
+Mova's technology as built is:
 
 | Layer | Technology |
 |---|---|
-| Mobile application | React Native |
-| Backend language and runtime | TypeScript / Node.js |
-| Backend hosting | Vercel Functions |
-| Database | Supabase PostgreSQL |
-| Authentication | Supabase Auth |
-| AI integration | OpenAI API, accessed server-side |
-| Input and data validation | Zod |
-| Database migrations | Supabase CLI |
-| Version control and collaboration | GitHub |
+| App | React Native with Expo (web today; iOS and Android from the same code), TypeScript |
+| Shared rules and schemas | A shared TypeScript package with Zod validation |
+| Domain engine | A TypeScript engine that runs the product's use cases on the device against local storage |
+| Data | On the person's device; no accounts and no remote database in the submitted build |
+| AI | Groq (OpenAI-compatible API), called only from a server endpoint so the key never reaches the app |
+| Hosting | Vercel: static web build plus one serverless function for the AI |
+| Reference server | A Postgres (Supabase) implementation of the same use cases, kept for a future account-based version |
+| Version control | GitHub |
 
-The OpenAI API must be accessed through the backend rather than exposing API credentials in the client application.
+The AI key is held only in the server environment (`GROQ_API_KEY`) and is never in the client application. The AI endpoint currently has no per-visitor rate limit.
 
-The detailed architecture and implementation requirements belong in the Product Specification.
+The detailed architecture belongs in the Product Specification.
 
 ## 11. Success Criteria
 
@@ -264,22 +273,23 @@ The product's success criteria include:
 - **Connected management:** Users can manage the defined fitness workflows in one workspace instead of coordinating disconnected tools.
 - **Reliable records:** Planned sessions, completed activities, missed workouts, rescheduling, and spontaneous activities remain distinguishable and accessible.
 - **Continuity:** Users can change routines and planning periods without losing historical records.
-- **User control:** AI-generated plans and changes are reviewed and approved before being saved.
-- **Actionable assistance:** AI can use relevant saved context to support planning and monthly reviews.
+- **User control:** AI-generated plans and changes are saved only when the user ticks or approves them.
+- **Actionable assistance:** The assistant produces a usable routine, meal plan or goal from one request, without an interview, and the result appears on its own page.
 - **Practical organisation:** Users can manage schedules, reminders, meal timetables, and shopping lists within the intended product scope.
 - **Adaptability:** Users can respond to changes in their schedule without compromising the integrity of their activity history.
 
-Specific measurable targets should be defined through product testing and evaluation rather than invented before a baseline has been established.
+Alongside these, a new person should be able to set up in under a minute, and a missed workout should be fixable in two taps from the Overview. Specific measurable targets should be defined through product testing and evaluation rather than invented before a baseline has been established.
 
 ## 12. Product Documentation
 
-Mova is documented through three complementary files:
+Mova is documented through four complementary files:
 
 - **[README](../README.md):** The personal story behind Mova, the problem that inspired it, and a high-level introduction to the project.
 - **[Product Brief](PRODUCT_BRIEF.md):** The product vision, problem statement, intended users, capabilities, principles, scope, and technology direction.
-- **[Product Specification](PRODUCT_SPECIFICATION.md):** The complete detailed requirements, workflows, business rules, edge cases, acceptance criteria, data behaviours, architecture, and implementation guidance.
+- **[Product Specification](PRODUCT_SPECIFICATION.md):** The detailed behaviour of the built product: workflows with user stories and acceptance criteria, business rules, AI behaviour, architecture and known limitations.
+- **[Design Guide](../DESIGN.md):** Visual design: colour, type, layout and components.
 
-The Product Specification is the detailed source of truth for product behaviour and implementation. This brief provides an overview and must not be used as a substitute for the complete specification.
+The Product Specification is the detailed source of truth for product behaviour. This brief provides an overview and must not be used as a substitute for the complete specification.
 
 ---
 

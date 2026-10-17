@@ -10,11 +10,11 @@ Over time, keeping everything connected becomes a challenge. I can have a plan f
 
 I wanted one place where my fitness plan and my actual activity could live together — a workspace that remembers my history, helps me stay organised, and adapts as my routine changes.
 
-That idea became **Personal Fitness Workspace**: an AI-powered personal fitness management system designed to bring planning, scheduling, workout logging, meal planning, and progress reviews into one connected experience.
+That idea became **Personal Fitness Workspace**: a personal fitness management workspace designed to bring planning, scheduling, workout logging, meal planning, and progress reviews into one connected experience.
 
 ## What I'm building
 
-- **AI-assisted fitness planning:** Discuss my goals and preferences, review suggested routines, and approve changes before they're saved.
+- **Fitness planning:** Set goals, build routines by hand or ask the built-in assistant for one, and keep control of what gets saved.
 - **Workout management:** Create workouts, record what I actually completed, and log spontaneous sessions.
 - **Flexible scheduling:** Handle missed and rescheduled workouts without losing the original plan or activity history.
 - **Persistent workout history:** Keep past records even when routines and monthly plans change.
@@ -38,7 +38,7 @@ The principles guiding this project are simple:
 
 ## Technology
 
-The project uses **React Native** for the frontend, with a TypeScript/Node.js backend, Vercel for backend hosting, Supabase for authentication and PostgreSQL, and the OpenAI API for AI-assisted experiences.
+The project uses **React Native** (Expo) with TypeScript for the app, which runs on the web today. Data stays on the device, the app is hosted on Vercel, and the built-in assistant calls Groq through a small server endpoint so the key is never in the app.
 
 ## Project documentation
 
