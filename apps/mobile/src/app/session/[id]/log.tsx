@@ -1,8 +1,8 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { exerciseKey, type SetLogInput, type WeightUnit, type WorkoutSessionDetail } from '@mova/shared';
-import { Banner, Button, Card, ErrorState, LoadingState, Row, Screen, Segmented, Text, TextField } from '@/components';
+import { Banner, Button, Card, ErrorState, LoadingState, Row, Screen, Segmented, SheetPage, Text, TextField } from '@/components';
 import { Icon } from '@/components/Status';
 import { useFinishSession, useProfile, useSaveSets, useSession } from '@/hooks/api';
 import { errorMessage, newIdempotencyKey } from '@/lib/api';
@@ -53,7 +53,7 @@ function initialRows(s: WorkoutSessionDetail): SetRow[] {
   return rows;
 }
 
-export default function LogWorkout() {
+function LogWorkoutBody() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const session = useSession(id);
   const profile = useProfile();
@@ -147,7 +147,6 @@ export default function LogWorkout() {
         </>
       }
     >
-      <Stack.Screen options={{ title: s.title }} />
       <Row style={{ justifyContent: 'space-between' }}>
         <Text variant="small" color="inkSecondary">
           Planned {formatDate(s.plannedDate)} · enter what you actually did
@@ -276,3 +275,12 @@ const styles = StyleSheet.create({
   cAct: { width: 60, alignItems: 'flex-end' },
   input: { minHeight: 36, borderRadius: radii.md, backgroundColor: colors.cream, color: colors.ink, fontSize: 16, fontFamily: fonts.regular },
 });
+
+/** Logging opens as a bottom sheet like the rest of the app, so the floating nav bar can never sit under its Finish button. */
+export default function LogWorkout() {
+  return (
+    <SheetPage title="Log workout">
+      <LogWorkoutBody />
+    </SheetPage>
+  );
+}
